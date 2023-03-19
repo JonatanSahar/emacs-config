@@ -1,0 +1,467 @@
+;;; $DOOMDIR/config.el -*- lexical-binding: t; -*-
+
+;; Place your private configuration here! Remember, you do not need to run 'doom
+;; sync' after modifying this file!
+
+
+;; Some functionality uses this to identify you, e.g. GPG configuration, email
+;; clients, file templates and snippets.
+(setq user-full-name "Jonathan Sahar"
+      user-mail-address "jonathan.sahar@gmail.com")
+
+;; Doom exposes five (optional) variables for controlling fonts in Doom. Here
+;; are the three important ones:
+;;
+;; + `doom-font'
+;; + `doom-variable-pitch-font'
+;; + `doom-big-font' -- used for `doom-big-font-mode'; use this for
+;;   presentations or streaming.
+;;
+;; They all accept either a font-spec, font string ("Input Mono-12"), or xlfd
+;; font string. You generally only need these two:
+;; (setq doom-font (font-spec :family "monospace" :size 12 :weight 'semi-light)
+;;       doom-variable-pitch-font (font-spec :family "sans" :size 13))
+;; (setq doom-font
+;;
+(setq
+        doom-font  (font-spec :family "Roboto Mono" :weight 'regular :size 18)
+        doom-big-font  (font-spec :family "Roboto Mono" :weight 'regular :size 18)
+ ;; doom-font  (font-spec :family "Alef" :size 14)
+ ;; doom-font  (font-spec :family "Source Code Pro" :size 18)
+ ;; doom-font (font-spec :family "Alef" :size 10)
+ ;; doom-big-font (font-spec :family "Noto Mono" :size 10)
+ ;; doom-big-font (font-spec :family "JetBrains Mono" :size 10)
+ ;; doom-variable-pitch-font (font-spec :family "Source Code Pro" :size 14)
+ doom-variable-pitch-font (font-spec :family "Noto Sans" :size 16)
+ ;; doom-unicode-font (font-spec :name "Noto Mono" :size 10))
+ )
+
+
+;; (custom-theme-set-faces 'user
+  ;;        '(variable-pitch ((t (:family "ETBembo" :height 180 :weight thin))))
+  ;;        '(fixed-pitch ((t ( :family "Fira Code Retina" :height 200))))))
+
+;; There are two ways to load a theme. Both assume the theme is installed and
+;; available. You can either set `doom-theme' or manually load a theme with the
+;; `load-theme' function. This is the default:
+(setq doom-theme 'doom-one-light)
+;;(setq doom-theme 'doom-vibrant)
+;;
+;; If you use `org' and don't want your org files in the default location below,
+;; change `org-directory'. It must be set before org loads!
+;;
+;; This determines the style of line numbers in effect. If set to `nil', line
+;; numbers are disabled. For relative line numbers, set this to `relative'.
+(setq-default display-line-numbers-type 'relative)
+
+
+;; Here are some additional functions/macros that could help you configure Doom:
+;;
+;; - `load!' for loading external *.el files relative to this one
+;; - `use-package!' for configuring packages
+;; - `after!' for running code after a package has loaded
+;; - `add-load-path!' for adding directories to the `load-path', relative to
+;;   this file. Emacs searches the `load-path' when you load packages with
+;;   `require' or `use-package'.
+;; - `map!' for binding new keys
+;;
+;; To get information about any of these functions/macros, move the cursor over;; the highlighted symbol at press 'K' (non-evil users must press 'C-c c k').
+;; This will open documentation for it, including demos of how they are used.
+;;
+;; You can also try 'gd' (or 'C-c c d') to jump to their definition and see how
+;; they are implemented.
+;; various settings
+(setq
+ notes-dir "~/Documents/notes"
+ gtd-dir (concat (file-name-as-directory notes-dir)  (file-name-as-directory "gtd"))
+ slip-box-dir (concat (file-name-as-directory notes-dir)  (file-name-as-directory "slip-box"))
+ literature-notes-dir (list (concat (file-name-as-directory slip-box-dir)  (file-name-as-directory "literature-notes")))
+ emacs-directory doom-emacs-dir
+ org-capture-writing-inbox-file (concat (file-name-as-directory notes-dir) "writing_inbox.org")
+)
+
+ (setq
+  evil-respect-visual-line-mode 't
+ delete-by-moving-to-trash nil                      ; Delete files to trash
+ uniquify-buffer-name-style nil              ; Uniquify buffer names
+ window-combination-resize t                      ; take new window space from all other        windows (not just current)
+ x-stretch-cursor t                              ; Stretch cursor to the glyph width
+ undo-limit 80000000                         ; Raise undo-limit to 80Mb
+ evil-want-fine-undo t                       ; By default while in insert all changes are one big blob. Be more granular
+ garbage-collection-messages t
+ auto-save-default t                         ; Nobody likes to lose work, I certainly don't
+ inhibit-compacting-font-caches t            ; When there are lots of glyphs, keep them in memory
+ backup-directory-alist `(("." . ,(concat user-emacs-directory "autosaved_files")))
+ truncate-string-ellipsis "…")               ; Unicode ellispis are nicer than "...", and also save /precious/ space
+
+
+;; load orgnv
+(add-to-list 'load-path (concat doom-emacs-dir (file-name-as-directory "orgnv")))
+(load "orgnv.el")
+(require 'orgnv)
+(setq orgnv-directories (list (concat (file-name-as-directory notes-dir)  (file-name-as-directory "slip-box"))))
+
+;; load openai-api
+;;(add-to-list 'load-path (concat emacs-directory (file-name-as-directory "aide.el")))
+;;(load "aide.el")
+;;(require 'aide)
+
+;; load dired+
+(add-load-path! (concat emacs-directory (file-name-as-directory "dired-plus")))
+(load "dired+.el")
+
+
+(load! "package-config.el")
+(load! "my-functions.el")
+(load! "keybindings.el")
+
+
+(setq which-key-idle-delay 0.2
+      which-key-idle-secondary-delay 0.1
+      which-key-allow-multiple-replacements t)
+
+(setq-default evil-shift-width 4 ; globally
+              tab-width 4) ; globally
+(setq evil-shift-width 4
+      tab-width 4)
+
+(delete-selection-mode 1)                         ; Replace selection when inserting text
+(display-time-mode 1)                             ; Enable time in the mode-line
+(display-battery-mode 1)                          ; On laptops it's nice to know how much power you have
+(global-subword-mode 1)                           ; Iterate through CamelCase words
+
+(setq-default major-mode 'org-mode)
+
+(if (eq initial-window-system 'x)                 ; if started by emacs command or desktop file
+    (toggle-frame-maximized)
+  (toggle-frame-fullscreen))
+
+(setq
+ visual-fill-column-width 90
+ split-window-preferred-function 'visual-fill-column-split-window-sensibly
+
+ dired-dwim-target t
+
+ evil-vsplit-window-right t
+ evil-split-window-below t)
+
+(remove-hook 'text-mode-hook #'auto-fill-mode)
+
+(defun my/snipe_ivy ()
+  (evilem-create (list 'evil-snipe-repeat
+                       'evil-snipe-repeat-reverse)
+                 :bind ((evil-snipe-scope 'buffer)
+                        (evil-snipe-enable-highlight)
+                        (evil-snipe-enable-incremental-highlight))))
+
+(map! :map evil-snipe-parent-transient-map "C-;" #'my/snipe_ivy )
+
+(custom-set-variables
+ '(helm-ag-base-command "rg --no-heading")
+ `(helm-ag-success-exit-status '(0 2)))
+
+
+
+(setq-default evil-escape-delay 0.4)
+
+(font-lock-add-keywords nil '(("\"\\(\\(?:.\\|\n\\)*?[^\\]\\)\"" 0 font-lock-string-face)))
+;; (add-hook! org-agenda-mode #'writeroom-mode)
+(add-hook! org-roam-mode #'visual-line-mode)
+(add-hook! org-mode (lambda ()
+          (+zen/toggle)
+          (sp-pair "$" "$")
+                      ))
+
+(add-hook 'text-mode-hook 'my-buffer-face-mode-text)
+(add-hook 'text-mode-hook (lambda ()
+                            (setq bidi-paragraph-direction nil)
+                            (setq bidi-paragraph-start-re  "^")
+                            (setq bidi-paragraph-separate-re  "^")
+                            (setq helm-ff-fuzzy-matching t)
+                            (setq captain-predicate (lambda () t))
+                            (setq company-backends '((company-capf company-files company-dabbrev-code company-dabbrev)))
+                            (delete-selection-mode 1)                         ; Replace selection when inserting text
+                            (visual-fill-column-mode 1)
+                            (visual-line-mode 1)
+                            ;; (flyspell-mode 1)
+                            (captain-mode 1)
+                            (abbrev-mode 1)
+                            (font-lock-mode 1)
+                            (buffer-face-mode)
+                            (+zen/toggle)
+                            (my/fix-hebrew-hyphen)
+                            ))
+
+
+(add-hook 'prog-mode-hook 'my-buffer-face-mode-programming)
+(add-hook 'prog-mode-hook (lambda ()
+                            (setq captain-predicate (lambda () (nth 8 (syntax-ppss (point)))))
+                            (setq company-backends '((company-capf company-files company-dabbrev-code company-dabbrev)))
+                            (+zen/toggle)
+                            ; Replace selection when inserting text
+                            (delete-selection-mode 1)
+                            ))
+
+(evil-snipe-override-mode 1)
+
+(add-hook 'after-init-hook 'company-statistics-mode)
+
+(add-hook 'occur-mode-hook
+          (defun occur-show-replace-context+ ()
+            (add-hook 'replace-update-post-hook
+                      'occur-mode-display-occurrence nil 'local)))
+(define-advice occur-mode-display-occurrence
+    (:around (fun &rest args) save-match-data)
+  (save-match-data
+    (apply fun args)))
+
+
+  (setq-default prescient-history-length 1000)
+
+(add-hook 'bibtex-mode-hook 'my/fix-windows-bib-file)
+
+(defadvice! prompt-for-buffer (&rest _)
+  :after 'evil-window-vsplit (switch-to-buffer))
+
+(setq initial-major-mode 'org-mode)
+(setq helm-ff-fuzzy-matching t)
+
+(set-input-method 'hebrew-full)
+
+(remove-hook 'after-save-hook #'ws-butler-after-save)   ;
+
+(defun my/dedicate-org-roam-buffer ()
+  (interactive)
+  (add-to-list 'display-buffer-alist
+               '("\\*org-roam\\*"
+                 (display-buffer-in-side-window)
+                 (dedicated . t)
+                 (side . right)
+                 (slot . 0)
+                 (window-width . 0.33)
+                 (window-parameters . ((no-other-window . t)
+                                       (no-delete-other-windows . t)))))
+  )
+
+
+(defun with-minibuffer-keymap (keymap)
+  (lambda (fn &rest args)
+    (minibuffer-with-setup-hook
+        (lambda ()
+          (use-local-map
+           (make-composed-keymap keymap (current-local-map))))
+      (apply fn args))))
+
+(defvar embark-completing-read-prompter-map
+  (let ((map (make-sparse-keymap)))
+    (define-key map (kbd "<tab>") 'abort-recursive-edit)
+    map))
+
+;; (advice-add 'embark-completing-read-prompter :around
+;;             (with-minibuffer-keymap embark-completing-read-prompter-map))
+;; (define-key vertico-map (kbd "C-<tab>") 'embark-act-with-completing-read)
+
+  (defun embark-act-with-completing-read (&optional arg)
+    (interactive "P")
+    (let* ((embark-prompter 'embark-completing-read-prompter)
+           (act (propertize "Act" 'face 'highlight))
+           (embark-indicator (lambda (_keymap targets) nil)))
+      (embark-act arg)))
+
+
+(setq org-odt-preferred-output-format "docx")
+(defun my/make-small-frame () (interactive) (set-frame-size (selected-frame) 50 42))
+(defun my/make-medium-frame () (interactive) (set-frame-size (selected-frame) 100 40))
+(defun my/make-large-frame () (interactive) (set-frame-size (selected-frame) 100 45))
+(add-to-list 'default-frame-alist '(height . 40))
+(add-to-list 'default-frame-alist '(width . 50))
+
+(setq org-id-link-to-org-use-id 'create-if-interactive)
+(setq python-shell-prompt-detect-failure-warning nil)
+(setq lsp-pylsp-plugins-flake8-max-line-length 90)
+(custom-set-variables '(linum-format 'dynamic))
+(toggle-frame-fullscreen)
+(setq org-fold-core-style "overlays")
+
+
+
+;;; On Windows, commands run by flycheck may have CRs (\r\n line endings).
+;;; Strip them out before parsing.
+(defun flycheck-parse-output (output checker buffer)
+  "Parse OUTPUT from CHECKER in BUFFER.
+
+OUTPUT is a string with the output from the checker symbol
+CHECKER.  BUFFER is the buffer which was checked.
+
+Return the errors parsed with the error patterns of CHECKER."
+  (let ((sanitized-output (replace-regexp-in-string "\r" "" output))
+        )
+    (funcall (flycheck-checker-get checker 'error-parser) sanitized-output checker buffer)))
+
+(setq lsp-typescript-npm "c:/Program Files/nodejs/npm")
+
+(setq lsp-python-ms-python-executable-cmd "c:/Users/Jonathan/miniconda3/python")
+(setq lsp-pyright-python-executable-cmd "c:/Users/Jonathan/miniconda3/python")
+
+(setq flycheck-python-pyright-executable  "c:/Users/Jonathan/programs/scripts/pyright.exe")
+(setq flycheck-python-pycompile-executable "c:/Users/Jonathan/miniconda3/python")
+
+(setq python-shell-interpreter "c:/Users/Jonathan/miniconda3/python")
+
+
+(setq +zen-text-scale 1)
+
+(setq +bidi-hebrew-font (font-spec :family "Heebo"))
+
+(add-hook! (text-mode) :local (lambda ()
+                            (add-hook! after-save-hook #'my/fix-hebrew-hyphen)
+
+                            ))
+
+;; (setq mouse-wheel-scroll-amount '(2 (1)))
+(setq mouse-wheel-scroll-amount '(2 (hscroll)))
+
+(my/dedicate-org-roam-buffer)
+
+;;; Ibuffer and extras (dired-like buffer list manager)
+  (setq ibuffer-expert t)
+  (setq ibuffer-display-summary nil)
+  (setq ibuffer-use-other-window nil)
+  (setq ibuffer-show-empty-filter-groups nil)
+  (setq ibuffer-movement-cycle nil)
+  (setq ibuffer-default-sorting-mode 'filename/process)
+  (setq ibuffer-use-header-line t)
+  (setq ibuffer-default-shrink-to-minimum-size nil)
+  (setq ibuffer-formats
+        '((mark modified read-only locked " "
+                (name 40 40 :left :elide)
+                " "
+                (size 9 -1 :right)
+                " "
+                (mode 16 16 :left :elide)
+                " " filename-and-process)
+          (mark " "
+                (name 16 -1)
+                " " filename)))
+  (setq ibuffer-saved-filter-groups nil)
+  (setq ibuffer-old-time 48)
+  (add-hook 'ibuffer-mode-hook #'hl-line-mode)
+  (define-key global-map (kbd "C-x C-b") #'ibuffer)
+  (let ((map ibuffer-mode-map))
+    (define-key map (kbd "* f") #'ibuffer-mark-by-file-name-regexp)
+    (define-key map (kbd "* g") #'ibuffer-mark-by-content-regexp) ; "g" is for "grep"
+    (define-key map (kbd "* n") #'ibuffer-mark-by-name-regexp)
+    (define-key map (kbd "s n") #'ibuffer-do-sort-by-alphabetic)  ; "sort name" mnemonic
+    (define-key map (kbd "/ g") #'ibuffer-filter-by-content))
+
+(add-hook 'dired-mode-hook 'dired-filter-mode)
+(setq citar--multiple-setup (cons "<tab>"  "RET"))
+(setq writeroom-mode-line 't)
+(setq +zen-text-scale 0)
+
+(define-globalized-minor-mode global-delete-selection-mode delete-selection-mode
+  (lambda () (delete-selection-mode 1)))
+
+(global-delete-selection-mode 1)
+
+(writeroom-mode 1)
+
+(defun my/org-roam-find-node ()
+  (interactive)
+  (org-roam-node-find nil nil (org-roam-node-read nil (lambda (node)
+                                                        (string-match "Notes on" (org-roam-node-title node))))))
+
+(defmacro define-and-bind-text-object (key start-regex end-regex)
+  (let ((inner-name (make-symbol "inner-name"))
+        (outer-name (make-symbol "outer-name")))
+    `(progn
+       (evil-define-text-object ,inner-name (count &optional beg end type)
+         (evil-select-paren ,start-regex ,end-regex beg end type count nil))
+       (evil-define-text-object ,outer-name (count &optional beg end type)
+         (evil-select-paren ,start-regex ,end-regex beg end type count t))
+       (define-key evil-inner-text-objects-map ,key (quote ,inner-name))
+       (define-key evil-outer-text-objects-map ,key (quote ,outer-name)))))
+
+(define-and-bind-text-object "l" "^" "\s*$") ; a line object without trailing whitespaces
+
+(yas-global-mode 0)
+
+(setq eshell-prompt-function
+      (lambda()
+        (concat (getenv "USER") "@" (getenv "HOST") ":"
+                ((lambda (p-lst)
+                   (if (> (length p-lst) 3)
+                       (concat
+                        (mapconcat (lambda (elm) (substring elm 0 1))
+                                   (butlast p-lst (- (length p-lst) 3))
+                                   "/")
+                        "/"
+                        (mapconcat (lambda (elm) elm)
+                                   (last p-lst (- (length p-lst) 3))
+                                   "/"))
+                     (mapconcat (lambda (elm) elm)
+                                p-lst
+                                "/")))
+                 (split-string (eshell/pwd) "/"))
+                (if (= (user-uid) 0) " # " " $ "))))
+
+(setq tramp-default-method "plink -share")
+
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(line-number ((t (:inherit default :foreground "steel blue" :strike-through nil :underline nil :slant normal :weight semi-bold :family "Roboto Mono"))))
+ '(line-number-current-line ((t (:inherit (hl-line default) :foreground "light steel blue" :strike-through nil :underline nil :slant normal :weight semi-bold :family "Roboto Mono"))))
+ '(org-default ((t (:family "Heebo")))))
+
+
+(setq company-backends '((company-capf company-files company-dabbrev-code company-dabbrev)))
+(setq writeroom-width 100)
+(diredp-toggle-find-file-reuse-dir 1)
+(setq dired-compress-file-alist '(("\\.gz\\'" . "gzip -9f %i") ("\\.bz2\\'" . "bzip2 -9f %i") ("\\.xz\\'" . "xz -9f %i") ("\\.zst\\'" . "zstd -qf -19 --rm -o %o %i") ("\\.zip\\'" . "zip %o -r --filesync %i")))
+(+word-wrap-mode 1)
+
+;; (set-popup-rules!
+;;  '(
+;;  ("^ \\*" :slot -1 ) ; fallback rule for special buffers
+;;    ("^\\*" :select t :size 0.3)
+;;    ("^\\*Ibuffer" :size 0.3 :ttl t)
+;;    ("^\\*Embark.*Ibuffer" :size 0.3  ))
+;;    ;; ("^\\*ChatGPT"  :size 0.35 )))
+
+
+  ;; Optionally tweak the register preview window.
+  ;; This adds thin lines, sorting and hides the mode line of the window.
+  ;; (advice-add #'register-preview :override #'consult-register-window-)
+  ;; (setq register-preview-delay 0.5
+  ;;       register-preview-function #'consult-register-format)
+
+(setq gptel-api-key "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")
+(add-to-list 'load-path (concat doom-emacs-dir (file-name-as-directory "gptel")))
+(require 'gptel)
+
+;; tabs
+(defun my/name-tab-by-project-or-default ()
+  "Return project name if in a project, or default tab-bar name if not.
+The default tab-bar name uses the buffer name."
+  (let ((project-name (projectile-project-name)))
+    (if (string= "-" project-name)
+        (tab-bar-tab-name-current)
+      (projectile-project-name))))
+
+(setq tab-bar-show nil)
+(setq tab-bar-mode t)
+(setq tab-bar-new-tab-choice "*doom*")
+(setq tab-bar-tab-name-function #'my/name-tab-by-project-or-default)
+
+(add-hook! minibuffer-setup #'+zen/toggle)
+(setq auto-revert-remote-files nil)
+(setq remote-file-name-inhibit-cache nil)
+(setq vc-ignore-dir-regexp
+      (format "%s\\|%s"
+                    vc-ignore-dir-regexp
+                    tramp-file-name-regexp))
+(setq tramp-verbose 1)
+(setq projectile-mode-line "Projectile")
