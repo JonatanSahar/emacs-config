@@ -44,8 +44,7 @@
 ;; There are two ways to load a theme. Both assume the theme is installed and
 ;; available. You can either set `doom-theme' or manually load a theme with the
 ;; `load-theme' function. This is the default:
-(setq doom-theme 'doom-one-light)
-;;(setq doom-theme 'doom-vibrant)
+(setq doom-theme 'modus-operandi-tinted)
 ;;
 ;; If you use `org' and don't want your org files in the default location below,
 ;; change `org-directory'. It must be set before org loads!
@@ -82,6 +81,7 @@
 
  (setq
   evil-respect-visual-line-mode 't
+  scroll-bar-mode 1
  delete-by-moving-to-trash nil                      ; Delete files to trash
  uniquify-buffer-name-style nil              ; Uniquify buffer names
  window-combination-resize t                      ; take new window space from all other        windows (not just current)
@@ -438,9 +438,6 @@ Return the errors parsed with the error patterns of CHECKER."
   ;; (setq register-preview-delay 0.5
   ;;       register-preview-function #'consult-register-format)
 
-(setq gptel-api-key "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")
-(add-to-list 'load-path (concat doom-emacs-dir (file-name-as-directory "gptel")))
-(require 'gptel)
 
 ;; tabs
 (defun my/name-tab-by-project-or-default ()
@@ -465,3 +462,7 @@ The default tab-bar name uses the buffer name."
                     tramp-file-name-regexp))
 (setq tramp-verbose 1)
 (setq projectile-mode-line "Projectile")
+
+(fset 'insert-link-to-new-note-thesis
+   (kmacro-lambda-form [?d ?  ?n ?i ?\C-y return return ?\C-y return ?t ?h ?e ?s return] 0 "%d"))
+(map! :leader :map org-mode-map :v "nk"  #'insert-link-to-new-note-thesis)

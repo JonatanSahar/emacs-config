@@ -154,58 +154,59 @@
          ("begin" "$1" "$" "$$" "\\(" "\\["))))
   )
 
-;; (use-package! org-roam
-;;   :init
-;;   (map!
-;;         :leader
-;;         :prefix "k"
-;;         :desc "org-roam" "l" #'org-roam-buffer-toggle
-;;         :prefix "n"
-;;         :desc "org-roam" "l" #'org-roam-buffer-toggle
-;;         :desc "org-roam-node-insert" "i" #'org-roam-node-insert
-;;         :desc "org-roam-node-find" "f" #'org-roam-node-find
-;;         :desc "org-roam-ref-find" "r" #'org-roam-ref-find
-;;         :desc "org-roam-show-graph" "g" #'org-roam-show-graph
-;;         :desc "org-roam-capture" "c" #'org-roam-capture
-;;         :desc "org-roam-dailies-capture-today" "j" #'org-roam-dailies-capture-today
+(use-package! org-roam
+  :init
+  (map!
+        :leader
+        :prefix "k"
+        :desc "org-roam" "l" #'org-roam-buffer-toggle
+        :prefix "n"
+        :desc "org-roam" "l" #'org-roam-buffer-toggle
+        :desc "org-roam-node-insert" "i" #'org-roam-node-insert
+        :desc "org-roam-node-find" "f" #'org-roam-node-find
+        :desc "org-roam-ref-find" "r" #'org-roam-ref-find
+        :desc "org-roam-show-graph" "g" #'org-roam-show-graph
+        :desc "org-roam-capture" "c" #'org-roam-capture
+        :desc "org-roam-dailies-capture-today" "j" #'org-roam-dailies-capture-today
 
-;;         :map org-roam-preview-map :desc "universal argument" "C-u" #'universal-argument
-;;         :map org-roam-mode-map :desc "universal argument" "C-u" #'universal-argument
-;;         )
-;;   (setq
-;;    org-roam-directory (file-truename slip-box-dir)
-;;         org-roam-db-gc-threshold most-positive-fixnum
-;;         org-id-link-to-org-use-id t)
-;;   (add-to-list 'display-buffer-alist
-;;                '("\\*org-roam\\*"
-;;                  (display-buffer-in-side-window)
-;;                  (dedicated . t)
-;;                  (side . right)
-;;                  (slot . 0)
-;;                  (window-width . 0.33)
-;;                  (window-parameters . ((no-other-window . t)
-;;                                        (no-delete-other-windows . t)))))
-;;   :config
-;;   ;; (setq org-roam-mode-sections
-;;   ;;       (list #'org-roam-backlinks-insert-section
-;;   ;;             #'org-roam-reflinks-insert-section
-;;   ;;             ;; #'org-roam-unlinked-references-insert-section
-;;   ;;             ))
-;;   (org-roam-db-autosync-mode)
-;;   (setq org-roam-capture-templates
-;;         '(("d" "default" plain "%?"
-;;            :target (file+head "%<%Y-%m-%d-%H%M%S>-${slug}.org"
-;;                               ;; "${title}\n- tags :: \n")
-;;                               "#+title: ${title}\n- tags :: \n")
-;;            :unnarrowed t)))
+        :map org-roam-preview-map :desc "universal argument" "C-u" #'universal-argument
+        :map org-roam-mode-map :desc "universal argument" "C-u" #'universal-argument
+        )
+  (setq
+   org-roam-directory "~/Documents/notes/slip-box"
+   ;; org-roam-directory (file-truename slip-box-dir)
+        org-roam-db-gc-threshold most-positive-fixnum
+        org-id-link-to-org-use-id t)
+  (add-to-list 'display-buffer-alist
+               '("\\*org-roam\\*"
+                 (display-buffer-in-side-window)
+                 (dedicated . t)
+                 (side . right)
+                 (slot . 0)
+                 (window-width . 0.33)
+                 (window-parameters . ((no-other-window . t)
+                                       (no-delete-other-windows . t)))))
+  :config
+  ;; (setq org-roam-mode-sections
+  ;;       (list #'org-roam-backlinks-insert-section
+  ;;             #'org-roam-reflinks-insert-section
+  ;;             ;; #'org-roam-unlinked-references-insert-section
+  ;;             ))
+  (org-roam-db-autosync-mode)
+  (setq org-roam-capture-templates
+        '(("d" "default" plain "%?"
+           :target (file+head "%<%Y-%m-%d-%H%M%S>-${slug}.org"
+                              ;; "${title}\n- tags :: \n")
+                              "#+title: ${title}\n- tags :: \n")
+           :unnarrowed t)))
 
-;;   (defun my/org-roam-node-insert-immediate (arg &rest args)
-;;   (interactive "P")
-;;   (let ((args (cons arg args))
-;;         (org-roam-capture-templates (list (append (car org-roam-capture-templates)
-;;                                                   '(:immediate-finish t)))))
-;;     (apply #'org-roam-node-insert args)))
-;; )
+  (defun my/org-roam-node-insert-immediate (arg &rest args)
+  (interactive "P")
+  (let ((args (cons arg args))
+        (org-roam-capture-templates (list (append (car org-roam-capture-templates)
+                                                  '(:immediate-finish t)))))
+    (apply #'org-roam-node-insert args)))
+)
 
 ;; Since the org module lazy loads org-protocol (waits until an org URL is
 ;; detected), we can safely chain `org-roam-protocol' to it.
@@ -739,18 +740,18 @@ DEFS is a plist associating completion categories to commands."
   'file #'consult-find-for-minibuffer)
 
 
-;; (add-to-list 'ispell-local-dictionary-alist '("english-hunspell"
-;;                                               "[[:alpha:]]"
-;;                                               "[^[:alpha:]]"
-;;                                               "[']"
-;;                                               t
-;;                                               ("-d" "en_US" "-p" "C:\\Users\\Jonathan\\programs\\hunspell\\share\\hunspell\\personal.en")
-;;                                               nil
-;;                                               iso-8859-1))
+(setq ispell-local-dictionary-alist '("english-hunspell"
+                                              "[[:alpha:]]"
+                                              "[^[:alpha:]]"
+                                              "[']"
+                                              t
+                                              ("-d" "en_US" "-p" "C:\\Users\\Jonathan\\programs\\hunspell\\share\\hunspell\\personal.en")
+                                              nil
+                                              iso-8859-1))
 (add-to-list 'exec-path "C:\\Users\\Jonathan\\programs\\hunspell\\bin")
 
 (setq ispell-program-name (locate-file "hunspell"
-exec-path exec-suffixes 'file-executable-p))
+                                  exec-path exec-suffixes 'file-executable-p))
 
 (setq ispell-dictionary   "en_US") ; Default dictionary to use
 
@@ -808,22 +809,23 @@ exec-path exec-suffixes 'file-executable-p))
     (add-to-list 'consult-buffer-sources 'consult--source-workspace))
   )
 
-;; (use-package popper
-;;   :ensure t ; or :straight t
-;;   :bind (("C-`"   . popper-toggle-latest)
-;;          ("M-`"   . popper-cycle)
-;;          ("C-M-`" . popper-toggle-type))
-;;   :init
-;;   (setq popper-reference-buffers
-;;         '("\\*Messages\\*"
-;;           "Output\\*$"
-;;           "\\*Async Shell Command\\*"
-;;           "\\*Python\\*"
-;;           "\\*MATLAB\\*"
-;;           help-mode
-;;           compilation-mode))
-;;   (popper-mode +1)
-;;   (popper-echo-mode +1))                ; For echo area hints
+(use-package popper
+  :ensure t ; or :straight t
+  :bind (("C-`"   . popper-toggle-latest)
+         ("M-`"   . popper-cycle)
+         ("C-M-`" . popper-toggle-type))
+  :init
+  (setq popper-reference-buffers
+        '("\\*Messages\\*"
+          "Output\\*$"
+          "\\*Async Shell Command\\*"
+          "\\*Python\\*"
+          "\\*MATLAB\\*"
+          "\\*Ibuffer\\*"
+          help-mode
+          compilation-mode))
+  (popper-mode +1)
+  (popper-echo-mode +1))                ; For echo area hints
 
 ;; (require 'conda)
 ;; (conda-env-initialize-interactive-shells)
@@ -860,3 +862,156 @@ exec-path exec-suffixes 'file-executable-p))
      (and (string-prefix-p "magit" name)
           (not (file-name-extension name)))
      )))
+
+(use-package citar-org-roam
+  :after (citar org-roam)
+  :config (citar-org-roam-mode))
+
+(use-package! denote
+  :config
+   ;; Remember to check the doc strings of those variables.
+   (setq denote-directory (expand-file-name "~/notes/"))
+   (setq denote-known-keywords '("emacs" "philosophy" "politics" "economics"))
+   (setq denote-infer-keywords t)
+   (setq denote-sort-keywords t)
+   (setq denote-file-type nil) ; Org is the default, set others here
+   (setq denote-prompts '(title keywords))
+   (setq denote-excluded-directories-regexp nil)
+   (setq denote-excluded-keywords-regexp nil)
+
+   ;; Pick dates, where relevant, with Org's advanced interface:
+   (setq denote-date-prompt-use-org-read-date t)
+
+
+   ;; Read this manual for how to specify `denote-templates'.  We do not
+   ;; include an example here to avoid potential confusion.
+
+
+   ;; We allow multi-word keywords by default.  The author's personal
+   ;; preference is for single-word keywords for a more rigid workflow.
+   (setq denote-allow-multi-word-keywords t)
+
+   (setq denote-date-format nil) ; read doc string
+
+   ;; By default, we do not show the context of links.  We just display
+   ;; file names.  This provides a more informative view.
+   (setq denote-backlinks-show-context t)
+
+   ;; Also see `denote-link-backlinks-display-buffer-action' which is a bit
+   ;; advanced.
+
+   ;; If you use Markdown or plain text files (Org renders links as buttons
+   ;; right away)
+   (add-hook 'find-file-hook #'denote-link-buttonize-buffer)
+
+   ;; We use different ways to specify a path for demo purposes.
+   (setq denote-dired-directories
+         (list denote-directory
+               (thread-last denote-directory (expand-file-name "attachments"))
+               (expand-file-name "~/Documents/books")))
+
+   ;; Generic (great if you rename files Denote-style in lots of places):
+   ;; (add-hook 'dired-mode-hook #'denote-dired-mode)
+   ;;
+   ;; OR if only want it in `denote-dired-directories':
+   (add-hook 'dired-mode-hook #'denote-dired-mode-in-directories)
+
+   ;; Here is a custom, user-level command from one of the examples we
+   ;; showed in this manual.  We define it here and add it to a key binding
+   ;; below.
+   (defun my-denote-journal ()
+     "Create an entry tagged 'journal', while prompting for a title."
+     (interactive)
+     (denote
+      (denote--title-prompt)
+      '("journal")))
+
+   ;; Denote DOES NOT define any key bindings.  This is for the user to
+   ;; decide.  For example:
+
+(map!
+ (:map org-mode-map :leader :nv
+     "n j" #'my-denote-journal ; our custom command
+     "n n" #'denote
+     ;; "n N" #'denote-type
+     "n d" #'denote-date
+     "n z" #'denote-signature ; "zettelkasten" mnemonic
+     "n s" #'denote-subdirectory
+     "n t" #'denote-template
+     ;; If you intend to use Denote with a variety of file types, it is
+     ;; easier to bind the link-related commands to the `global-map', as
+     ;; shown here.  Otherwise follow the same pattern for `org-mode-map',
+     ;; `markdown-mode-map', and/or `text-mode-map'.
+     "n I" #'my/denote-link
+     "n i" #'denote-link-or-create ; denote-link ; "insert" mnemonic
+     "n a" #'denote-link-add-links
+     "n b" #'denote-link-backlinks
+     "n F" #'denote-link-find-file
+     "n B" #'denote-link-find-backlink
+     ;; Note that `denote-rename-file' can work from any context, not just
+     ;; Dired bufffers.  That is why we bind it here to the `global-map'.
+     "n r" #'denote-rename-file
+     "n R" #'denote-rename-file-using-front-matter)
+
+   ;; Key bindings specifically for Dired.
+ (:map dired-mode-map :leader :nv
+                         "ni" #'denote-link-dired-marked-notes
+                         "nr" #'denote-dired-rename-marked-files
+                         "nR" #'denote-dired-rename-marked-files-using-front-matter))
+
+(map! :map org-mode-map :nvi
+     "C-c n j" #'my-denote-journal ; our custom command
+     "C-c n n" #'denote
+     "C-c n N" #'denote-type
+     "C-c n d" #'denote-date
+     "C-c n z" #'denote-signature ; "zettelkasten" mnemonic
+     "C-c n s" #'denote-subdirectory
+     "C-c n t" #'denote-template
+     ;; If you intend to use Denote with a variety of file types, it is
+     ;; easier to bind the link-related commands to the `global-map', as
+     ;; shown here.  Otherwise follow the same pattern for `org-mode-map',
+     ;; `markdown-mode-map', and/or `text-mode-map'.
+     "C-c n i" #'my/denote-link-or-create ; "insert" mnemonic
+     "[[" #'my/denote-link-or-create ; "insert" mnemonic
+     "C-c n I" #'denote-link-add-links
+     "C-c n b" #'denote-link-backlinks
+     "C-c n f f" #'denote-link-find-file
+     "C-c n f b" #'denote-link-find-backlink
+     ;; Note that `denote-rename-file' can work from any context, not just
+     ;; Dired bufffers.  That is why we bind it here to the `global-map'.
+     "C-c n r" #'denote-rename-file
+     "C-c n R" #'denote-rename-file-using-front-matter
+
+   ;; Key bindings specifically for Dired.
+   :map dired-mode-map
+     "C-c C-d C-i" #'denote-link-dired-marked-notes
+     "C-c C-d C-r" #'denote-dired-rename-marked-files
+     "C-c C-d C-R" #'denote-dired-rename-marked-files-using-front-matter)
+
+   (with-eval-after-load 'org-capture
+     (setq denote-org-capture-specifiers "%l\n%i\n%?")
+     (add-to-list 'org-capture-templates
+                  '("n" "New note (with denote.el)" plain
+                    (file denote-last-path)
+                    #'denote-org-capture
+                    :no-save t
+                    :immediate-finish nil
+                    :kill-buffer t
+                    :jump-to-captured t)))
+
+   ;; Also check the commands `denote-link-after-creating',
+   ;; `denote-link-or-create'.  You may want to bind them to keys as well
+  )
+
+
+(use-package! consult-notes
+  :config
+  (
+   map! :map global-map :leader :nv  "nf" #'consult-notes
+   )
+  )
+
+(add-to-list 'load-path (concat doom-emacs-dir (file-name-as-directory "gptel")))
+(require 'gptel)
+(setq gptel-api-key (getenv "OPENAI_API_KEY"))
+(setq gptel-use-curl nil)

@@ -7,12 +7,18 @@
  '(helm-ag-base-command "rg --no-heading")
  '(helm-ag-success-exit-status '(0 2))
  '(linum-format 'dynamic)
- '(matlab-shell-command-switches '("-nodesktop -nosplash "))
+ '(matlab-shell-command-switches '("-nodesktop -nosplash ") t)
  '(org-outline-path-complete-in-steps nil)
  '(org-refile-use-outline-path 'file)
+ '(org-safe-remote-resources
+   '("\\`https://fniessen\\.github\\.io\\(?:/\\|\\'\\)" "\\`https://fniessen\\.github\\.io/org-html-themes/org/theme-readtheorg\\.setup\\'"))
  '(package-selected-packages '(aio popper emacsql-sqlite3 emacsql-sqlite all-the-icons))
  '(warning-suppress-log-types '(((yasnippet zombie)) ((yasnippet zombie)) (defvaralias)))
- '(warning-suppress-types '(((yasnippet zombie)) ((yasnippet zombie)) (defvaralias)) t))
+ '(warning-suppress-types
+   '(((yasnippet zombie))
+     ((yasnippet zombie))
+     ((yasnippet zombie))
+     (defvaralias))))
 
 (custom-set-faces
  ;; custom-set-faces was added by Custom.

@@ -85,7 +85,6 @@
    :i "C-v" nil) ;;unmap a bunch of keys
 
 (map! :map (evil-org-mode-map emacs-lisp-mode-map prog-mode-map text-mode-map org-mode-map)
-  :ni "M-`" #'delete-other-windows
   :i "C-z" #'evil-undo
   :i "C-Z" #'evil-emacs-state
   :n "<down>" (lambda nil (interactive) (scroll-up-command 1))
@@ -246,12 +245,15 @@
 (map! :leader
       :nv
       :desc "copy buffer name"  "fc" #'my/get-buffer-name
-      :desc "helm-bibtex"  "nB" #'helm-bibtex
+      :desc "denote backlinks"  "nB" #'denote-link-backlinks
+      ;; :desc "helm-bibtex"  "nB" #'helm-bibtex
       :desc "citar references"  "nb" #'citar-open
       :desc "rebuild orgNv database"  "nr" #'(lambda () (interactive) (setq orgnv--database (orgnv-build-database)))
       :desc "Org Noter"  "nN" #'org-noter
       :desc "agenda for literature followup" "oal" #'(lambda () (interactive) (org-agenda nil "l"))
-      "M-x" :n "SPC" #'execute-extended-command)
+      :desc "M-x" :n "x" #'execute-extended-command
+      :desc "scratch buffer" :n "z" #'doom/open-scratch-buffer
+      )
 
 
 (map!
@@ -261,9 +263,11 @@
  :n "gJ" #'+evil/insert-newline-below
 
  :n "g[" #'org-roam-insert
- :n "g]" #'kmacro-end-and-call-macro
+ :n "g]" #'kmacro-end-an-call-macro
  :n "g." #'er/expand-region
 
+ :n "gh" #'execute-extended-command
+ :n "gf" #'execute-extended-command
 
  ;; :n "gh" #'windmove-left
  ;; :n "gj" #'windmove-down
@@ -317,7 +321,7 @@
         :nvi "C-h" #'windmove-left
         :nvi "C-j" #'windmove-down
         :nvi "C-k" #'windmove-up
-        :ni "]]" #'org-roam-node-insert
+        :i "]]" #'org-roam-node-insert
  )
 
 ;; (map!
@@ -455,7 +459,8 @@
         :desc "search and replace vim style" "s" #'my/search-replace
         :desc "search and replace vim style - in region" "S" #'my/search-replace-in-region
         :desc "refile subtree" "R" 'org-refile
-        :desc "paste from kill-ring" "p" #'consult-register
+        ;; :desc "paste from kill-ring" "p" #'consult-register
+        :desc "register dwi" "p" #'consult-register-load
         ;; :desc "paste from kill-ring" "p" 'helm-show-kill-ring
         ;; :desc "helm org rifle" "R" 'helm-org-rifle
         :desc "run macro" "e" #'kmacro-end-and-call-macro
@@ -509,6 +514,10 @@
       :desc "window resize hydra" "w." 'hydra-window-resize/body
       :desc "Open project buffer in other window" "pF" #'projectile-find-file-dwim-other-window
       :desc "open a buffer and switch to its tabspace" "bt" #'tabspaces-switch-buffer-and-tab
+      :desc "consult buffer" "z" #'consult-buffer
+      :desc "consult buffer to new window" "Z" #'consult-buffer-other-window
+      :desc "consult buffer" "SPC" #'consult-buffer
+      :desc "consult buffer to new window" "S-SPC" #'consult-buffer-other-window
          )
 
 
@@ -699,4 +708,6 @@
  :nv "gn" #'centaur-tabs-forward
  :nvi "C-<prior>" #'centaur-tabs-backward
  :nvi "C-<next>" #'centaur-tabs-forward
+ ;; :nvi "C-`" #'popper-toggle-latest
+ :nvi "M-`" #'popper-cycle
  )

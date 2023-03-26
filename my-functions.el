@@ -6,7 +6,7 @@
   )
     ;;; During visual selection point has +1 value
 (defun my/evil-mc-make-vertical-cursors (beg end)
-  (interactive (list (region-beginning) (- (region-end) 1)))
+  (interctive (list (region-beginning) (- (region-end) 1)))
   (evil-exit-visual-state)
   (evil-mc-pause-cursors)
       ;;; Because `evil-mc-resume-cursors` produces a cursor,
@@ -617,3 +617,64 @@ Current pattern: %`evil-mc-pattern
     (evil-indent (point-min) (point-max))
     ))
 
+
+(defun my/name-tab-by-project-or-default ()
+  "Return project name if in a project, or default tab-bar name if not.
+The default tab-bar name uses the buffer name."
+  (let ((project-name (projectile-project-name)))
+    (if (string= "-" project-name)
+        (tab-bar-tab-name-current)
+      (projectile-project-name))))
+
+(defun my/create-denote-link-from-current-selection ()
+  "Cut the current region and echo its contents into the messages buffer."
+  (interactive)
+  (when (region-active-p)
+    (let ((region-text (buffer-substring-no-properties
+                        (region-beginning) (region-end))))
+      (setq deactivate-mark t)
+      (kill-region (region-beginning) (region-end))
+      (message region-text)
+      (denote-link-or-create region-text 't)
+      )))
+
+(defun rlct/denote--pretty-format-filename (file)
+    (let* (
+           (title (denote-retrieve-filename-title file))
+           (keywords (denote-extract-keywords-from-path file))
+           (keywords-as-string (mapconcat 'identity keywords ", "))
+           )
+      (concat title "      " "(" keywords-as-string ")" )
+      )
+    )
+
+  (defun rlct/denote--find-file-with-pretty-format (&optional initial-text)
+    (interactive)
+    (let* (
+           (paths (mapcar #'(lambda (file)
+                              (cons (rlct/denote--pretty-format-filename file) file))
+                          (denote-directory-files)))
+           (filename (cdr (assoc (completing-read "Select a file: " paths  nil t) paths)))
+           )
+      filename
+      )
+    )
+
+
+  (defun my/denote-link()
+    (interactive)
+    (let ((denote-file-prompt 'rlct/denote--find-file-with-pretty-format))
+      (advice-add 'denote-file-prompt :around denote-file-prompt)
+      )
+    (call-interactively 'denote-link)
+    (advice-remove 'denote-file-prompt 'rlct/denote--find-file-with-pretty-format)
+    )
+
+  (defun my/denote-link-or-create()
+    (interactive)
+    (let ((denote-file-prompt 'rlct/denote--find-file-with-pretty-format))
+      (advice-add 'denote-file-prompt :around denote-file-prompt)
+      )
+    (call-interactively 'denote-link-or-create)
+    (advice-remove 'denote-file-prompt 'rlct/denote--find-file-with-pretty-format)
+    )

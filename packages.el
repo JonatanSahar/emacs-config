@@ -57,12 +57,19 @@
 (package! org-pretty-tags :pin "40fd72f3e7...")
 (package! org-superstar)
 (package! org-ref)
+(package! citar-org-roam)
 (package! org-roam-bibtex
   :recipe (:host github :repo "org-roam/org-roam-bibtex"))
 
 (package! org-roam-ui)
 (package! simple-httpd)
 (package! f)
+
+(package! denote)
+(package! consult-notes)
+(package! citar-denote)
+
+
 
 ;; writing experience
 (package! olivetti)
@@ -122,3 +129,5 @@
 (package! ibuffer-projectile)
 (package! conda)
 (package! emacs-aio)
+(package! modus-themes)
+(package! ef-themes)
