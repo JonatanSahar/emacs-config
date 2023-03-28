@@ -626,19 +626,7 @@ The default tab-bar name uses the buffer name."
         (tab-bar-tab-name-current)
       (projectile-project-name))))
 
-(defun my/create-denote-link-from-current-selection ()
-  "Cut the current region and echo its contents into the messages buffer."
-  (interactive)
-  (when (region-active-p)
-    (let ((region-text (buffer-substring-no-properties
-                        (region-beginning) (region-end))))
-      (setq deactivate-mark t)
-      (kill-region (region-beginning) (region-end))
-      (message region-text)
-      (denote-link-or-create region-text 't)
-      )))
-
-(defun rlct/denote--pretty-format-filename (file)
+(defun my/denote--pretty-format-filename (file)
     (let* (
            (title (denote-retrieve-filename-title file))
            (keywords (denote-extract-keywords-from-path file))
@@ -648,11 +636,11 @@ The default tab-bar name uses the buffer name."
       )
     )
 
-  (defun rlct/denote--find-file-with-pretty-format (&optional initial-text)
+  (defun my/denote--find-file-with-pretty-format (&optional initial-text)
     (interactive)
     (let* (
            (paths (mapcar #'(lambda (file)
-                              (cons (rlct/denote--pretty-format-filename file) file))
+                              (cons (my/denote--pretty-format-filename file) file))
                           (denote-directory-files)))
            (filename (cdr (assoc (completing-read "Select a file: " paths  nil t) paths)))
            )
@@ -663,18 +651,18 @@ The default tab-bar name uses the buffer name."
 
   (defun my/denote-link()
     (interactive)
-    (let ((denote-file-prompt 'rlct/denote--find-file-with-pretty-format))
+    (let ((denote-file-prompt 'my/denote--find-file-with-pretty-format))
       (advice-add 'denote-file-prompt :around denote-file-prompt)
       )
     (call-interactively 'denote-link)
-    (advice-remove 'denote-file-prompt 'rlct/denote--find-file-with-pretty-format)
+    (advice-remove 'denote-file-prompt 'my/denote--find-file-with-pretty-format)
     )
 
   (defun my/denote-link-or-create()
     (interactive)
-    (let ((denote-file-prompt 'rlct/denote--find-file-with-pretty-format))
+    (let ((denote-file-prompt 'my/denote--find-file-with-pretty-format))
       (advice-add 'denote-file-prompt :around denote-file-prompt)
       )
     (call-interactively 'denote-link-or-create)
-    (advice-remove 'denote-file-prompt 'rlct/denote--find-file-with-pretty-format)
+    (advice-remove 'denote-file-prompt 'my/denote--find-file-with-pretty-format)
     )

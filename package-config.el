@@ -954,10 +954,10 @@ DEFS is a plist associating completion categories to commands."
      "n R" #'denote-rename-file-using-front-matter)
 
    ;; Key bindings specifically for Dired.
- (:map dired-mode-map :leader :nv
-                         "ni" #'denote-link-dired-marked-notes
-                         "nr" #'denote-dired-rename-marked-files
-                         "nR" #'denote-dired-rename-marked-files-using-front-matter))
+ ;; (:map dired-mode-map :leader :nv
+ ;;                         "ni" #'denote-link-dired-marked-notes
+ ;;                         "nr" #'denote-dired-rename-marked-files
+ ;;                         "nR" #'denote-dired-rename-marked-files-using-front-matter))
 
 (map! :map org-mode-map :nvi
      "C-c n j" #'my-denote-journal ; our custom command
@@ -971,9 +971,10 @@ DEFS is a plist associating completion categories to commands."
      ;; easier to bind the link-related commands to the `global-map', as
      ;; shown here.  Otherwise follow the same pattern for `org-mode-map',
      ;; `markdown-mode-map', and/or `text-mode-map'.
-     "C-c n i" #'my/denote-link-or-create ; "insert" mnemonic
-     "[[" #'my/denote-link-or-create ; "insert" mnemonic
-     "C-c n I" #'denote-link-add-links
+     "C-c n I" #'denote-link; "insert" mnemonic
+     "C-c n i" #'denote-link-or-create ; "insert" mnemonic
+     "[[" #'denote-link-or-create
+     "C-c n a" #'denote-link-add-links
      "C-c n b" #'denote-link-backlinks
      "C-c n f f" #'denote-link-find-file
      "C-c n f b" #'denote-link-find-backlink
@@ -1003,15 +1004,27 @@ DEFS is a plist associating completion categories to commands."
    ;; `denote-link-or-create'.  You may want to bind them to keys as well
   )
 
-
-(use-package! consult-notes
-  :config
-  (
-   map! :map global-map :leader :nv  "nf" #'consult-notes
-   )
-  )
-
 (add-to-list 'load-path (concat doom-emacs-dir (file-name-as-directory "gptel")))
 (require 'gptel)
 (setq gptel-api-key (getenv "OPENAI_API_KEY"))
 (setq gptel-use-curl nil)
+
+(use-package consult-notes
+  :commands (consult-notes
+             consult-notes-search-in-all-notes
+             ;; if using org-roam
+             consult-notes-org-roam-find-node
+             consult-notes-org-roam-find-node-relation)
+  :config
+  (map! :map global-map :leader :nv  "nf" #'consult-notes)
+  ;; Set org-roam integration, denote integration, or org-heading integration e.g.:
+  (when (locate-library "denote")
+    (consult-notes-denote-mode))
+  (setq consult-notes-denote-display-id nil)
+  )
+
+(use-package! consult
+  :config
+  (autoload 'projectile-project-root "projectile")
+  (setq consult-project-function (lambda (_) (projectile-project-root)))
+  )
