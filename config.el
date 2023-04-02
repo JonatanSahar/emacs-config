@@ -24,16 +24,12 @@
 ;; (setq doom-font
 ;;
 (setq
-        doom-font  (font-spec :family "Roboto Mono" :weight 'regular :size 18)
-        doom-big-font  (font-spec :family "Roboto Mono" :weight 'regular :size 18)
- ;; doom-font  (font-spec :family "Alef" :size 14)
- ;; doom-font  (font-spec :family "Source Code Pro" :size 18)
- ;; doom-font (font-spec :family "Alef" :size 10)
- ;; doom-big-font (font-spec :family "Noto Mono" :size 10)
- ;; doom-big-font (font-spec :family "JetBrains Mono" :size 10)
- ;; doom-variable-pitch-font (font-spec :family "Source Code Pro" :size 14)
- doom-variable-pitch-font (font-spec :family "Noto Sans" :size 16)
- ;; doom-unicode-font (font-spec :name "Noto Mono" :size 10))
+        ;; doom-font  (font-spec :family "Roboto Mono" :weight 'regular :size 18)
+        ;; doom-big-font  (font-spec :family "Roboto Mono" :weight 'regular :size 18)
+        ;; doom-variable-pitch-font (font-spec :family "Noto Sans" :size 16)
+        doom-font  (font-spec :family "Iosevka Comfy" :weight 'regular :size 18)
+        doom-big-font  (font-spec :family "Iosevka Comfy" :weight 'regular :size 18)
+        doom-variable-pitch-font (font-spec :family "Iosevka Comfy Duo" :weight 'regular :size 18)
  )
 
 
@@ -93,22 +89,6 @@
  inhibit-compacting-font-caches t            ; When there are lots of glyphs, keep them in memory
  backup-directory-alist `(("." . ,(concat user-emacs-directory "autosaved_files")))
  truncate-string-ellipsis "…")               ; Unicode ellispis are nicer than "...", and also save /precious/ space
-
-
-;; load orgnv
-(add-to-list 'load-path (concat doom-emacs-dir (file-name-as-directory "orgnv")))
-(load "orgnv.el")
-(require 'orgnv)
-(setq orgnv-directories (list (concat (file-name-as-directory notes-dir)  (file-name-as-directory "slip-box"))))
-
-;; load openai-api
-;;(add-to-list 'load-path (concat emacs-directory (file-name-as-directory "aide.el")))
-;;(load "aide.el")
-;;(require 'aide)
-
-;; load dired+
-(add-load-path! (concat emacs-directory (file-name-as-directory "dired-plus")))
-(load "dired+.el")
 
 
 (load! "package-config.el")
@@ -189,9 +169,7 @@
                             (font-lock-mode 1)
                             (buffer-face-mode)
                             (+zen/toggle)
-                            (my/fix-hebrew-hyphen)
                             ))
-
 
 (add-hook 'prog-mode-hook 'my-buffer-face-mode-programming)
 (add-hook 'prog-mode-hook (lambda ()
@@ -222,9 +200,6 @@
 
 (defadvice! prompt-for-buffer (&rest _)
   :after 'evil-window-vsplit (switch-to-buffer))
-
-(setq initial-major-mode 'org-mode)
-(setq helm-ff-fuzzy-matching t)
 
 (set-input-method 'hebrew-full)
 
@@ -347,12 +322,12 @@ Return the errors parsed with the error patterns of CHECKER."
   (setq ibuffer-old-time 48)
   (add-hook 'ibuffer-mode-hook #'hl-line-mode)
   (define-key global-map (kbd "C-x C-b") #'ibuffer)
-  (let ((map ibuffer-mode-map))
-    (define-key map (kbd "* f") #'ibuffer-mark-by-file-name-regexp)
-    (define-key map (kbd "* g") #'ibuffer-mark-by-content-regexp) ; "g" is for "grep"
-    (define-key map (kbd "* n") #'ibuffer-mark-by-name-regexp)
-    (define-key map (kbd "s n") #'ibuffer-do-sort-by-alphabetic)  ; "sort name" mnemonic
-    (define-key map (kbd "/ g") #'ibuffer-filter-by-content))
+  ;; (let ((map ibuffer-mode-map))
+  ;;   (define-key map (kbd "* f") #'ibuffer-mark-by-file-name-regexp)
+  ;;   (define-key map (kbd "* g") #'ibuffer-mark-by-content-regexp) ; "g" is for "grep"
+  ;;   (define-key map (kbd "* n") #'ibuffer-mark-by-name-regexp)
+  ;;   (define-key map (kbd "s n") #'ibuffer-do-sort-by-alphabetic)  ; "sort name" mnemonic
+  ;;   (define-key map (kbd "/ g") #'ibuffer-filter-by-content))
 
 (add-hook 'dired-mode-hook 'dired-filter-mode)
 (setq citar--multiple-setup (cons "<tab>"  "RET"))
@@ -366,10 +341,6 @@ Return the errors parsed with the error patterns of CHECKER."
 
 (writeroom-mode 1)
 
-(defun my/org-roam-find-node ()
-  (interactive)
-  (org-roam-node-find nil nil (org-roam-node-read nil (lambda (node)
-                                                        (string-match "Notes on" (org-roam-node-title node))))))
 
 (defmacro define-and-bind-text-object (key start-regex end-regex)
   (let ((inner-name (make-symbol "inner-name"))
@@ -408,36 +379,16 @@ Return the errors parsed with the error patterns of CHECKER."
 (setq tramp-default-method "plink -share")
 
 (custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(line-number ((t (:inherit default :foreground "steel blue" :strike-through nil :underline nil :slant normal :weight semi-bold :family "Roboto Mono"))))
- '(line-number-current-line ((t (:inherit (hl-line default) :foreground "light steel blue" :strike-through nil :underline nil :slant normal :weight semi-bold :family "Roboto Mono"))))
+ ;; '(line-number ((t (:inherit default :foreground "steel blue" :strike-through nil :underline nil :slant normal :weight semi-bold :family "Roboto Mono"))))
+ ;; '(line-number-current-line ((t (:inherit (hl-line default) :foreground "light steel blue" :strike-through nil :underline nil :slant normal :weight semi-bold :family "Roboto Mono"))))
  '(org-default ((t (:family "Heebo")))))
 
 
 (setq company-backends '((company-capf company-files company-dabbrev-code company-dabbrev)))
 (setq writeroom-width 100)
-(diredp-toggle-find-file-reuse-dir 1)
+;; (diredp-toggle-find-file-reuse-dir 1)
 (setq dired-compress-file-alist '(("\\.gz\\'" . "gzip -9f %i") ("\\.bz2\\'" . "bzip2 -9f %i") ("\\.xz\\'" . "xz -9f %i") ("\\.zst\\'" . "zstd -qf -19 --rm -o %o %i") ("\\.zip\\'" . "zip %o -r --filesync %i")))
 (+word-wrap-mode 1)
-
-;; (set-popup-rules!
-;;  '(
-;;  ("^ \\*" :slot -1 ) ; fallback rule for special buffers
-;;    ("^\\*" :select t :size 0.3)
-;;    ("^\\*Ibuffer" :size 0.3 :ttl t)
-;;    ("^\\*Embark.*Ibuffer" :size 0.3  ))
-;;    ;; ("^\\*ChatGPT"  :size 0.35 )))
-
-
-  ;; Optionally tweak the register preview window.
-  ;; This adds thin lines, sorting and hides the mode line of the window.
-  ;; (advice-add #'register-preview :override #'consult-register-window-)
-  ;; (setq register-preview-delay 0.5
-  ;;       register-preview-function #'consult-register-format)
-
 
 ;; tabs
 (defun my/name-tab-by-project-or-default ()

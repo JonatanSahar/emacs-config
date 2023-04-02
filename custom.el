@@ -8,6 +8,8 @@
  '(helm-ag-success-exit-status '(0 2))
  '(linum-format 'dynamic)
  '(matlab-shell-command-switches '("-nodesktop -nosplash ") t)
+ '(org-agenda-files
+   '("~/notes/20230323T111555--paper-summaries-from-guy__thesis.org"))
  '(org-outline-path-complete-in-steps nil)
  '(org-refile-use-outline-path 'file)
  '(org-safe-remote-resources

@@ -582,13 +582,14 @@ Current pattern: %`evil-mc-pattern
 (defun my-buffer-face-mode-programming ()
   "Sets a fixed width (monospace) font in current buffer"
   (interactive)
-  ;; (setq buffer-face-mode-face '(:extend t :family "Fira Code"))
-  (setq buffer-face-mode-face '(:extend t :family "Roboto Mono"))
+  (setq buffer-face-mode-face '(:extend t :family "Iosevka Comfy"))
+  ;; (setq buffer-face-mode-face '(:extend t :family "Roboto Mono"))
   (buffer-face-mode))
 
 (defun my-buffer-face-mode-text ()
   (interactive)
-  (setq buffer-face-mode-face '(:extend t :family "Heebo"))
+  (setq buffer-face-mode-face '(:extend t :family "Iosevka Comfy"))
+  ;; (setq buffer-face-mode-face '(:extend t :family "Heebo"))
   (buffer-face-mode))
 
 (defun my/toggle-writing-mode ()

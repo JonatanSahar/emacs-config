@@ -50,21 +50,25 @@
 ;(unpin! t)
 
 (package! org-roam)
-(package! org-super-agenda :pin "dd0d104c26...")
-(package! helm-org-rifle)
-(package! org-download)
-(package! org :pin "73875939a8b5545")
-(package! org-pretty-tags :pin "40fd72f3e7...")
-(package! org-superstar)
-(package! org-ref)
 (package! citar-org-roam)
 (package! org-roam-bibtex
   :recipe (:host github :repo "org-roam/org-roam-bibtex"))
-
 (package! org-roam-ui)
+
+;; (package! org :pin "73875939a8b5545")
+(package! org-pretty-tags :pin "40fd72f3e7...")
+(package! org-superstar)
+(package! org-super-agenda :pin "dd0d104c26...")
+(package! helm-org-rifle)
+(package! org-download)
+
 (package! simple-httpd)
 (package! f)
 
+
+(package! org-transclusion)
+
+;; denote
 (package! denote)
 (package! consult-notes)
 (package! citar-denote)
@@ -95,8 +99,14 @@
 (package! org-mime)
 (package! dired-hacks-utils)
 (package! dired-filter)
+(package! dired-ranger)
 (package! tabspaces)
 (package!  popper)
+(package! ibuffer-projectile)
+(package! consult-projectile)
+
+(package! evil-better-visual-line)
+
 
 ;; ivy/helm alternative
 (package! consult)
@@ -109,16 +119,14 @@
 (package! ripgrep)
 (package! orderless)
 (package! consult-dir)
-(package! evil-better-visual-line)
+
+;; reference/bibliography
+(package! org-ref)
 (package!  helm-bibtex)
 (package!  bibtex-completion)
 (package!  consult-bibtex
 :recipe (:host github
          :repo "mohkale/consult-bibtex"))
-(package! nano-emacs
-        :recipe (:host github :repo "rougier/nano-emacs"))
-;; (package! lambda-themes
-;;   :recipe (:host github :repo "lambda-emacs/lambda-themes"))
 
 ;; code related
 (package! matlab-mode)
@@ -126,8 +134,10 @@
 (package! pyenv)
 (package! poetry)
 (package! virtualenvwrapper)
-(package! ibuffer-projectile)
 (package! conda)
 (package! emacs-aio)
+
+
+;; themes
 (package! modus-themes)
 (package! ef-themes)

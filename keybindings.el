@@ -31,6 +31,7 @@
     :nvi "C-<next>" nil
     :nv "gN" nil
     :nv "gn" nil
+    :nvi "C-n" nil
 
     (:map org-mode-map
         :nv "j" nil
@@ -248,8 +249,6 @@
       :desc "denote backlinks"  "nB" #'denote-link-backlinks
       ;; :desc "helm-bibtex"  "nB" #'helm-bibtex
       :desc "citar references"  "nb" #'citar-open
-      :desc "rebuild orgNv database"  "nr" #'(lambda () (interactive) (setq orgnv--database (orgnv-build-database)))
-      :desc "Org Noter"  "nN" #'org-noter
       :desc "agenda for literature followup" "oal" #'(lambda () (interactive) (org-agenda nil "l"))
       :desc "M-x" :n "x" #'execute-extended-command
       :desc "scratch buffer" :n "z" #'doom/open-scratch-buffer
@@ -530,8 +529,6 @@
 ;; (key-chord-define term-mode-map "jk" #'evil-force-normal-state)
 ;; (key-chord-define evil-visual-state-map "jk" #'evil-force-normal-state)
 
-(global-set-key [f12] 'wordnut-search)
-(global-set-key [(control f12)] 'wordnut-lookup-current-word)
 (global-set-key [f11] 'flyspell-correct-at-point)
 
 (evil-define-key 'normal wordnut-mode-map (kbd "q") 'quit-window)
@@ -604,10 +601,10 @@
  )
 
   (map! :map vertico-map
-        "C-." #'embark-act
-        "C-," #'embark-become
-        "C-/" #'embark-export
-        "C-a" #'embark-act
+        ;; "C-." #'embark-act
+        ;; "C-," #'embark-become
+        ;; "C-/" #'embark-export
+        "C-;" #'embark-act
         "C-b" #'embark-become
         "C-e" #'embark-export
         "C-j" #'vertico-previous
@@ -688,26 +685,36 @@
        ))
 
 
+(map!
+ :nvi "M-1" #'tab-bar-select-tab
+ :nvi "M-2" #'tab-bar-select-tab
+ :nvi "M-3" #'tab-bar-select-tab
+ :nvi "M-4" #'tab-bar-select-tab
+ :nvi "M-5" #'tab-bar-select-tab
+ )
+
 ;; (map!
-;;  :nvi "M-1" #'tab-bar-select-tab
-;;  :nvi "M-2" #'tab-bar-select-tab
-;;  :nvi "M-3" #'tab-bar-select-tab
-;;  :nvi "M-4" #'tab-bar-select-tab
-;;  :nvi "M-5" #'tab-bar-select-tab
-;;  ;; :nvi "C-<prior>"
-;;  ;; :nvi "C-<next>"
+;;  :nvi "M-1" #'centaur-tabs-select-visible-tab
+;;  :nvi "M-2" #'centaur-tabs-select-visible-tab
+;;  :nvi "M-3" #'centaur-tabs-select-visible-tab
+;;  :nvi "M-4" #'centaur-tabs-select-visible-tab
+;;  :nvi "M-5" #'centaur-tabs-select-visible-tab
+;;  :nv "gN" #'centaur-tabs-backward
+;;  :nv "gn" #'centaur-tabs-forward
+;;  :nvi "C-<prior>" #'centaur-tabs-backward
+;;  :nvi "C-<next>" #'centaur-tabs-forward
+;;  ;; :nvi "C-`" #'popper-toggle-latest
+;;  :nvi "M-`" #'popper-cycle
 ;;  )
 
-(map!
- :nvi "M-1" #'centaur-tabs-select-visible-tab
- :nvi "M-2" #'centaur-tabs-select-visible-tab
- :nvi "M-3" #'centaur-tabs-select-visible-tab
- :nvi "M-4" #'centaur-tabs-select-visible-tab
- :nvi "M-5" #'centaur-tabs-select-visible-tab
- :nv "gN" #'centaur-tabs-backward
- :nv "gn" #'centaur-tabs-forward
- :nvi "C-<prior>" #'centaur-tabs-backward
- :nvi "C-<next>" #'centaur-tabs-forward
- ;; :nvi "C-`" #'popper-toggle-latest
- :nvi "M-`" #'popper-cycle
- )
+(map! :map evil-normal-state-map
+      :n "h" 'left-char
+      :n "l" 'right-char
+      :n [left] 'left-char
+      :n [right] 'right-char
+      :n "h" 'left-char
+      :n "l" 'right-char
+      :n [left] 'left-char
+      :n [right] 'right-char)
+
+(setq visual-order-cursor-movement t)
