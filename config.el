@@ -27,9 +27,9 @@
         ;; doom-font  (font-spec :family "Roboto Mono" :weight 'regular :size 18)
         ;; doom-big-font  (font-spec :family "Roboto Mono" :weight 'regular :size 18)
         ;; doom-variable-pitch-font (font-spec :family "Noto Sans" :size 16)
-        doom-font  (font-spec :family "Iosevka Comfy" :weight 'regular :size 18)
-        doom-big-font  (font-spec :family "Iosevka Comfy" :weight 'regular :size 18)
-        doom-variable-pitch-font (font-spec :family "Iosevka Comfy Duo" :weight 'regular :size 18)
+        doom-font  (font-spec :family "Iosevka Comfy" :weight 'regular :size 20)
+        doom-big-font  (font-spec :family "Iosevka Comfy" :weight 'regular :size 20)
+        doom-variable-pitch-font (font-spec :family "Iosevka Comfy Duo" :weight 'regular :size 20)
  )
 
 
@@ -40,7 +40,14 @@
 ;; There are two ways to load a theme. Both assume the theme is installed and
 ;; available. You can either set `doom-theme' or manually load a theme with the
 ;; `load-theme' function. This is the default:
-(setq doom-theme 'modus-operandi-tinted)
+
+
+(load! "theme-config.el")
+;; (setq doom-theme 'modus-operandi-tinted)
+
+
+
+
 ;;
 ;; If you use `org' and don't want your org files in the default location below,
 ;; change `org-directory'. It must be set before org loads!

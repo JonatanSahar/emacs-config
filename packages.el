@@ -82,7 +82,7 @@
 (package! consult-company)
 (package! company-statistics)
 (package! company-wordfreq)
-(package! flyspell-lazy :pin "3ebf68cc9e...")
+;; (package! flyspell-lazy :pin "3ebf68cc9e...")
 (package! company-box)
 (package! compat)
 

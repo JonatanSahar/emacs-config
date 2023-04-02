@@ -550,6 +550,8 @@ DEFS is a plist associating completion categories to commands."
 (define-minibuffer-key "\C-s"
   'file #'consult-find-for-minibuffer)
 
+(after! ispell
+(ispell)
 (setq ispell-personal-dictionary-en  "C:\\Users\\Jonathan\\programs\\hunspell\\share\\hunspell\\personal.en")
 (setq ispell-personal-dictionary-heb  "C:\\Users\\Jonathan\\programs\\hunspell\\share\\hunspell\\personal.heb")
 (setq ispell-local-dictionary-alist '(("english-hunspell"
@@ -571,6 +573,7 @@ DEFS is a plist associating completion categories to commands."
                                        iso-8859-1)))
 
 (setq ispell-dictionary   "en_US,hebrew") ; Default dictionary to use
+
 ;; ispell-set-spellchecker-params has to be called
 ;; before ispell-hunspell-add-multi-dic will work
 (ispell-set-spellchecker-params)
@@ -583,7 +586,7 @@ DEFS is a plist associating completion categories to commands."
 (unless (file-exists-p ispell-personal-dictionary-en)
   (write-region "" nil ispell-personal-dictionary-en nil 0))
 (unless (file-exists-p ispell-personal-dictionary-heb)
-  (write-region "" nil ispell-personal-dictionary-heb nil 0))
+  (write-region "" nil ispell-personal-dictionary-heb nil 0)))
 
 (use-package! company-box
   :hook (company-mode . company-box-mode))

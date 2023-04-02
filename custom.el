@@ -3,6 +3,8 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
+ '(custom-safe-themes
+   '("5718ea4d49350ab88e353fd66f3d4d3954e890b4d3dd7928f9b6dcb0e76ac8bd" "929d5aa75ac40de51b6fccc766f5d431c16306c754e8dde599bd8d5623ff0ced" default))
  '(evil-digit-bound-motions '(evil-beginning-of-visual-line))
  '(helm-ag-base-command "rg --no-heading")
  '(helm-ag-success-exit-status '(0 2))
