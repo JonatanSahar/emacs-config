@@ -248,7 +248,7 @@
       :desc "copy buffer name"  "fc" #'my/get-buffer-name
       :desc "denote backlinks"  "nB" #'denote-link-backlinks
       ;; :desc "helm-bibtex"  "nB" #'helm-bibtex
-      :desc "citar references"  "nb" #'citar-open
+      ;; :desc "citar references"  "nb" #'citar-open
       :desc "agenda for literature followup" "oal" #'(lambda () (interactive) (org-agenda nil "l"))
       :desc "M-x" :n "x" #'execute-extended-command
       :desc "scratch buffer" :n "z" #'doom/open-scratch-buffer
@@ -261,7 +261,7 @@
  :n "gK" #'+evil/insert-newline-above
  :n "gJ" #'+evil/insert-newline-below
 
- :n "g[" #'org-roam-insert
+ :n "g[" #'denote-link-or-create
  :n "g]" #'kmacro-end-an-call-macro
  :n "g." #'er/expand-region
 
@@ -320,7 +320,6 @@
         :nvi "C-h" #'windmove-left
         :nvi "C-j" #'windmove-down
         :nvi "C-k" #'windmove-up
-        :i "]]" #'org-roam-node-insert
  )
 
 ;; (map!
@@ -352,6 +351,7 @@
 
 (map! :leader
   :nv
+  :desc "search org outline" "sO" #'consult-outline
   :desc "search project/dir" "sp" #'consult-ripgrep
   :desc "search project/dir" "sd" #'consult-ripgrep
   :desc "search buffer"  "ss" #'consult-line
@@ -590,8 +590,7 @@
    ;; :i "C-c y" #'evil-yank
    :ni "C-c I" #'org-cite-insert
    ;; :ni "C-c I" #'org-ref-insert-cite-link
-   :ni "C-c ]" #'org-roam-node-insert
-   :ni "C-c [" #'org-roam-node-insert
+   :ni "C-c [" #'denote-link-or-create
    ;; :ni "C-c I" #'org-cite-insert
 
    :n "C-S-j" #'evil-mc-make-cursor-move-next-line
@@ -679,8 +678,9 @@
        :desc "Close tab" "d" #'tab-bar-close-tab
        :desc "Close tab by name" "D" #'tab-bar-close-tab-by-name
        :desc "Close other tabs" "1" #'tab-bar-close-other-tabs
+       :desc "Previous tab" "h" #'tab-previous
+       :desc "Next tab" "l" #'tab-next
        :desc "Previous tab" "j" #'tab-previous
-       :desc "jump to tab by number" "i" #'centaur-tabs-ace-jump
        :desc "Next tab" "k" #'tab-next
        ))
 

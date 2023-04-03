@@ -46,6 +46,8 @@
 
 
 (use-package org
+  :init
+  (setq my-org-refile-maxlevel 1)
   :config
   (setq
    bidi-paragraph-direction nil
@@ -73,14 +75,16 @@
                       "~/notes/20230402T133604--interesting-papers__thesis.org")
 
    org-refile-targets '(
-                        ( org-capture-projects-file :maxlevel . 1)
-                        ( org-capture-someday-file :level . 1)
-                        ( org-capture-inbox-file :maxlevel . 2)
+                        ;; ( org-capture-projects-file :maxlevel . 1)
+                        ;; ( org-capture-someday-file :level . 1)
+                        ;; ( org-capture-inbox-file :maxlevel . 2)
+                        ("~/notes/20230323T113003--knowledge-base__thesis.org" :level . 1)
                         (nil . (:maxlevel . 9)) ;; current buffer
-                        ( org-capture-reminders-file :maxlevel . 1))
+                        ;; ( org-capture-reminders-file :maxlevel . 1)
+                        )
 
    org-todo-keywords '(
-                       (sequence "TODO(t)" "NEXT(n)" "READ(r)" "SKIM(s)" "NOTE(N)" "|" "DONE(d)")
+                       (sequence "TODO(t)" "NEXT(n)" "SKIM(s)" "READ(r)" "NOTE(N)" "|" "DONE(d)")
                        (sequence "[ ](T)" "[-](S)" "[?](W)" "|" "[X](D)"))
 
    org-agenda-block-separator " "
@@ -551,10 +555,10 @@ DEFS is a plist associating completion categories to commands."
   'file #'consult-find-for-minibuffer)
 
 (after! ispell
-(ispell)
+;; (ispell)
 (setq ispell-personal-dictionary-en  "C:\\Users\\Jonathan\\programs\\hunspell\\share\\hunspell\\personal.en")
 (setq ispell-personal-dictionary-heb  "C:\\Users\\Jonathan\\programs\\hunspell\\share\\hunspell\\personal.heb")
-(setq ispell-local-dictionary-alist '(("english-hunspell"
+(setq ispell-local-dictionary-alist '(("en_US"
                                        "[[:alpha:]]"
                                        "[^[:alpha:]]"
                                        "[']"
@@ -563,7 +567,7 @@ DEFS is a plist associating completion categories to commands."
                                        nil
                                        iso-8859-1)
 
-                                      ("hebrew-hunspell"
+                                      ("hebrew"
                                        "[[:alpha:]]"
                                        "[^[:alpha:]]"
                                        "[']"
@@ -572,7 +576,7 @@ DEFS is a plist associating completion categories to commands."
                                        nil
                                        iso-8859-1)))
 
-(setq ispell-dictionary   "en_US,hebrew") ; Default dictionary to use
+(setq ispell-dictionary "en_US,hebrew") ; Default dictionary to use
 
 ;; ispell-set-spellchecker-params has to be called
 ;; before ispell-hunspell-add-multi-dic will work
@@ -655,6 +659,7 @@ DEFS is a plist associating completion categories to commands."
           "\\*Python\\*"
           "\\*MATLAB\\*"
           "\\*Ibuffer\\*"
+          "\\*denote-backlinks"
           help-mode
           compilation-mode))
   (popper-mode +1)
@@ -929,22 +934,8 @@ the directory.  `REST' is passed to the `CONSULT-RIPGREP-FUNCTION'."
   ;; Probably not needed if you are using which-key.
   ;; (define-key consult-narrow-map (vconcat consult-narrow-key "?") #'consult-narrow-help)
 
-  ;; Optionally configure a function which returns the project root directory.
-  ;; There are multiple reasonable alternatives to chose from:
-  ;; * projectile-project-root
-  ;; * vc-root-dir
-  ;; * project-roots
-  ;; * locate-dominating-file
   (autoload 'projectile-project-root "projectile")
   (setq consult-project-root-function #'projectile-project-root)
-  ;; (setq consult-project-root-function
-  ;;       (lambda ()
-  ;;         (when-let (project (project-current))
-  ;;           (car (project-roots project)))))
-  ;; (setq consult-project-root-function #'vc-root-dir)
-  ;; (setq consult-project-root-function
-  ;;       (lambda () (locate-dominating-file "." ".git")))
-
 
   ;; Optionally add the `consult-flycheck' command.
   (use-package! consult-flycheck
@@ -1049,7 +1040,7 @@ the directory.  `REST' is passed to the `CONSULT-RIPGREP-FUNCTION'."
 
 
 (after! denote
-   (map! (:map evil-org-mode-map :prefix "C-n" :nvi
+   (map! :map evil-org-mode-map :prefix "C-n" :nvi
          "j" #'my-denote-journal ; our custom command
          "n" #'denote
          "N" #'denote-type
@@ -1071,13 +1062,26 @@ the directory.  `REST' is passed to the `CONSULT-RIPGREP-FUNCTION'."
          ;; Note that `denote-rename-file' can work from any context, not just
          ;; Dired bufffers.  That is why we bind it here to the `global-map'.
          "r" #'denote-rename-file
-         "R" #'denote-rename-file-using-front-matter)))
+         "R" #'denote-rename-file-using-front-matter))
 
 
 (use-package! citar-denote
   :init
   (citar-denote-mode)
-
+  (defun citar-denote-link-reference ()
+    "Insert a Denote link to a bibliographic note."
+    (interactive)
+    (if-let* ((citekey (citar-select-refs
+                        :filter (citar-denote-has-notes)
+                        :multiple nil))
+              (files (gethash (car citekey)
+                              (citar-denote-get-notes citekey)))
+              (file (if (= (length files) 1)
+                        (car files)
+                      (funcall project-read-file-name-function
+                               "Select note: "
+                               files nil nil nil))))
+        (denote-link file)))
   :bind
   (
    :map org-mode-map
@@ -1092,40 +1096,49 @@ the directory.  `REST' is passed to the `CONSULT-RIPGREP-FUNCTION'."
    ("C-c n c n" . citar-denote-cite-nocite)
    ("C-c n c m" . citar-denote-reference-nocite)
 
-   ("C-n C-c c" . citar-create-note)
-   ("C-n C-c o" . citar-denote-open-note)
-   ("C-n C-c d" . citar-denote-dwim)
-   ("C-n C-c a" . citar-denote-add-citekey)
-   ("C-n C-c k" . citar-denote-remove-citekey)
-   ("C-n C-c e" . citar-denote-open-reference-entry)
-   ("C-n C-c r" . citar-denote-find-reference)
-   ("C-n C-c f" . citar-denote-find-citation)
-   ("C-n C-c n" . citar-denote-cite-nocite)
-   ("C-n C-c m" . citar-denote-reference-nocite)
-   ("C-n C-c i" . org-cite-insert)
+   ("C-n c c" . citar-create-note)
+   ("C-n c o" . citar-denote-open-note)
+   ("C-n c d" . citar-denote-dwim)
+   ("C-n c a" . citar-denote-add-citekey)
+   ("C-n c k" . citar-denote-remove-citekey)
+   ("C-n c e" . citar-denote-open-reference-entry)
+   ("C-n c r" . citar-denote-find-reference)
+   ("C-n c f" . citar-denote-find-citation)
+   ("C-n c n" . citar-denote-cite-nocite)
+   ("C-n c m" . citar-denote-reference-nocite)
+   ("C-n c i" . citar-denote-link-reference)
+   ("C-n c I" . org-cite-insert)
    ))
 
-;; (map!
-;;  :after citar-denote
-;;  :leader
-;;  :map org-mode-map
-;;  (:prefix "k"
-;;           (:prefix "b"
-;;            :nv "c" #'citar-create-note
-;;            :nv "o" #'citar-denote-open-note
-;;            :nv "d" #'citar-denote-dwim
-;;            :nv "a" #'citar-denote-add-citekey
-;;            :nv "k" #'citar-denote-remove-citekey
-;;            :nv "e" #'citar-denote-open-reference-entry
-;;            :nv "r" #'citar-denote-find-reference
-;;            :nv "f" #'citar-denote-find-citation
-;;            :nv :nv "" #'citar-denote-cite-nocite
-;;            :nv "m" #'citar-denote-reference-nocite)))
+(map!
+ :leader :map evil-org-mode-map "nc" nil)
+
+
+(map!
+ ;; :after citar-denote
+ :leader
+ :map evil-org-mode-map
+ (:prefix "n"
+          (:prefix "c"
+                   :desc "opent the bibliography list" "c" #'citar-open
+                   :desc "create a note for ref" "n" #'citar-create-note
+                   :desc "open a note belonging to ref" "o" #'citar-denote-open-note
+                   :desc "act on this note's ref" "d" #'citar-denote-dwim
+                   :desc "add ref to this note" "a" #'citar-denote-add-citekey
+                   :desc "remove ref from this note" "k" #'citar-denote-remove-citekey
+                   :desc "go to bibtex entry" "e" #'citar-denote-open-reference-entry
+                   :desc "find notes citing the current ref" "r" #'citar-denote-find-reference
+                   :desc "find notes citing a ref"  "f" #'citar-denote-find-citation
+                   ;; "n" #'citar-denote-cite-nocite
+                   ;; "m" #'citar-denote-reference-nocite
+                   "i" #'citar-denote-link-reference
+                   "I" #'org-cite-insert)))
 
 (use-package! org-transclusion
   :after org
   :init
   (org-transclusion-mode 1)
+  (setq org-transclusion-exclude-elements '(property-drawer keyword))
   (defun denote-org-transclusion-add (link plist)
     (when (string= "denote" (org-element-property :type link))
       (let* ((denote-id (org-element-property :path link))     ;; get denote id from denote:<denote-id> link
@@ -1147,43 +1160,3 @@ the directory.  `REST' is passed to the `CONSULT-RIPGREP-FUNCTION'."
 
 
 
-;; Make customisations that affect Emacs faces BEFORE loading a theme
-;; (any change needs a theme re-load to take effect).
-(require 'ef-themes)
-
-;; If you like two specific themes and want to switch between them, you
-;; can specify them in `ef-themes-to-toggle' and then invoke the command
-;; `ef-themes-toggle'.  All the themes are included in the variable
-;; `ef-themes-collection'.
-(setq ef-themes-to-toggle '(ef-summer ef-winter))
-
-(setq ef-themes-headings ; read the manual's entry or the doc string
-      '((0 . (variable-pitch light 1.1))
-        (1 . (variable-pitch light 1.1))
-        (2 . (variable-pitch regular 1.1))
-        (3 . (variable-pitch regular 1.1))
-        (4 . (variable-pitch regular 1.1))
-        (5 . (variable-pitch 1.1)) ; absence of weight means `bold'
-        (6 . (variable-pitch 1.1))
-        (7 . (variable-pitch 1.1))
-        (t . (variable-pitch 1.1))))
-
-;; They are nil by default...
-(setq ef-themes-mixed-fonts t
-      ef-themes-variable-pitch-ui t)
-
-;; Read the doc string or manual for this one.  The symbols can be
-;; combined in any order.
-(setq ef-themes-region '(intense no-extend neutral))
-
-;; Disable all other themes to avoid awkward blending:
-(mapc #'disable-theme custom-enabled-themes)
-
-;; Load the theme of choice:
-;; (load-theme 'ef-summer :no-confirm)
-
-;; OR use this to load the theme which also calls `ef-themes-post-load-hook':
-;; (ef-themes-select 'ef-summer)
-
-;; The themes we provide are recorded in the `ef-themes-dark-themes',
-;; `ef-themes-light-themes'.

@@ -504,10 +504,9 @@ With a prefix ARG always prompt for command to use."
                   "_"
                   (format-time-string "%Y%m%d_%H%M%S_")) ) ".png"))
   ;; (shell-command "snippingtool /clip")
-  (shell-command (concat "powershell -command \"Add-Type -AssemblyName System.Windows.Forms;if ($([System.Windows.Forms.Clipboard]::ContainsImage())) {$image = [System.Windows.Forms.Clipboard]::GetImage();[System.Drawing.Bitmap]$image.Save('" filename "',[System.Drawing.Imaging.ImageFormat]::Png); Write-Output 'clipboard content saved as file'} else {Write-Output 'clipboard does not contain image data'}\""))
+  (powershell (concat "Add-Type -AssemblyName System.Windows.Forms; $clipImg = [System.Windows.Forms.Clipboard]::GetImage(); $clipImg.Save('" filename "')"))
   (insert (concat "[[file:" filename "]]"))
   (org-display-inline-images))
-
 
 (defun as-windows-path (unix-path)
   ;; "Takes a unix path and returns a matching WSL path
@@ -667,3 +666,20 @@ The default tab-bar name uses the buffer name."
     (call-interactively 'denote-link-or-create)
     (advice-remove 'denote-file-prompt 'my/denote--find-file-with-pretty-format)
     )
+
+(defun +org/my-refile-to-other-window (arg)
+  "Refile current heading to an org buffer visible in another window.
+If prefix ARG, copy instead of move."
+  (interactive "P")
+  (let ((org-refile-keep arg)
+        org-refile-targets
+        current-prefix-arg)
+    (dolist (win (delq (selected-window) (window-list)))
+      (with-selected-window win
+        (let ((file (buffer-file-name (buffer-base-buffer))))
+          (and (eq major-mode 'org-mode)
+               file
+               (cl-pushnew (cons file (cons :maxlevel my-org-refile-maxlevel))
+                           org-refile-targets)))))
+    (call-interactively #'org-refile)))
+(map! :map evil-org-mode-map :localleader :nv "ro" #'+org/my-refile-to-other-window)

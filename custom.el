@@ -17,6 +17,10 @@
  '(org-safe-remote-resources
    '("\\`https://fniessen\\.github\\.io\\(?:/\\|\\'\\)" "\\`https://fniessen\\.github\\.io/org-html-themes/org/theme-readtheorg\\.setup\\'"))
  '(package-selected-packages '(aio popper emacsql-sqlite3 emacsql-sqlite all-the-icons))
+ '(tab-bar-mode t)
+ '(tab-bar-new-tab-choice "*doom*")
+ '(tab-bar-show nil)
+ '(tab-bar-tab-name-function 'my/name-tab-by-project-or-default)
  '(warning-suppress-log-types '(((yasnippet zombie)) ((yasnippet zombie)) (defvaralias)))
  '(warning-suppress-types
    '(((yasnippet zombie))
