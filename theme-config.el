@@ -60,8 +60,8 @@
         (6 . (variable-pitch 1.05))
         (7 . (variable-pitch 1.05))
         (t . (variable-pitch 1.05))
-        (agenda-date . (1.3))
-        (agenda-structure . (variable-pitch light 1.8)))
+        (agenda-date . (1.1))
+        (agenda-structure . (variable-pitch light 1.1)))
       )
 
 ;; Optionally define a key to switch between Modus themes.  Also check

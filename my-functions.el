@@ -456,6 +456,7 @@ https://org-roam.discourse.group/t/org-roam-major-redesign/1198/34."
 ;;   (setq writeroom-width (if writeroom-width )))
 
 (defun my/orgnv-update-db ()
+  (interactive)
   (setq orgnv--database (orgnv-build-database))
   )
 
@@ -503,7 +504,6 @@ With a prefix ARG always prompt for command to use."
           (concat (buffer-file-name)
                   "_"
                   (format-time-string "%Y%m%d_%H%M%S_")) ) ".png"))
-  ;; (shell-command "snippingtool /clip")
   (powershell (concat "Add-Type -AssemblyName System.Windows.Forms; $clipImg = [System.Windows.Forms.Clipboard]::GetImage(); $clipImg.Save('" filename "')"))
   (insert (concat "[[file:" filename "]]"))
   (org-display-inline-images))
@@ -683,3 +683,11 @@ If prefix ARG, copy instead of move."
                            org-refile-targets)))))
     (call-interactively #'org-refile)))
 (map! :map evil-org-mode-map :localleader :nv "ro" #'+org/my-refile-to-other-window)
+
+
+(defun other-window-consult-ripgrep ()
+  (interactive)
+  (let ((dir default-directory))
+    (with-selected-window (next-window)
+      (let ((default-directory dir))
+        (consult-ripgrep)))))

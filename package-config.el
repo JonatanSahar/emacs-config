@@ -58,7 +58,8 @@
    org-cycle-separator-lines 1
    ;; org-image-actual-width nil
    org-export-with-toc 'nil
-   org-image-actual-width (list 550)
+   ;; org-image-actual-width (list 550)
+   org-image-actual-width (list 150)
    org-ellipsis "…"
    ;; ➡, ⚡, ▼, ↴, ∞, ⬎, ⤷, ⤵, …
    org-deadline-warning-days 7
@@ -67,6 +68,7 @@
    org-startup-with-inline-images t
    org-hide-emphasis-markers t
    org-list-indent-offset 2
+   org-blank-before-new-entry '((heading . t) (plain-list-item . auto))
    org-list-demote-modify-bullet
    '(("+" . "*") ("-" . "+") ("*" . "-"))
    org-capture-papers-file "~/notes/20230402T133604--interesting-papers__thesis.org"
@@ -119,28 +121,14 @@
        (todo "SKIM" (
                      (org-agenda-overriding-header "\n⚡ Next to skim:\n")
                      (org-agenda-remove-tags t)
-                     ;; (org-agenda-prefix-format (concat " %b  %-2i  %t%s" ))
-                     (org-agenda-prefix-format '((agenda . " %i %-12:c%?-12t% s")
-                                                 (timeline . "  % s")
-                                                 (todo .
-                                                       " %i %-12:c %(concat \"[ \"(org-format-outline-path (org-get-outline-path)) \" ]\") ")
-                                                 (tags .
-                                                       " %i %-12:c %(concat \"[ \"(org-format-outline-path (org-get-outline-path)) \" ]\") ")
-                                                 (search . " %i %-12:c"))
-                                               )
+                     (org-agenda-prefix-format (concat " %b  %-2i  %t%s" ))
+                     ;; (org-agenda-prefix-format "  %?-12t% s")
                      (org-agenda-todo-keyword-format "")))
        (todo "READ" (
                      (org-agenda-overriding-header "\n⚡ Next to read:\n")
                      (org-agenda-remove-tags t)
-                     ;; (org-agenda-prefix-format (concat " %b  %-2i  %t%s" ))
-                     (org-agenda-prefix-format '((agenda . " %i %-12:c%?-12t% s")
-                                                 (timeline . "  % s")
-                                                 (todo .
-                                                       " %i %-12:c %(concat \"[ \"(org-format-outline-path (org-get-outline-path)) \" ]\") ")
-                                                 (tags .
-                                                       " %i %-12:c %(concat \"[ \"(org-format-outline-path (org-get-outline-path)) \" ]\") ")
-                                                 (search . " %i %-12:c"))
-                                               )
+                     ;; (org-agenda-prefix-format "  %?-12t% s")
+                     (org-agenda-prefix-format (concat " %b  %-2i  %t%s" ))
                      (org-agenda-todo-keyword-format "")))
        )
       )
@@ -162,12 +150,14 @@
                            ("p" "Paper ref to read "
                             entry
                             (file org-capture-papers-file)
-                            "* SKIM %? %i
-- link/cite:
-- type of paper:
-- why read it?
+"* SKIM %^{title?|%i}
+- link/cite: %^{link/DOI?}
+- type of paper: %^{type?|study|review|theoretical|theory & study}
+- why read it? %^{why read it?}
 - figures:
-")
+
+%^{a short summary?}
+" :empty-lines-after 1)
 
 ;;                          ("n" "Note"
 ;;                           entry
@@ -262,7 +252,7 @@
          ("C-x  C-m " . multiple-cursors-hydra/body)
          ("C-x  C-'" . hydra-fold/body))
   :config
-  
+
   (defhydra hydra-fold (:pre (hs-minor-mode 1))
 
     "fold"
@@ -498,7 +488,7 @@ With prefix, rebuild the cache before offering candidates."
   :hook (python-mode . (lambda ()
                          (require 'lsp-pyright)
                          (lsp)))  ; or lsp-
-  :config 
+  :config
 
   (setq lsp-pyright-use-library-code-for-types t) ;; set this to nil if getting too many false positive type errors
   (setq lsp-pyright-stub-path (concat (getenv "HOME") "/src/python-type-stubs"))
@@ -554,8 +544,6 @@ DEFS is a plist associating completion categories to commands."
 (define-minibuffer-key "\C-s"
   'file #'consult-find-for-minibuffer)
 
-(after! ispell
-;; (ispell)
 (setq ispell-personal-dictionary-en  "C:\\Users\\Jonathan\\programs\\hunspell\\share\\hunspell\\personal.en")
 (setq ispell-personal-dictionary-heb  "C:\\Users\\Jonathan\\programs\\hunspell\\share\\hunspell\\personal.heb")
 (setq ispell-local-dictionary-alist '(("en_US"
@@ -563,7 +551,7 @@ DEFS is a plist associating completion categories to commands."
                                        "[^[:alpha:]]"
                                        "[']"
                                        t
-                                       ("-d" "en_US" "-p" ispell-personal-dictionary-en)
+                                       ("-d" "en_US" "-p"   "C:\\Users\\Jonathan\\programs\\hunspell\\share\\hunspell\\personal.en")
                                        nil
                                        iso-8859-1)
 
@@ -572,16 +560,11 @@ DEFS is a plist associating completion categories to commands."
                                        "[^[:alpha:]]"
                                        "[']"
                                        t
-                                       ("-d" "hebrew" "-p" ispell-personal-dictionary-heb)
+                                       ("-d" "hebrew" "-p"   "C:\\Users\\Jonathan\\programs\\hunspell\\share\\hunspell\\personal.heb")
                                        nil
                                        iso-8859-1)))
 
-(setq ispell-dictionary "en_US,hebrew") ; Default dictionary to use
-
-;; ispell-set-spellchecker-params has to be called
-;; before ispell-hunspell-add-multi-dic will work
-(ispell-set-spellchecker-params)
-(ispell-hunspell-add-multi-dic "en_US,hebrew")
+(setq ispell-dictionary "en_US") ; Default dictionary to use
 (add-to-list 'exec-path "C:\\Users\\Jonathan\\programs\\hunspell\\bin")
 
 (setq ispell-program-name (locate-file "hunspell"
@@ -590,7 +573,15 @@ DEFS is a plist associating completion categories to commands."
 (unless (file-exists-p ispell-personal-dictionary-en)
   (write-region "" nil ispell-personal-dictionary-en nil 0))
 (unless (file-exists-p ispell-personal-dictionary-heb)
-  (write-region "" nil ispell-personal-dictionary-heb nil 0)))
+  (write-region "" nil ispell-personal-dictionary-heb nil 0))
+
+
+(defun init-spellchecker()
+;; ispell-set-spellchecker-params has to be called
+;; before ispell-hunspell-add-multi-dic will work
+(setq ispell-dictionary "en_US,hebrew") ; Default dictionary to use
+(ispell-set-spellchecker-params)
+(ispell-hunspell-add-multi-dic "en_US,hebrew"))
 
 (use-package! company-box
   :hook (company-mode . company-box-mode))
@@ -793,15 +784,17 @@ DEFS is a plist associating completion categories to commands."
 
 (add-to-list 'load-path (concat doom-emacs-dir (file-name-as-directory "gptel")))
 (require 'gptel)
-(setq gptel-api-key (getenv "OPENAI_API_KEY"))
-(setq gptel-use-curl nil)
+(setq gptel-api-key (getenv "OPENAI_API_KEY")
+      gptel-use-curl nil
+      gptel-default-mode 'org-mode)
+
 
 (after! consult
   (consult-customize
    consult-buffer consult-buffer-other-window consult-ripgrep consult-git-grep consult-grep
    consult-bookmark consult-recent-file consult-xref
    ;; consult--source-file consult--source-project-file consult--source-bookmark
-   :preview-key "M-.")
+   :preview-key "C-.")
   ;; Replace bindings. Lazily loaded due by `use-package!'.
   ;; :bind (;; C-c bindings (mode-specific-map)
   ;;        ("C-c h" . consult-history)
@@ -855,8 +848,8 @@ DEFS is a plist associating completion categories to commands."
   ;;        ("s-#" . consult-project-imenu)
   ;;        :map isearch-mode-map
   ;;        ("M-e" . consult-isearch)                 ;; orig. isearch-edit-string
-  ;;        ("M-s e" . consult-isearch)               ;; orig. isearch-edit-string
-  ;;        ("M-s l" . consult-line))                 ;; required by consult-line to detect isearch
+  ;;        ("M-s l" . consult-line)                 ;; required by consult-line to detect isearch
+         ;; ("M-e" . #'consult-isearch-forward))               ;; orig. isearch-edit-string
 
   ;; The :init configuration is always executed (Not lazy)
   :init
@@ -947,6 +940,9 @@ the directory.  `REST' is passed to the `CONSULT-RIPGREP-FUNCTION'."
 
   (autoload 'projectile-project-root "projectile")
   (setq consult-project-function (lambda (_) (projectile-project-root)))
+  (map! :map evil-normal-state-map
+   "M-e" #'consult-isearch-forward
+   )
   )
 
 (use-package! consult-company
@@ -981,6 +977,7 @@ the directory.  `REST' is passed to the `CONSULT-RIPGREP-FUNCTION'."
    (:map org-mode-map :leader
 
          (:prefix "n"
+         :nv "o" #'denote-open-or-create
          :nv "j" #'my-denote-journal ; our custom command
          :nv "n" #'denote
          :nv "d" #'denote-date
@@ -1010,6 +1007,7 @@ the directory.  `REST' is passed to the `CONSULT-RIPGREP-FUNCTION'."
 
    (:map org-mode-map :nvi
          "C-c n j" #'my-denote-journal ; our custom command
+         "C-c n o" #'denote-open-or-create
          "C-c n n" #'denote
          "C-c n N" #'denote-type
          "C-c n d" #'denote-date
@@ -1027,6 +1025,8 @@ the directory.  `REST' is passed to the `CONSULT-RIPGREP-FUNCTION'."
          "C-c n b" #'denote-link-backlinks
          "C-c n f f" #'denote-link-find-file
          "C-c n f b" #'denote-link-find-backlink
+         "C-c n k a" #'denote-keywords-add
+         "C-c n k r" #'denote-keywords-remove
          ;; Note that `denote-rename-file' can work from any context, not just
          ;; Dired bufffers.  That is why we bind it here to the `global-map'.
          "C-c n r" #'denote-rename-file
@@ -1042,6 +1042,8 @@ the directory.  `REST' is passed to the `CONSULT-RIPGREP-FUNCTION'."
 (after! denote
    (map! :map evil-org-mode-map :prefix "C-n" :nvi
          "j" #'my-denote-journal ; our custom command
+
+         "o" #'denote-open-or-create
          "n" #'denote
          "N" #'denote-type
          "d" #'denote-date
@@ -1055,14 +1057,18 @@ the directory.  `REST' is passed to the `CONSULT-RIPGREP-FUNCTION'."
          "I" #'denote-link; "insert" mnemonic
          "i" #'denote-link-or-create ; "insert" mnemonic
          "[[" #'denote-link-or-create
+         "]]" #'denote-link-or-create
          "a" #'denote-link-add-links
          "b" #'denote-link-backlinks
          "f f" #'denote-link-find-file
          "f b" #'denote-link-find-backlink
+         "k a" #'denote-keywords-add
+         "k r" #'denote-keywords-remove
          ;; Note that `denote-rename-file' can work from any context, not just
          ;; Dired bufffers.  That is why we bind it here to the `global-map'.
          "r" #'denote-rename-file
-         "R" #'denote-rename-file-using-front-matter))
+         "R" #'denote-rename-file-using-front-matter)
+   )
 
 
 (use-package! citar-denote
@@ -1136,27 +1142,34 @@ the directory.  `REST' is passed to the `CONSULT-RIPGREP-FUNCTION'."
 
 (use-package! org-transclusion
   :after org
-  :init
-  (org-transclusion-mode 1)
-  (setq org-transclusion-exclude-elements '(property-drawer keyword))
-  (defun denote-org-transclusion-add (link plist)
-    (when (string= "denote" (org-element-property :type link))
-      (let* ((denote-id (org-element-property :path link))     ;; get denote id from denote:<denote-id> link
-             (file-path (denote-get-path-by-id denote-id))     ;; path resolved by the id
-             (new-link (with-temp-buffer                       ;; create a [[file:/path/to/denote/note]] org link
-                         (insert "file:")                      ;; and store it in 'new-link' variable
-                         (insert file-path)
-                         (beginning-of-buffer)
-                         (org-element-link-parser))))
-        (org-transclusion-add-org-file new-link plist))))      ;; re-use the org transclusion infrastructure for file: links
-  (cl-pushnew 'denote-org-transclusion-add                     ;; register the org transclusion 'plugin'
-              org-transclusion-add-functions)
+  :config
+(defun denote-org-transclusion-add (link plist)
+  (when (string= "denote" (org-element-property :type link))
+    (let* ((denote-id (org-element-property :path link))
+           (text-after-double-colon (car (cdr (split-string denote-id "::"))))
+           ;; (text-after-double-colon nil)
+           (denote-id (car (split-string denote-id "::")))
+           (file-path (denote-get-path-by-id denote-id))
+
+           (new-link (with-temp-buffer
+          (insert "file:")
+                       (insert file-path)
+                       (when text-after-double-colon
+                         (insert "::")
+                         (insert text-after-double-colon))
+                       (beginning-of-buffer)
+                       (org-element-link-parser))))
+      (org-transclusion-add-org-file new-link plist))))
   (map!
    :map global-map "<f12>" #'org-transclusion-add
    :leader
    :prefix "n"
    :desc "Org Transclusion Mode" "t" #'org-transclusion-mode)
+
+        (setq org-transclusion-exclude-elements '(property-drawer keyword))
+        (cl-pushnew 'denote-org-transclusion-add                     ;; register the org transclusion 'plugin'
+                    org-transclusion-add-functions)
+        (org-transclusion-mode 1)
   )
 
-
-
+(flyspell-lazy-mode -1)

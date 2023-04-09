@@ -82,16 +82,17 @@
  org-capture-writing-inbox-file (concat (file-name-as-directory notes-dir) "writing_inbox.org")
 )
 
- (setq
-  evil-respect-visual-line-mode 't
-  scroll-bar-mode 1
+(setq
+ line-spacing 0.3
+ evil-respect-visual-line-mode 't
+ scroll-bar-mode 1
  delete-by-moving-to-trash nil                      ; Delete files to trash
  uniquify-buffer-name-style nil              ; Uniquify buffer names
  window-combination-resize t                      ; take new window space from all other        windows (not just current)
  x-stretch-cursor t                              ; Stretch cursor to the glyph width
  undo-limit 80000000                         ; Raise undo-limit to 80Mb
  evil-want-fine-undo t                       ; By default while in insert all changes are one big blob. Be more granular
- garbage-collection-messages t
+ garbage-collection-messages nil
  auto-save-default t                         ; Nobody likes to lose work, I certainly don't
  inhibit-compacting-font-caches t            ; When there are lots of glyphs, keep them in memory
  backup-directory-alist `(("." . ,(concat user-emacs-directory "autosaved_files")))
@@ -117,11 +118,9 @@
 (display-battery-mode 1)                          ; On laptops it's nice to know how much power you have
 (global-subword-mode 1)                           ; Iterate through CamelCase words
 
-(setq-default major-mode 'org-mode)
-
-(if (eq initial-window-system 'x)                 ; if started by emacs command or desktop file
-    (toggle-frame-maximized)
-  (toggle-frame-fullscreen))
+;; (if (eq initial-window-system 'x)                 ; if started by emacs command or desktop file
+;;     (toggle-frame-maximized)
+;;   (toggle-frame-fullscreen))
 
 (setq
  visual-fill-column-width 90
@@ -226,29 +225,6 @@
   )
 
 
-(defun with-minibuffer-keymap (keymap)
-  (lambda (fn &rest args)
-    (minibuffer-with-setup-hook
-        (lambda ()
-          (use-local-map
-           (make-composed-keymap keymap (current-local-map))))
-      (apply fn args))))
-
-(defvar embark-completing-read-prompter-map
-  (let ((map (make-sparse-keymap)))
-    (define-key map (kbd "<tab>") 'abort-recursive-edit)
-    map))
-
-;; (advice-add 'embark-completing-read-prompter :around
-;;             (with-minibuffer-keymap embark-completing-read-prompter-map))
-;; (define-key vertico-map (kbd "C-<tab>") 'embark-act-with-completing-read)
-
-  (defun embark-act-with-completing-read (&optional arg)
-    (interactive "P")
-    (let* ((embark-prompter 'embark-completing-read-prompter)
-           (act (propertize "Act" 'face 'highlight))
-           (embark-indicator (lambda (_keymap targets) nil)))
-      (embark-act arg)))
 
 
 (setq org-odt-preferred-output-format "docx")
@@ -262,8 +238,7 @@
 (setq python-shell-prompt-detect-failure-warning nil)
 (setq lsp-pylsp-plugins-flake8-max-line-length 90)
 (custom-set-variables '(linum-format 'dynamic))
-(toggle-frame-fullscreen)
-(setq org-fold-core-style "overlays")
+;; (toggle-frame-fullscreen)
 
 
 
@@ -291,7 +266,7 @@ Return the errors parsed with the error patterns of CHECKER."
 (setq python-shell-interpreter "c:/Users/Jonathan/miniconda3/python")
 
 
-(setq +zen-text-scale 1)
+(setq +zen-text-scale nil)
 
 (setq +bidi-hebrew-font (font-spec :family "Heebo"))
 
@@ -303,7 +278,6 @@ Return the errors parsed with the error patterns of CHECKER."
 ;; (setq mouse-wheel-scroll-amount '(2 (1)))
 (setq mouse-wheel-scroll-amount '(2 (hscroll)))
 
-(my/dedicate-org-roam-buffer)
 
 ;;; Ibuffer and extras (dired-like buffer list manager)
   (setq ibuffer-expert t)
@@ -424,3 +398,22 @@ The default tab-bar name uses the buffer name."
 (fset 'insert-link-to-new-note-thesis
    (kmacro-lambda-form [?d ?  ?n ?i ?\C-y return return ?\C-y return ?t ?h ?e ?s return] 0 "%d"))
 (map! :leader :map org-mode-map :v "nk"  #'insert-link-to-new-note-thesis)
+
+
+
+;; *****************************************
+;; never collect garbage. use with caution!~
+  (setq gc-cons-threshold 5000000000) ;10GB
+  ;; (defun garbage-collect (&rest args)
+  ;;   (message "trying to garbage collect. probably you want to quit emacs."))
+  (setq garbage-collection-messages t)
+;; *****************************************
+
+;; UTF-8 as default encoding
+(set-language-environment "English")
+(set-language-environment "UTF-8")
+(set-default-coding-systems 'utf-8)
+(set-keyboard-coding-system 'utf-8-unix)
+
+;; do this especially on Windows, for python output problems
+(set-terminal-coding-system 'utf-8-unix)

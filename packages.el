@@ -49,11 +49,11 @@
 ;; ...Or *all* packages (NOT RECOMMENDED; will likely break things)
 ;(unpin! t)
 
-(package! org-roam)
-(package! citar-org-roam)
-(package! org-roam-bibtex
-  :recipe (:host github :repo "org-roam/org-roam-bibtex"))
-(package! org-roam-ui)
+;; (package! org-roam)
+;; (package! citar-org-roam)
+;; (package! org-roam-bibtex
+  ;; :recipe (:host github :repo "org-roam/org-roam-bibtex"))
+;; (package! org-roam-ui)
 
 ;; (package! org :pin "73875939a8b5545")
 (package! org-pretty-tags :pin "40fd72f3e7...")
@@ -66,7 +66,7 @@
 (package! f)
 
 
-(package! org-transclusion)
+(package! org-transclusion :pin "5cb9454")
 
 ;; denote
 (package! denote)
@@ -82,7 +82,7 @@
 (package! consult-company)
 (package! company-statistics)
 (package! company-wordfreq)
-;; (package! flyspell-lazy :pin "3ebf68cc9e...")
+;; (package! flyspell-lazy)
 (package! company-box)
 (package! compat)
 
@@ -136,8 +136,11 @@
 (package! virtualenvwrapper)
 (package! conda)
 (package! emacs-aio)
+(package! corfu)
+(package! cape)
 
 
 ;; themes
 (package! modus-themes)
 (package! ef-themes)
+(package! org-modern)

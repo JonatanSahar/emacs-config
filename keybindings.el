@@ -94,8 +94,6 @@
   :i "C-S-k" (lambda nil (interactive) (scroll-down-command 1))
   :n "k" #'evil-previous-visual-line
   :n "j" #'evil-next-visual-line
-  ;; :n "j" (lambda nil (interactive) (scroll-up-command 1))
-  ;; :n "k" (lambda nil (interactive) (scroll-down-command 1))
   :ni "C-c =" #'helm-flyspell-correct
   :nv "C-e" #'evil-end-of-visual-line
   :i "M-h" #'org-beginning-of-line
@@ -351,7 +349,8 @@
 
 (map! :leader
   :nv
-  :desc "search org outline" "sO" #'consult-outline
+  :desc "search org outline" "sG" #'+lookup/online
+  :desc "search org outline" "so" #'consult-outline
   :desc "search project/dir" "sp" #'consult-ripgrep
   :desc "search project/dir" "sd" #'consult-ripgrep
   :desc "search buffer"  "ss" #'consult-line
@@ -420,6 +419,7 @@
           )
 
         (:prefix ("i" . "insert stuff")
+                :nv :desc "copy and comment line(s)" "C" #'evilnc-copy-and-comment-lines
                 :desc "make evil-mc-cursor here" "c" #'my/make-cursor-here
                 :desc "add line above" "k" #'+evil/insert-newline-above
                 :desc "add line below" "j" #'+evil/insert-newline-below
@@ -434,11 +434,11 @@
                 (:prefix ("l" . "latex symbols")
                   :desc "right double arrow"  "r" (kbd "$\\Rightarrow$"))
                 (:prefix ("s" . "surround stuff")
-                 :desc "surround object with bold"  "*" (kbd "jkysio*")
-                 :desc "surround object with quotes"  "\"" (kbd "jkysio\"")
-                 :desc "surround object with single quotes"  "\'" (kbd "jkysio\'")
-                 :desc "surround object with parens" "\)" (kbd "jkysio\)")
-                 :desc "surround object with brackets" "\]" (kbd "jkysio\]")
+                 :desc "surround object with bold"  "*" (kbd "ysio*")
+                 :desc "surround object with quotes"  "\"" (kbd "ysio\"")
+                 :desc "surround object with single quotes"  "\'" (kbd "ysio\'")
+                 :desc "surround object with parens" "\)" (kbd "ysio\)")
+                 :desc "surround object with brackets" "\]" (kbd "ysio\]")
                 ))
 
         (:prefix ("k" . "my commands")
@@ -558,6 +558,10 @@
    :nvi "C-c  S" #'my/org-screenshot
    :nvi "C-c  s" #'evil-Surround-region
    )
+
+
+
+(map! :map minibuffer-mode-map :nvi ";" #'embark-act)
 (map!
    :nvi "C-;" #'embark-act
    :nvi "C-c  c" #'evil-yank
@@ -652,34 +656,36 @@
 
 (map! :leader :nv "TAB" nil)
 
-(map! :leader
-      :prefix "TAB"
-      "TAB" #'tab-bar-select-tab-by-name
-      "r" #'tab-rename
-      "n" #'tab-bar-new-tab
-      "t" #'tab-new
-      "w" #'tab-close
-      "d" #'tab-close
-      "1" #'tab-bar-select-tab
-      "2" #'tab-bar-select-tab
-      "3" #'tab-bar-select-tab
-      "4" #'tab-bar-select-tab
-      "5" #'tab-bar-select-tab
-      "h" #'tab-previous
-      "l" #'tab-next
-      )
+;; (map! :leader
+;;       :prefix "TAB"
+;;       "TAB" #'tab-bar-switch-to-recent-tab
+;;       ";" #'tab-bar-select-tab-by-name
+;;       "r" #'tab-rename
+;;       "n" #'tab-bar-new-tab
+;;       "t" #'tab-new
+;;       "w" #'tab-close
+;;       "d" #'tab-close
+;;       "1" #'tab-bar-select-tab
+;;       "2" #'tab-bar-select-tab
+;;       "3" #'tab-bar-select-tab
+;;       "4" #'tab-bar-select-tab
+;;       "5" #'tab-bar-select-tab
+;;       "h" #'tab-previous
+;;       "l" #'tab-next
+;;       )
 
 (map! :leader
       (:prefix-map ("TAB" . "Tabs")
-       :desc "Switch tab" "TAB" #'tab-bar-select-tab-by-name
+       :desc "Switch tab" "TAB" #'tab-bar-switch-to-recent-tab
+       :desc "Show tab list" "l" #'tab-bar-select-tab-by-name
        :desc "New tab" "n" #'tab-bar-new-tab
        :desc "Rename tab" "r" #'tab-bar-rename-tab
        :desc "Rename tab by name" "R" #'tab-bar-rename-tab-by-name
        :desc "Close tab" "d" #'tab-bar-close-tab
        :desc "Close tab by name" "D" #'tab-bar-close-tab-by-name
        :desc "Close other tabs" "1" #'tab-bar-close-other-tabs
-       :desc "Previous tab" "h" #'tab-previous
-       :desc "Next tab" "l" #'tab-next
+       ;; :desc "Previous tab" "h" #'tab-previous
+       ;; :desc "Next tab" "l" #'tab-next
        :desc "Previous tab" "j" #'tab-previous
        :desc "Next tab" "k" #'tab-next
        ))
@@ -718,3 +724,23 @@
       :n [right] 'right-char)
 
 (setq visual-order-cursor-movement t)
+
+(map! :map evil-org-mode-map
+      "<f9>" #'+eval/region
+      "C-c  k" #'org-capture
+      "C-c  C-C" #'org-capture)
+
+(map!
+ "C-x  C-n" nil)
+
+(map!
+ "C-x  C-x" #'org-capture
+ "C-x  C-n" #'org-capture
+ "C-c  C-C" #'org-capture
+ "C-c  C-<return>" :desc "send the current region to GPTel" #'gptel-send)
+(map! :leader :prefix "Gg"
+      :desc "open the GPTel buffer" "g" #'gptel
+      :desc "send the current region to GPTel" "G" #'gptel-send
+      :leader :prefix "s"
+      :desc "open the GPTel buffer" "g" #'gptel-send)
+
