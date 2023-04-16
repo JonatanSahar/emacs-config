@@ -6,8 +6,6 @@
  '(custom-safe-themes
    '("5718ea4d49350ab88e353fd66f3d4d3954e890b4d3dd7928f9b6dcb0e76ac8bd" "929d5aa75ac40de51b6fccc766f5d431c16306c754e8dde599bd8d5623ff0ced" default))
  '(evil-digit-bound-motions '(evil-beginning-of-visual-line))
- '(helm-ag-base-command "rg --no-heading")
- '(helm-ag-success-exit-status '(0 2))
  '(linum-format 'dynamic)
  '(matlab-shell-command-switches '("-nodesktop -nosplash ") t)
  '(org-agenda-files
@@ -16,10 +14,7 @@
  '(org-refile-use-outline-path 'file)
  '(org-safe-remote-resources
    '("\\`https://fniessen\\.github\\.io\\(?:/\\|\\'\\)" "\\`https://fniessen\\.github\\.io/org-html-themes/org/theme-readtheorg\\.setup\\'"))
- '(package-selected-packages '(aio popper emacsql-sqlite3 emacsql-sqlite all-the-icons))
- '(tab-bar-mode t)
  '(tab-bar-new-tab-choice "*doom*")
- '(tab-bar-show nil)
  '(tab-bar-tab-name-function 'my/name-tab-by-project-or-default)
  '(warning-suppress-log-types '(((yasnippet zombie)) ((yasnippet zombie)) (defvaralias)))
  '(warning-suppress-types

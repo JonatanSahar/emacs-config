@@ -162,7 +162,7 @@
 (defun my/search-replace-in-region ()
   (interactive)
   ;; (if (eq last-command 'evil-yank)
-      
+
   (let ((evil-ex-initial-input "s/"))
     (call-interactively 'evil-ex))
   )
@@ -501,9 +501,11 @@ With a prefix ARG always prompt for command to use."
   (setq filename
         (concat
          (make-temp-name
-          (concat (buffer-file-name)
-                  "_"
-                  (format-time-string "%Y%m%d_%H%M%S_")) ) ".png"))
+          (concat
+           (buffer-file-name)
+           "_"
+           (format-time-string "%Y%m%d_%H%M%S_")) ) ".png"))
+  (setq filename (concat (file-name-directory filename) "images/" (file-name-nondirectory filename)))
   (powershell (concat "Add-Type -AssemblyName System.Windows.Forms; $clipImg = [System.Windows.Forms.Clipboard]::GetImage(); $clipImg.Save('" filename "')"))
   (insert (concat "[[file:" filename "]]"))
   (org-display-inline-images))
@@ -581,29 +583,17 @@ Current pattern: %`evil-mc-pattern
 (defun my-buffer-face-mode-programming ()
   "Sets a fixed width (monospace) font in current buffer"
   (interactive)
-  (setq buffer-face-mode-face '(:extend t :family "Iosevka Comfy"))
-  ;; (setq buffer-face-mode-face '(:extend t :family "Roboto Mono"))
+  (setq writeroom-width 120)
+  ;; (setq buffer-face-mode-face '(:extend t :family "Fira Code Retina"))
+  (setq buffer-face-mode-face '(:extend t :family "Iosevka Comfy Duo"))
   (buffer-face-mode))
 
 (defun my-buffer-face-mode-text ()
   (interactive)
-  (setq buffer-face-mode-face '(:extend t :family "Iosevka Comfy"))
-  ;; (setq buffer-face-mode-face '(:extend t :family "Heebo"))
+  (setq writeroom-width 120)
+  ;; (setq buffer-face-mode-face '(:extend t :family "iA Writer Quattro V Regular"))
+  (setq buffer-face-mode-face '(:extend t :family "Iosevka Comfy Duo"))
   (buffer-face-mode))
-
-(defun my/toggle-writing-mode ()
-  "Toggle a distraction-free environment for writing."
-  (interactive)
-  (cond ((bound-and-true-p olivetti-mode)
-         (olivetti-mode -1)
-         (olivetti-toggle-hide-modeline)
-         (toggle-frame-fullscreen)
-         (menu-bar-mode 1))
-        (t
-         (olivetti-mode 1)
-         (olivetti-toggle-hide-modeline)
-         (toggle-frame-fullscreen)
-         (menu-bar-mode -1))))
 
 (defun my/bash-shell ()
   (interactive)
@@ -617,7 +607,6 @@ Current pattern: %`evil-mc-pattern
     (evil-indent (point-min) (point-max))
     ))
 
-
 (defun my/name-tab-by-project-or-default ()
   "Return project name if in a project, or default tab-bar name if not.
 The default tab-bar name uses the buffer name."
@@ -627,45 +616,45 @@ The default tab-bar name uses the buffer name."
       (projectile-project-name))))
 
 (defun my/denote--pretty-format-filename (file)
-    (let* (
-           (title (denote-retrieve-filename-title file))
-           (keywords (denote-extract-keywords-from-path file))
-           (keywords-as-string (mapconcat 'identity keywords ", "))
-           )
-      (concat title "      " "(" keywords-as-string ")" )
-      )
+  (let* (
+         (title (denote-retrieve-filename-title file))
+         (keywords (denote-extract-keywords-from-path file))
+         (keywords-as-string (mapconcat 'identity keywords ", "))
+         )
+    (concat title "      " "(" keywords-as-string ")" )
     )
+  )
 
-  (defun my/denote--find-file-with-pretty-format (&optional initial-text)
-    (interactive)
-    (let* (
-           (paths (mapcar #'(lambda (file)
-                              (cons (my/denote--pretty-format-filename file) file))
-                          (denote-directory-files)))
-           (filename (cdr (assoc (completing-read "Select a file: " paths  nil t) paths)))
-           )
-      filename
-      )
+(defun my/denote--find-file-with-pretty-format (&optional initial-text)
+  (interactive)
+  (let* (
+         (paths (mapcar #'(lambda (file)
+                            (cons (my/denote--pretty-format-filename file) file))
+                        (denote-directory-files)))
+         (filename (cdr (assoc (completing-read "Select a file: " paths  nil t) paths)))
+         )
+    filename
     )
+  )
 
 
-  (defun my/denote-link()
-    (interactive)
-    (let ((denote-file-prompt 'my/denote--find-file-with-pretty-format))
-      (advice-add 'denote-file-prompt :around denote-file-prompt)
-      )
-    (call-interactively 'denote-link)
-    (advice-remove 'denote-file-prompt 'my/denote--find-file-with-pretty-format)
+(defun my/denote-link()
+  (interactive)
+  (let ((denote-file-prompt 'my/denote--find-file-with-pretty-format))
+    (advice-add 'denote-file-prompt :around denote-file-prompt)
     )
+  (call-interactively 'denote-link)
+  (advice-remove 'denote-file-prompt 'my/denote--find-file-with-pretty-format)
+  )
 
-  (defun my/denote-link-or-create()
-    (interactive)
-    (let ((denote-file-prompt 'my/denote--find-file-with-pretty-format))
-      (advice-add 'denote-file-prompt :around denote-file-prompt)
-      )
-    (call-interactively 'denote-link-or-create)
-    (advice-remove 'denote-file-prompt 'my/denote--find-file-with-pretty-format)
+(defun my/denote-link-or-create()
+  (interactive)
+  (let ((denote-file-prompt 'my/denote--find-file-with-pretty-format))
+    (advice-add 'denote-file-prompt :around denote-file-prompt)
     )
+  (call-interactively 'denote-link-or-create)
+  (advice-remove 'denote-file-prompt 'my/denote--find-file-with-pretty-format)
+  )
 
 (defun +org/my-refile-to-other-window (arg)
   "Refile current heading to an org buffer visible in another window.
@@ -691,3 +680,20 @@ If prefix ARG, copy instead of move."
     (with-selected-window (next-window)
       (let ((default-directory dir))
         (consult-ripgrep)))))
+
+(defvar universal-coding-system-env-list '("PYTHONIOENCODING")
+  "List of environment variables \\[universal-coding-system-argument] should set")
+
+(defadvice universal-coding-system-argument (around provide-env-handler activate)
+  "Augments \\[universal-coding-system-argument] so it also sets environment variables
+
+Naively sets all environment variables specified in
+`universal-coding-system-env-list' to the literal string
+representation of the argument `coding-system'.
+
+No guarantees are made that the environment variables set by this advice support
+the same coding systems as Emacs."
+  (let ((process-environment (copy-alist process-environment)))
+    (dolist (extra-env universal-coding-system-env-list)
+      (setenv extra-env (symbol-name (ad-get-arg 0))))
+    ad-do-it))

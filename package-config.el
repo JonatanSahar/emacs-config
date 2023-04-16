@@ -153,11 +153,13 @@
 "* SKIM %^{title?|%i}
 - link/cite: %^{link/DOI?}
 - type of paper: %^{type?|study|review|theoretical|theory & study}
-- why read it? %^{why read it?}
+- why read it?
+  %^{why read it?}
 - figures:
 
-%^{a short summary?}
-" :empty-lines-after 1)
+%^{a short summary?}"
+
+:empty-lines-after 1)
 
 ;;                          ("n" "Note"
 ;;                           entry
@@ -247,9 +249,8 @@
 
 (use-package hydra
   :defer 5
-  :bind (("C-c C-w" . hydra-window-resize/body)
+  :bind (
          ("C-c  C-u" . hydra-outline/body)
-         ("C-x  C-m " . multiple-cursors-hydra/body)
          ("C-x  C-'" . hydra-fold/body))
   :config
 
@@ -792,7 +793,7 @@ DEFS is a plist associating completion categories to commands."
 (after! consult
   (consult-customize
    consult-buffer consult-buffer-other-window consult-ripgrep consult-git-grep consult-grep
-   consult-bookmark consult-recent-file consult-xref
+   consult-bookmark consult-recent-file consult-xref consult-theme
    ;; consult--source-file consult--source-project-file consult--source-bookmark
    :preview-key "C-.")
   ;; Replace bindings. Lazily loaded due by `use-package!'.
@@ -964,46 +965,46 @@ the directory.  `REST' is passed to the `CONSULT-RIPGREP-FUNCTION'."
     (consult-notes-denote-mode))
   (setq consult-notes-denote-display-id nil)
   (consult-customize consult-notes
-                   :preview-key
-                   '("M-."
-                     :debounce 0.5 "<up>" "<down>"
-                     :debounce 0.5 any))
+                   :preview-key "C-.")
+                   ;; '("M-."
+                   ;;   :debounce 0.5 "<up>" "<down>"
+                   ;;   :debounce 0.5 any))
   )
 
-(map! :after consult-notes :leader :prefix "n" :nv "f" #'consult-notes)
+;; (map! :after consult-notes :leader :prefix "n" :nv "f" #'consult-notes)
 
-(after! denote
-  (map!
+(map!
+   ;; :after denote
    (:map org-mode-map :leader
-
+         (:map org-mode-map :leader
+               ;; (:prefix "n"
+               ;;          (:prefix ("d" ."dired")
+               ;;           :nv "r" #'denote-rename-file
+               ;;           :nv "R" #'denote-rename-file-using-front-matter)
+               ;;          (:prefix ("k" . "keywords")
+               ;;                   "a" #'denote-keywords-add
+               ;;                   "r" #'denote-keywords-remove)
+               ;;          ))
          (:prefix "n"
-         :nv "o" #'denote-open-or-create
-         :nv "j" #'my-denote-journal ; our custom command
-         :nv "n" #'denote
-         :nv "d" #'denote-date
-         :nv "z" #'denote-signature ; "zettelkasten" mnemonic
-         :nv "s" #'denote-subdirectory
-         :nv "t" #'denote-template
-         ;; If you intend to use Denote with a variety of file types, it is
-         ;; easier to bind the link-related commands to the `global-map', as
-         ;; shown here.  Otherwise follow the same pattern for `org-mode-map',
-         ;; `markdown-mode-map', and/or `text-mode-map'.
-         :nv "i" #'denote-link-or-create ; denote-link ; "insert" mnemonic
-         :nv "I" #'denote-link
-         :nv "a" #'denote-link-add-links
-         :nv "b" #'denote-link-backlinks
-         :nv "F" #'denote-link-find-file
-         :nv "B" #'denote-link-find-backlink
-         ;; Note that `denote-rename-file' can work from any context, not just
-         ;; Dired bufffers.  That is why we bind it here to the `global-map'.
-         :nv "r" #'denote-rename-file
-         :nv "R" #'denote-rename-file-using-front-matter))
-
-   ;; Key bindings specifically for Dired.
-   ;; (:map dired-mode-map :leader :nv
-   ;;                         "i" #'denote-link-dired-marked-notes
-   ;;                         "r" #'denote-dired-rename-marked-files
-   ;;                         "R" #'denote-dired-rename-marked-files-using-front-matter)
+                :nv "o" #'denote-open-or-create
+                :nv "f" #'denote-open-or-create
+                :nv "j" #'my-denote-journal ; our custom command
+                :nv "n" #'denote
+                :nv "r" #'denote-rename-file
+                :nv "R" #'denote-rename-file-using-front-matter
+                :nv "k" #'denote-keywords-add
+                :nv "K" #'denote-keywords-remove
+                :nv "D" #'denote-date
+                :nv "z" #'denote-signature ; "zettelkasten" mnemonic
+                :nv "s" #'denote-subdirectory
+                :nv "t" #'denote-template
+                :nv "i" #'denote-link-or-create ; denote-link ; "insert" mnemonic
+                :nv "I" #'denote-link
+                :nv "a" #'denote-link-add-links
+                :nv "b" (lambda nil (interactive) (denote-link-backlinks) (windmove-down)) ;;(revert-buffer-with-coding-system 'utf-8))
+                :nv "F" #'denote-link-find-file
+                :nv "B" #'denote-link-find-backlink))
+   )
 
    (:map org-mode-map :nvi
          "C-c n j" #'my-denote-journal ; our custom command
@@ -1036,11 +1037,9 @@ the directory.  `REST' is passed to the `CONSULT-RIPGREP-FUNCTION'."
    (:map dired-mode-map
          "C-c C-d C-i" #'denote-link-dired-marked-notes
          "C-c C-d C-r" #'denote-dired-rename-marked-files
-         "C-c C-d C-R" #'denote-dired-rename-marked-files-using-front-matter)))
+         "C-c C-d C-R" #'denote-dired-rename-marked-files-using-front-matter)
 
-
-(after! denote
-   (map! :map evil-org-mode-map :prefix "C-n" :nvi
+   (:map evil-org-mode-map :prefix "C-n" :nvi
          "j" #'my-denote-journal ; our custom command
 
          "o" #'denote-open-or-create
@@ -1067,9 +1066,7 @@ the directory.  `REST' is passed to the `CONSULT-RIPGREP-FUNCTION'."
          ;; Note that `denote-rename-file' can work from any context, not just
          ;; Dired bufffers.  That is why we bind it here to the `global-map'.
          "r" #'denote-rename-file
-         "R" #'denote-rename-file-using-front-matter)
-   )
-
+         "R" #'denote-rename-file-using-front-matter))
 
 (use-package! citar-denote
   :init
@@ -1140,36 +1137,49 @@ the directory.  `REST' is passed to the `CONSULT-RIPGREP-FUNCTION'."
                    "i" #'citar-denote-link-reference
                    "I" #'org-cite-insert)))
 
-(use-package! org-transclusion
-  :after org
-  :config
-(defun denote-org-transclusion-add (link plist)
-  (when (string= "denote" (org-element-property :type link))
-    (let* ((denote-id (org-element-property :path link))
-           (text-after-double-colon (car (cdr (split-string denote-id "::"))))
-           ;; (text-after-double-colon nil)
-           (denote-id (car (split-string denote-id "::")))
-           (file-path (denote-get-path-by-id denote-id))
+;; (use-package! org-transclusion
+;;   :after org
+;;   :config
+;; (defun denote-org-transclusion-add (link plist)
+;;   (when (string= "denote" (org-element-property :type link))
+;;     (let* ((denote-id (org-element-property :path link))
+;;            (text-after-double-colon (car (cdr (split-string denote-id "::"))))
+;;            ;; (text-after-double-colon nil)
+;;            (denote-id (car (split-string denote-id "::")))
+;;            (file-path (denote-get-path-by-id denote-id))
 
-           (new-link (with-temp-buffer
-          (insert "file:")
-                       (insert file-path)
-                       (when text-after-double-colon
-                         (insert "::")
-                         (insert text-after-double-colon))
-                       (beginning-of-buffer)
-                       (org-element-link-parser))))
-      (org-transclusion-add-org-file new-link plist))))
-  (map!
-   :map global-map "<f12>" #'org-transclusion-add
-   :leader
-   :prefix "n"
-   :desc "Org Transclusion Mode" "t" #'org-transclusion-mode)
+;;            (new-link (with-temp-buffer
+;;           (insert "file:")
+;;                        (insert file-path)
+;;                        (when text-after-double-colon
+;;                          (insert "::")
+;;                          (insert text-after-double-colon))
+;;                        (beginning-of-buffer)
+;;                        (org-element-link-parser))))
+;;       (org-transclusion-add-org-file new-link plist))))
+;;   (map!
+;;    :map global-map "<f12>" #'org-transclusion-add
+;;    :leader
+;;    :prefix "n"
+;;    :desc "Org Transclusion Mode" "t" #'org-transclusion-mode)
 
-        (setq org-transclusion-exclude-elements '(property-drawer keyword))
-        (cl-pushnew 'denote-org-transclusion-add                     ;; register the org transclusion 'plugin'
-                    org-transclusion-add-functions)
-        (org-transclusion-mode 1)
-  )
+;;         (setq org-transclusion-exclude-elements '(property-drawer keyword))
+;;         (cl-pushnew 'denote-org-transclusion-add                     ;; register the org transclusion 'plugin'
+;;                     org-transclusion-add-functions)
+;;         (org-transclusion-mode 1)
+;;   )
 
-(flyspell-lazy-mode -1)
+;; (flyspell-lazy-mode -1)
+
+(add-hook! 'helm-minibuffer-set-up-hook '+zen/toggle)
+;; (use-package! org-remark)
+;; (org-remark-global-tracking-mode +1)
+;; (map! :map global-map :leader (:prefix "n" :prefix "m" :nv "M" #'org-remark-mark))
+;; (map! :after org-remark  :map org-remark-mode-map :leader (:prefix "n" :prefix "m"
+;;                                                     :nv "M" #'org-remark-open
+;;                                                     :nv "M" #'org-remark-view-next
+;;                                                     :nv "M" #'org-remark-view-prev
+;;                                                     :nv "M" #'org-remark-remove))
+
+
+;; (use-package! org-modern)

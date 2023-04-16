@@ -65,7 +65,9 @@
 (package! simple-httpd)
 (package! f)
 
+(package! nov)
 
+(package! org-remark)
 (package! org-transclusion :pin "5cb9454")
 
 ;; denote
@@ -104,7 +106,6 @@
 (package!  popper)
 (package! ibuffer-projectile)
 (package! consult-projectile)
-
 (package! evil-better-visual-line)
 
 

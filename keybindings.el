@@ -309,8 +309,8 @@
         :vn "zk" #'org-backward-heading-same-level
         :vn "zl" #'org-next-visible-heading
 
-        :n "z=" #'helm-flyspell-correct
-        :n "g=" #'helm-flyspell-correct
+        :n "z=" #'flyspell-correct-at-point
+        :n "g=" #'flyspell-correct-at-point
 
         ;; :nv "gf" #'evil-repeat
         :nvi "C-S-l" #'org-roam-insert
@@ -328,22 +328,18 @@
  ;;           :vn "k" #'evil-mc-make-and-goto-prev-match
  ;;           :vn "K" #'evil-mc-skip-and-goto-prev-match)))
 
-(map! :prefix "zz"
-      ;; :map org-mode-map
-      ;; :nv "0" #'anki-editor-reset-cloze-number
-      ;; :nv "n" #'anki-editor-cloze-region-auto-incr
-      ;; :nv "N" #'anki-editor-cloze-region-dont-incr
-      ;; :nv "c" #'anki-editor-cloze-word-under-cursor-auto-incr
-      ;; :nv "l" #'evil-next-flyspell-error
-      :nv "Z" (lambda ()
-         (interactive)
-         (call-interactively #'evil-next-flyspell-error)
-         (call-interactively #'helm-flyspell-correct)
-         )
+(map! :prefix "z"
+      ;; :nv "Z" #'evil-prev-flyspell-error
+      ;; :nv "z" #'evil-next-flyspell-error
       :nv "z" (lambda ()
          (interactive)
+         (call-interactively #'evil-next-flyspell-error)
+         (call-interactively #'flyspell-correct-at-point)
+         )
+      :nv "Z" (lambda ()
+         (interactive)
          (call-interactively #'evil-prev-flyspell-error)
-         (call-interactively #'helm-flyspell-correct)
+         (call-interactively #'flyspell-correct-at-point)
          )
        )
 
@@ -736,11 +732,14 @@
 (map!
  "C-x  C-x" #'org-capture
  "C-x  C-n" #'org-capture
- "C-c  C-C" #'org-capture
- "C-c  C-<return>" :desc "send the current region to GPTel" #'gptel-send)
+ "C-c  C-<return>" :desc "send the current region to GPTel" #'gptel-send
+ "C-c  <return>" :desc "run command with encoding" #'universal-coding-system-argument)
 (map! :leader :prefix "Gg"
       :desc "open the GPTel buffer" "g" #'gptel
       :desc "send the current region to GPTel" "G" #'gptel-send
       :leader :prefix "s"
       :desc "open the GPTel buffer" "g" #'gptel-send)
 
+
+(map! :map evil-org-mode-map :nvi "C-c k" #'evil-window-next
+      :map global-map :nvi "C-c k" #'evil-window-next)

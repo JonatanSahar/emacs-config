@@ -24,29 +24,31 @@
 ;; (setq doom-font
 ;;
 (setq
-        ;; doom-font  (font-spec :family "Roboto Mono" :weight 'regular :size 18)
-        ;; doom-big-font  (font-spec :family "Roboto Mono" :weight 'regular :size 18)
-        ;; doom-variable-pitch-font (font-spec :family "Noto Sans" :size 16)
+        ;; Roboto Mono font
+        ;; doom-font  (font-spec :family "Roboto Mono" :weight 'regular :size 20)
+        ;; doom-big-font  (font-spec :family "Roboto Mono" :weight 'regular :size 20)
+        ;; doom-variable-pitch-font (font-spec :family "Noto Sans" :size 20)
+
+        ;; Iosevka Comfy font
         doom-font  (font-spec :family "Iosevka Comfy" :weight 'regular :size 20)
         doom-big-font  (font-spec :family "Iosevka Comfy" :weight 'regular :size 20)
         doom-variable-pitch-font (font-spec :family "Iosevka Comfy Duo" :weight 'regular :size 20)
+
+        ;; doom-font  (font-spec :family "Iosevka Comfy" :weight 'regular :size 24)
+        ;; doom-big-font  (font-spec :family "Iosevka Comfy" :weight 'regular :size 24)
+        ;; doom-variable-pitch-font (font-spec :family "Iosevka Comfy Duo" :weight 'regular :size 24)
+
+        ;; iA Writer Quattro font
+        ;; doom-font  (font-spec :family "iA Writer Mono V Regular" :weight 'regular :size 18)
+        ;; doom-big-font  (font-spec :family "iA Writer Quattro V Regular" :weight 'regular :size 18)
+        ;; doom-variable-pitch-font (font-spec :family "iA Writer Quattro V Regular" :weight 'regular :size 18)
+
+        ;; doom-font  (font-spec :family "iA Writer Quattro V Regular" :weight 'regular :size 24)
+        ;; doom-big-font  (font-spec :family "iA Writer Quattro V Regular" :weight 'regular :size 24)
+        ;; doom-variable-pitch-font (font-spec :family "iA Writer Quattro V Regular" :weight 'regular :size 24)
  )
 
-
-;; (custom-theme-set-faces 'user
-  ;;        '(variable-pitch ((t (:family "ETBembo" :height 180 :weight thin))))
-  ;;        '(fixed-pitch ((t ( :family "Fira Code Retina" :height 200))))))
-
-;; There are two ways to load a theme. Both assume the theme is installed and
-;; available. You can either set `doom-theme' or manually load a theme with the
-;; `load-theme' function. This is the default:
-
-
-(load! "theme-config.el")
-;; (setq doom-theme 'modus-operandi-tinted)
-
-
-
+(load! "themes-and-fonts.el")
 
 ;;
 ;; If you use `org' and don't want your org files in the default location below,
@@ -82,8 +84,10 @@
  org-capture-writing-inbox-file (concat (file-name-as-directory notes-dir) "writing_inbox.org")
 )
 
+(setq package-gnupghome-dir ".local/elpa/gnupg")
+(setq-default line-spacing 0.1)
+
 (setq
- line-spacing 0.3
  evil-respect-visual-line-mode 't
  scroll-bar-mode 1
  delete-by-moving-to-trash nil                      ; Delete files to trash
@@ -108,19 +112,15 @@
       which-key-idle-secondary-delay 0.1
       which-key-allow-multiple-replacements t)
 
-(setq-default evil-shift-width 4 ; globally
-              tab-width 4) ; globally
+(setq-default
+ evil-shift-width 4 ; globally
+ tab-width 4) ; globally
 (setq evil-shift-width 4
       tab-width 4)
 
-(delete-selection-mode 1)                         ; Replace selection when inserting text
 (display-time-mode 1)                             ; Enable time in the mode-line
 (display-battery-mode 1)                          ; On laptops it's nice to know how much power you have
 (global-subword-mode 1)                           ; Iterate through CamelCase words
-
-;; (if (eq initial-window-system 'x)                 ; if started by emacs command or desktop file
-;;     (toggle-frame-maximized)
-;;   (toggle-frame-fullscreen))
 
 (setq
  visual-fill-column-width 90
@@ -158,32 +158,36 @@
           (sp-pair "$" "$")
                       ))
 
-(add-hook 'text-mode-hook 'my-buffer-face-mode-text)
-(add-hook 'text-mode-hook (lambda ()
+
+;; (add-hook! 'text-mode-hook 'my-buffer-face-mode-text)
+(add-hook! 'text-mode-hook (lambda ()
+                             (delete-selection-mode 1)
+                             (visual-fill-column-mode 1)
+                             (visual-line-mode 1)
+                             (captain-mode 1)
+                             (abbrev-mode 1)
+                             (font-lock-mode 1)
+                             (buffer-face-mode 1)
+                            (+zen/toggle)
+                            ))
+
+(add-hook! 'text-mode-hook (lambda ()
                             (setq bidi-paragraph-direction nil)
                             (setq bidi-paragraph-start-re  "^")
                             (setq bidi-paragraph-separate-re  "^")
                             (setq helm-ff-fuzzy-matching t)
                             (setq captain-predicate (lambda () t))
                             (setq company-backends '((company-capf company-files company-dabbrev-code company-dabbrev)))
-                            (delete-selection-mode 1)                         ; Replace selection when inserting text
-                            (visual-fill-column-mode 1)
-                            (visual-line-mode 1)
-                            ;; (flyspell-mode 1)
-                            (captain-mode 1)
-                            (abbrev-mode 1)
-                            (font-lock-mode 1)
-                            (buffer-face-mode)
-                            (+zen/toggle)
+                            (setq line-spacing 0.5)
                             ))
 
 (add-hook 'prog-mode-hook 'my-buffer-face-mode-programming)
 (add-hook 'prog-mode-hook (lambda ()
                             (setq captain-predicate (lambda () (nth 8 (syntax-ppss (point)))))
                             (setq company-backends '((company-capf company-files company-dabbrev-code company-dabbrev)))
-                            (+zen/toggle)
-                            ; Replace selection when inserting text
+                            (setq line-spacing 0.3)
                             (delete-selection-mode 1)
+                            (+zen/toggle)
                             ))
 
 (evil-snipe-override-mode 1)
@@ -194,13 +198,14 @@
           (defun occur-show-replace-context+ ()
             (add-hook 'replace-update-post-hook
                       'occur-mode-display-occurrence nil 'local)))
+
 (define-advice occur-mode-display-occurrence
     (:around (fun &rest args) save-match-data)
   (save-match-data
     (apply fun args)))
 
 
-  (setq-default prescient-history-length 1000)
+ (setq-default prescient-history-length 1000)
 
 (add-hook 'bibtex-mode-hook 'my/fix-windows-bib-file)
 
@@ -209,7 +214,7 @@
 
 (set-input-method 'hebrew-full)
 
-(remove-hook 'after-save-hook #'ws-butler-after-save)   ;
+(remove-hook 'after-save-hook #'ws-butler-after-save)
 
 (defun my/dedicate-org-roam-buffer ()
   (interactive)
@@ -221,15 +226,11 @@
                  (slot . 0)
                  (window-width . 0.33)
                  (window-parameters . ((no-other-window . t)
-                                       (no-delete-other-windows . t)))))
-  )
-
-
-
+                                       (no-delete-other-windows . t))))))
 
 (setq org-odt-preferred-output-format "docx")
 (defun my/make-small-frame () (interactive) (set-frame-size (selected-frame) 50 42))
-(defun my/make-medium-frame () (interactive) (set-frame-size (selected-frame) 100 40))
+(defun my/make-medium-frame () (interactive) (set-frame-size (selected-frame) 100 35))
 (defun my/make-large-frame () (interactive) (set-frame-size (selected-frame) 100 45))
 (add-to-list 'default-frame-alist '(height . 40))
 (add-to-list 'default-frame-alist '(width . 50))
@@ -238,9 +239,6 @@
 (setq python-shell-prompt-detect-failure-warning nil)
 (setq lsp-pylsp-plugins-flake8-max-line-length 90)
 (custom-set-variables '(linum-format 'dynamic))
-;; (toggle-frame-fullscreen)
-
-
 
 ;;; On Windows, commands run by flycheck may have CRs (\r\n line endings).
 ;;; Strip them out before parsing.
@@ -310,18 +308,22 @@ Return the errors parsed with the error patterns of CHECKER."
   ;;   (define-key map (kbd "s n") #'ibuffer-do-sort-by-alphabetic)  ; "sort name" mnemonic
   ;;   (define-key map (kbd "/ g") #'ibuffer-filter-by-content))
 
-(add-hook 'dired-mode-hook 'dired-filter-mode)
+
+
+;; define global minor modes
+(add-hook! 'dired-mode-hook :append '(dired-filter-mode +zen/toggle))
 (setq citar--multiple-setup (cons "<tab>"  "RET"))
 (setq writeroom-mode-line 't)
 (setq +zen-text-scale 0)
 
+(define-globalized-minor-mode global-zen-mode writeroom-mode
+  (lambda () (+zen/toggle 1)))
 (define-globalized-minor-mode global-delete-selection-mode delete-selection-mode
   (lambda () (delete-selection-mode 1)))
 
 (global-delete-selection-mode 1)
-
-(writeroom-mode 1)
-
+(global-zen-mode 1)
+;; (writeroom-mode 1)
 
 (defmacro define-and-bind-text-object (key start-regex end-regex)
   (let ((inner-name (make-symbol "inner-name"))
@@ -359,18 +361,12 @@ Return the errors parsed with the error patterns of CHECKER."
 
 (setq tramp-default-method "plink -share")
 
-(custom-set-faces
- ;; '(line-number ((t (:inherit default :foreground "steel blue" :strike-through nil :underline nil :slant normal :weight semi-bold :family "Roboto Mono"))))
- ;; '(line-number-current-line ((t (:inherit (hl-line default) :foreground "light steel blue" :strike-through nil :underline nil :slant normal :weight semi-bold :family "Roboto Mono"))))
- '(org-default ((t (:family "Heebo")))))
-
+(put 'tab-bar-tab-inactive 'face-alias 'tab-bar)
 
 (setq company-backends '((company-capf company-files company-dabbrev-code company-dabbrev)))
 (setq writeroom-width 100)
 ;; (diredp-toggle-find-file-reuse-dir 1)
 (setq dired-compress-file-alist '(("\\.gz\\'" . "gzip -9f %i") ("\\.bz2\\'" . "bzip2 -9f %i") ("\\.xz\\'" . "xz -9f %i") ("\\.zst\\'" . "zstd -qf -19 --rm -o %o %i") ("\\.zip\\'" . "zip %o -r --filesync %i")))
-(+word-wrap-mode 1)
-
 ;; tabs
 (defun my/name-tab-by-project-or-default ()
   "Return project name if in a project, or default tab-bar name if not.
@@ -380,7 +376,10 @@ The default tab-bar name uses the buffer name."
         (tab-bar-tab-name-current)
       (projectile-project-name))))
 
-(setq tab-bar-show nil)
+(setq tab-bar-show 1)
+;; (setq tab-bar-show nil)
+(setq tab-bar-format '(tab-bar-format-history tab-bar-format-tabs tab-bar-separator))
+(setq tab-bar-close-button-show nil)
 (setq tab-bar-mode t)
 (setq tab-bar-new-tab-choice "*doom*")
 (setq tab-bar-tab-name-function #'my/name-tab-by-project-or-default)
@@ -395,25 +394,32 @@ The default tab-bar name uses the buffer name."
 (setq tramp-verbose 1)
 (setq projectile-mode-line "Projectile")
 
-(fset 'insert-link-to-new-note-thesis
-   (kmacro-lambda-form [?d ?  ?n ?i ?\C-y return return ?\C-y return ?t ?h ?e ?s return] 0 "%d"))
-(map! :leader :map org-mode-map :v "nk"  #'insert-link-to-new-note-thesis)
+;; example for kmacro binding
+;; (fset 'insert-link-to-new-note-thesis
+;;    (kmacro-lambda-form [?d ?  ?n ?i ?\C-y return return ?\C-y return ?t ?h ?e ?s return] 0 "%d"))
+;; (map! :leader :map org-mode-map :v "nk"  #'insert-link-to-new-note-thesis)
 
 
 
 ;; *****************************************
 ;; never collect garbage. use with caution!~
-  (setq gc-cons-threshold 5000000000) ;10GB
+  ;; (setq gc-cons-threshold 5000000000)
   ;; (defun garbage-collect (&rest args)
   ;;   (message "trying to garbage collect. probably you want to quit emacs."))
-  (setq garbage-collection-messages t)
+  (setq garbage-collection-messages nil)
 ;; *****************************************
 
 ;; UTF-8 as default encoding
-(set-language-environment "English")
 (set-language-environment "UTF-8")
-(set-default-coding-systems 'utf-8)
-(set-keyboard-coding-system 'utf-8-unix)
-
+(set-input-method 'hebrew-full)
+;; (prefer-coding-system 'utf-8)
+;; (set-default-coding-systems 'utf-8)
+;; (set-keyboard-coding-system 'utf-8-unix)
+(setq file-coding-system-alist '(("\\.elc\\'" . utf-8-emacs) ("\\.el\\'" . prefer-utf-8) ("\\.utf\\(-8\\)?\\'" . utf-8) ("\\.xml\\'" . xml-find-file-coding-system) ("\\(\\`\\|/\\)loaddefs.el\\'" raw-text . raw-text-unix) ("\\.tar\\'" no-conversion . no-conversion) ("\\.po[tx]?\\'\\|\\.po\\." . po-find-file-coding-system) ("\\.\\(tex\\|ltx\\|dtx\\|drv\\)\\'" . latexenc-find-file-coding-system) ("\\.org\\'" . utf-8)  ("" undecided)))
 ;; do this especially on Windows, for python output problems
-(set-terminal-coding-system 'utf-8-unix)
+;; (set-terminal-coding-system 'utf-8-unix)
+;;
+
+
+(set-face-attribute 'fixed-pitch nil :height 1.0)
+(set-face-attribute 'variable-pitch nil :height 1.0)
