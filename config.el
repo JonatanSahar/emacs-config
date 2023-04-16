@@ -179,6 +179,7 @@
                             (setq captain-predicate (lambda () t))
                             (setq company-backends '((company-capf company-files company-dabbrev-code company-dabbrev)))
                             (setq line-spacing 0.5)
+                            (setq buffer-file-coding-system 'utf-8)
                             ))
 
 (add-hook 'prog-mode-hook 'my-buffer-face-mode-programming)

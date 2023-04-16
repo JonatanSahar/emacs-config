@@ -733,7 +733,9 @@
  "C-x  C-x" #'org-capture
  "C-x  C-n" #'org-capture
  "C-c  C-<return>" :desc "send the current region to GPTel" #'gptel-send
- "C-c  <return>" :desc "run command with encoding" #'universal-coding-system-argument)
+ "C-c  <return>" :desc "run command with encoding" (lambda nil (interactive) (universal-coding-system-argument 'utf-8))
+)
+
 (map! :leader :prefix "Gg"
       :desc "open the GPTel buffer" "g" #'gptel
       :desc "send the current region to GPTel" "G" #'gptel-send
