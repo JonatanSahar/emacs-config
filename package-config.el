@@ -638,8 +638,7 @@ DEFS is a plist associating completion categories to commands."
     (add-to-list 'consult-buffer-sources 'consult--source-workspace))
   )
 
-(use-package popper
-  :ensure t ; or :straight t
+(use-package! popper
   :bind (("C-`"   . popper-toggle-latest)
          ("M-`"   . popper-cycle)
          ("C-M-`" . popper-toggle-type))
@@ -655,7 +654,9 @@ DEFS is a plist associating completion categories to commands."
           help-mode
           compilation-mode))
   (popper-mode +1)
-  (popper-echo-mode +1))                ; For echo area hints
+  (popper-echo-mode +1)
+  (map! :map popper-mode-map :nv "q" #'popper-kill-latest-popup)
+  )                ; For echo area hints
 
 ;; (require 'conda)
 ;; (conda-env-initialize-interactive-shells)

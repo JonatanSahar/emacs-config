@@ -386,19 +386,22 @@
        :n "s" #'matlab-shell
        ))
 
+(defun my-shell nil (interactive) (shell) (popper-toggle-type) (evil-normal-state))
+
 (map! :leader
         (:prefix ("j" . "navigation")
         :desc "avy timer" "j" 'evil-avy-goto-char-timer
         :desc "avy line" "l" 'evil-avy-goto-line)
 
         (:prefix "t"
-        :nv "t" #'treemacs
+        :nv "T" #'treemacs
+        :nv "t" #'popper-toggle-latest
         :nv "s" #'shell
         )
 
         (:prefix "o"
         :nv :desc "windows cmd" "w" #'shell
-        :nv :desc "eshell" "s" #'eshell
+        :nv :desc "eshell" "s" #'my-shell
         :nv :desc "dired in some dir" "d" #'consult-dir
         :nv :desc "dired in a new window" "D" #'consult-dir
         )
