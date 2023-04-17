@@ -164,13 +164,16 @@
                              (delete-selection-mode 1)
                              (visual-fill-column-mode 1)
                              (visual-line-mode 1)
-                             (captain-mode 1)
                              (abbrev-mode 1)
                              (font-lock-mode 1)
                              (buffer-face-mode 1)
-                            (+zen/toggle)
-                            ))
-
+                             (captain-mode 1)
+                             (+zen/toggle)
+                             (org-modern-mode 1)
+                            (setq org-modern-star nil)
+                            (setq org-hide-leading-stars t)
+                            (+word-wrap-mode 1)
+                             ))
 (add-hook! 'text-mode-hook (lambda ()
                             (setq bidi-paragraph-direction nil)
                             (setq bidi-paragraph-start-re  "^")
@@ -180,7 +183,9 @@
                             (setq company-backends '((company-capf company-files company-dabbrev-code company-dabbrev)))
                             (setq line-spacing 0.5)
                             (setq buffer-file-coding-system 'utf-8)
+                            (setq save-buffer-coding-system 'utf-8)
                             ))
+
 
 (add-hook 'prog-mode-hook 'my-buffer-face-mode-programming)
 (add-hook 'prog-mode-hook (lambda ()
@@ -188,6 +193,7 @@
                             (setq company-backends '((company-capf company-files company-dabbrev-code company-dabbrev)))
                             (setq line-spacing 0.3)
                             (delete-selection-mode 1)
+                            (+word-wrap-mode 1)
                             (+zen/toggle)
                             ))
 
@@ -233,7 +239,7 @@
 (defun my/make-small-frame () (interactive) (set-frame-size (selected-frame) 50 42))
 (defun my/make-medium-frame () (interactive) (set-frame-size (selected-frame) 100 35))
 (defun my/make-large-frame () (interactive) (set-frame-size (selected-frame) 100 45))
-(add-to-list 'default-frame-alist '(height . 40))
+(add-to-list 'default-frame-alist '(height . 38))
 (add-to-list 'default-frame-alist '(width . 50))
 
 (setq org-id-link-to-org-use-id 'create-if-interactive)

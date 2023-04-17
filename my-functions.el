@@ -593,7 +593,10 @@ Current pattern: %`evil-mc-pattern
   (setq writeroom-width 120)
   ;; (setq buffer-face-mode-face '(:extend t :family "iA Writer Quattro V Regular"))
   (setq buffer-face-mode-face '(:extend t :family "Iosevka Comfy Duo"))
-  (buffer-face-mode))
+  (buffer-face-mode)
+  (set-face-attribute 'fixed-pitch nil :height 1.0)
+  (set-face-attribute 'variable-pitch nil :height 1.0)
+  )
 
 (defun my/bash-shell ()
   (interactive)

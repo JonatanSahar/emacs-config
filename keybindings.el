@@ -396,6 +396,7 @@
         (:prefix "t"
         :nv "T" #'treemacs
         :nv "t" #'popper-toggle-latest
+        :nv "<return>" #'popper-toggle-latest
         :nv "s" #'shell
         )
 
@@ -748,3 +749,5 @@
 
 (map! :map evil-org-mode-map :nvi "C-c k" #'evil-window-next
       :map global-map :nvi "C-c k" #'evil-window-next)
+
+(map! :map global-map :nv "'" #'evil-goto-mark)

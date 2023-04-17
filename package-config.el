@@ -639,8 +639,10 @@ DEFS is a plist associating completion categories to commands."
   )
 
 (use-package! popper
-  :bind (("C-`"   . popper-toggle-latest)
-         ("M-`"   . popper-cycle)
+  :bind (
+         ;; ("C-`"   . popper-toggle-latest)
+         ("C-`"   . #'popper-kill-latest-popup)
+         ;; ("M-`"   . popper-cycle)
          ("C-M-`" . popper-toggle-type))
   :init
   (setq popper-reference-buffers
@@ -655,7 +657,7 @@ DEFS is a plist associating completion categories to commands."
           compilation-mode))
   (popper-mode +1)
   (popper-echo-mode +1)
-  (map! :map popper-mode-map :nv "q" #'popper-kill-latest-popup)
+  (map! :map popper-mode-map :nv "`" #'popper-toggle-latest)
   )                ; For echo area hints
 
 ;; (require 'conda)
@@ -1183,4 +1185,8 @@ the directory.  `REST' is passed to the `CONSULT-RIPGREP-FUNCTION'."
 ;;                                                     :nv "M" #'org-remark-remove))
 
 
-;; (use-package! org-modern)
+(use-package! org-modern
+;; :config
+;; (setq org-modern-star '("*"))
+;; (global-org-modern-mode)
+)
