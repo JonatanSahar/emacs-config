@@ -783,11 +783,11 @@ DEFS is a plist associating completion categories to commands."
 (diredp-toggle-find-file-reuse-dir 1)
 
 (add-to-list 'load-path (concat doom-emacs-dir (file-name-as-directory "orgnv")))
-(require 'orgnv)
+;;(require 'orgnv)
 
 
 (add-to-list 'load-path (concat doom-emacs-dir (file-name-as-directory "gptel")))
-(require 'gptel)
+;; (require 'gptel)
 (setq gptel-api-key (getenv "OPENAI_API_KEY")
       gptel-use-curl nil
       gptel-default-mode 'org-mode)

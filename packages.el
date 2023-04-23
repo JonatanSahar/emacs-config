@@ -56,9 +56,9 @@
 ;; (package! org-roam-ui)
 
 ;; (package! org :pin "73875939a8b5545")
-(package! org-pretty-tags :pin "40fd72f3e7...")
+(package! org-pretty-tags)
 (package! org-superstar)
-(package! org-super-agenda :pin "dd0d104c26...")
+(package! org-super-agenda)
 (package! helm-org-rifle)
 (package! org-download)
 
@@ -68,7 +68,7 @@
 (package! nov)
 
 (package! org-remark)
-(package! org-transclusion :pin "5cb9454")
+(package! org-transclusion)
 
 ;; denote
 (package! denote)
