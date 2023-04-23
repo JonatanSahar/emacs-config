@@ -151,16 +151,13 @@
 (setq-default evil-escape-delay 0.4)
 
 (font-lock-add-keywords nil '(("\"\\(\\(?:.\\|\n\\)*?[^\\]\\)\"" 0 font-lock-string-face)))
-;; (add-hook! org-agenda-mode #'writeroom-mode)
-(add-hook! org-roam-mode #'visual-line-mode)
-(add-hook! org-mode (lambda ()
-          (+zen/toggle)
+(add-hook! org-mode
           (sp-pair "$" "$")
-                      ))
+                      )
 
 
 ;; (add-hook! 'text-mode-hook 'my-buffer-face-mode-text)
-(add-hook! 'text-mode-hook (lambda ()
+(add-hook! 'text-mode-hook
                              (delete-selection-mode 1)
                              (visual-fill-column-mode 1)
                              (visual-line-mode 1)
@@ -169,18 +166,17 @@
                              (buffer-face-mode 1)
                              (captain-mode 1)
                              (+zen/toggle)
-                             (org-modern-mode 1)
                             (setq org-modern-star nil)
                             (setq org-hide-leading-stars t)
                             (flyspell-lazy-mode -1)
                             (+word-wrap-mode 1)
-                             ))
-(add-hook! 'text-mode-hook (lambda ()
+                            (flyspell-lazy-mode -1)
+                             )
+(add-hook! 'text-mode-hook
                             (setq bidi-paragraph-direction nil)
                             (setq bidi-paragraph-start-re  "^")
                             (setq bidi-paragraph-separate-re  "^")
                             (setq helm-ff-fuzzy-matching t)
-                            (setq captain-predicate (lambda () t))
                             (setq company-backends '((company-capf company-files company-dabbrev-code company-dabbrev)))
                             (setq line-spacing 0.5)
                             (setq buffer-file-coding-system 'utf-8)
@@ -190,16 +186,16 @@
                             ))
 
 
-(add-hook 'prog-mode-hook 'my-buffer-face-mode-programming)
-(add-hook 'prog-mode-hook (lambda ()
-                            (setq captain-predicate (lambda () (nth 8 (syntax-ppss (point)))))
+(add-hook! 'prog-mode-hook 'my-buffer-face-mode-programming)
+(add-hook! 'prog-mode-hook
                             (setq company-backends '((company-capf company-files company-dabbrev-code company-dabbrev)))
                             (setq line-spacing 0.3)
                             (delete-selection-mode 1)
                             (flyspell-lazy-mode -1)
                             (+word-wrap-mode 1)
                             (+zen/toggle)
-                            ))
+                            )
+
 
 (evil-snipe-override-mode 1)
 
@@ -332,9 +328,8 @@ Return the errors parsed with the error patterns of CHECKER."
 (define-globalized-minor-mode global-delete-selection-mode delete-selection-mode
   (lambda () (delete-selection-mode 1)))
 
-(global-delete-selection-mode 1)
-(global-zen-mode 1)
-;; (writeroom-mode 1)
+;; (global-delete-selection-mode 1)
+;; (global-zen-mode 1)
 
 (defmacro define-and-bind-text-object (key start-regex end-regex)
   (let ((inner-name (make-symbol "inner-name"))
@@ -395,7 +390,8 @@ The default tab-bar name uses the buffer name."
 (setq tab-bar-new-tab-choice "*doom*")
 (setq tab-bar-tab-name-function #'my/name-tab-by-project-or-default)
 
-(add-hook! minibuffer-setup #'+zen/toggle)
+;; (add-hook! minibuffer-setup #'+zen/toggle)
+(remove-hook! minibuffer-setup #'+zen/toggle)
 (setq auto-revert-remote-files nil)
 (setq remote-file-name-inhibit-cache nil)
 (setq vc-ignore-dir-regexp
@@ -410,6 +406,11 @@ The default tab-bar name uses the buffer name."
 ;;    (kmacro-lambda-form [?d ?  ?n ?i ?\C-y return return ?\C-y return ?t ?h ?e ?s return] 0 "%d"))
 ;; (map! :leader :map org-mode-map :v "nk"  #'insert-link-to-new-note-thesis)
 
+(fset 'make-region-bold
+   (kmacro-lambda-form [?S ?*] 0 "%d"))
+(map! :map evil-org-mode-map :v "C-b"  #'make-region-bold)
+;; (map! :map evil-org-mode-map :v "C-u"  #'make-region-underline)
+;; (map! :map evil-org-mode-map :v "C-i"  #'make-region-italic)
 
 
 ;; *****************************************

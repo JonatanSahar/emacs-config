@@ -7,8 +7,8 @@
   )
 
 (use-package! dired-filter
+  :hook (dired-mode . dired-filter-mode)
   :config
-  (add-hook 'dired-mode-hook 'dired-filter-mode)
   (evil-define-key* 'normal dired-mode-map "F" #'dired-filter-mode)
   (evil-define-key* 'normal dired-mode-map "f" dired-filter-map)
   (evil-define-key* 'normal dired-mode-map "M" dired-filter-mark-map)
@@ -28,8 +28,7 @@
 
 
 (use-package! dired-ranger
-  :init
-
+  :config
   (map! :map dired-mode-map :n "c" nil)
   (evil-define-key* 'normal dired-mode-map "cz" #'dired-do-compress-to)
   (map! :map dired-mode-map :prefix "c" :n
@@ -182,64 +181,6 @@
           ("begin" "$1" "$" "$$" "\\(" "\\["))))
   )
 
-;; (use-package! org-roam
-;;   :init
-;;   ;; (map!
-;;   ;;       :leader
-;;   ;;       :prefix "k"
-;;   ;;       :desc "org-roam" "l" #'org-roam-buffer-toggle
-;;   ;;       :prefix "n"
-;;   ;;       :desc "org-roam" "l" #'org-roam-buffer-toggle
-;;   ;;       :desc "org-roam-node-insert" "i" #'org-roam-node-insert
-;;   ;;       :desc "org-roam-node-find" "f" #'org-roam-node-find
-;;   ;;       :desc "org-roam-ref-find" "r" #'org-roam-ref-find
-;;   ;;       :desc "org-roam-show-graph" "g" #'org-roam-show-graph
-;;   ;;       :desc "org-roam-capture" "c" #'org-roam-capture
-;;   ;;       :desc "org-roam-dailies-capture-today" "j" #'org-roam-dailies-capture-today
-
-;;   ;;       :map org-roam-preview-map :desc "universal argument" "C-u" #'universal-argument
-;;   ;;       :map org-roam-mode-map :desc "universal argument" "C-u" #'universal-argument
-;;   ;;       )
-;;   (setq
-;;    org-roam-directory "~/Documents/notes/slip-box"
-;;    ;; org-roam-directory (file-truename slip-box-dir)
-;;    org-roam-db-gc-threshold most-positive-fixnum
-;;    org-id-link-to-org-use-id t)
-;;   (add-to-list 'display-buffer-alist
-;;                '("\\*org-roam\\*"
-;;                  (display-buffer-in-side-window)
-;;                  (dedicated . t)
-;;                  (side . right)
-;;                  (slot . 0)
-;;                  (window-width . 0.33)
-;;                  (window-parameters . ((no-other-window . t)
-;;                                        (no-delete-other-windows . t)))))
-;;   :config
-;;   ;; (setq org-roam-mode-sections
-;;   ;;       (list #'org-roam-backlinks-insert-section
-;;   ;;             #'org-roam-reflinks-insert-section
-;;   ;;             ;; #'org-roam-unlinked-references-insert-section
-;;   ;;             ))
-;;   (org-roam-db-autosync-mode)
-;;   (setq org-roam-capture-templates
-;;         '(("d" "default" plain "%?"
-;;            :target (file+head "%<%Y-%m-%d-%H%M%S>-${slug}.org"
-;;                               ;; "${title}\n- tags :: \n")
-;;                               "#+title: ${title}\n- tags :: \n")
-;;            :unnarrowed t)))
-
-;;   (defun my/org-roam-node-insert-immediate (arg &rest args)
-;;     (interactive "P")
-;;     (let ((args (cons arg args))
-;;           (org-roam-capture-templates (list (append (car org-roam-capture-templates)
-;;                                                     '(:immediate-finish t)))))
-;;       (apply #'org-roam-node-insert args)))
-;;   )
-
-;; Since the org module lazy loads org-protocol (waits until an org URL is
-;; detected), we can safely chain `org-roam-protocol' to it.
-;; (use-package org-roam-protocol
-;;   :after org-protocol)
 
 (defun my/get-bib-file-list ()
   "Get the list of all the bib files containing my bib database."
@@ -248,7 +189,7 @@
 
 
 (use-package hydra
-  :defer 5
+  :defer 10
   :bind (
          ("C-c  C-u" . hydra-outline/body)
          ("C-x  C-'" . hydra-fold/body))
@@ -387,21 +328,21 @@
   (setq! citar-file-note-org-include '(org-id org-roam-ref))
   (setq! citar-notes-paths literature-notes-dir)
   (setq! citar-library-paths (list "~/Documents/bibliography"))
-;;   (setq citar-templates '((main . "${author editor:30}     ${date year issued:4}     ${title:48}")
-;;                           (suffix . "${tags keywords keywords:*}   ${=key= id:15}    ${=type=:12}")
-;;                           (preview . "${author editor} (${year issued date}) ${title}, ${journal journaltitle publisher container-title collection-title}.\n")
-;;                           (note .
-;;                                 "Notes on \"${title}\" (${author})
 
-;; * General notes
+(after! citar
+  (setq citar-templates '((main . "${author editor:30}     ${date year issued:4}     ${title:48}")
+                          (suffix . "         ${tags keywords keywords:*}   ${=key= id:15}    ${=type=:12}")
+                          (preview . "${author editor} (${year issued date}) ${title}, ${journal journaltitle publisher container-title collection-title}.\n")
+                          (note .
+                                "Notes on \"${title}\", (${author})
 
+* Summary and short reference
 
-;; * Summary and short reference
+* Reading notes
 
+* See also (notes, tags, related papers):
 
-;; * See also (notes, tags, related papers):
-
-;; ")))
+"))))
 
   (setq citar-symbols
         `((file . (,(all-the-icons-icon-for-file "foo.pdf" :face 'all-the-icons-dred) .
@@ -418,34 +359,7 @@
     "Face for obscuring/dimming icons"
     :group 'all-the-icons-faces)
 
-  )
-
-(use-package! websocket
-  :after org-roam)
-
-;;(defun wsl-fix-org-open-file (orig-org-open-file &rest args)
-;;  ;; temporarily replace function,
-;;  ;; see https://endlessparentheses.com/understanding-letf-and-how-it-replaces-flet.html
-;;  (cl-letf (((symbol-function 'start-process-shell-command) #'call-process-shell-command))
-;;    (apply orig-org-open-file args)))
-;;
-;;(advice-add #'org-open-file :around #'wsl-fix-org-open-file)
-
-(use-package org-super-agenda
-  :config
-  (org-super-agenda-mode t)
-  (add-to-list 'org-agenda-custom-commands
-               '("r" "Categor: Research" todo ""
-                 ((org-super-agenda-groups
-                   '((:category ("research"))
-                     ;; (:category ("research"))
-                     (:discard (:anything))
-                     ))
-                  )))
-  )
-
-(with-eval-after-load 'citar
-  (defun citar-open-library-file (key-entry)
+ (defun citar-open-library-file (key-entry)
     "Open library file associated with the KEY-ENTRY.
 
 With prefix, rebuild the cache before offering candidates."
@@ -457,9 +371,7 @@ With prefix, rebuild the cache before offering candidates."
                  (stringp citar-library-paths))
         (error "Make sure 'citar-library-paths' is a list of paths"))
       (citar--library-file-action key-entry 'open)))
-  )
 
-(with-eval-after-load 'citar
   (defun citar--library-file-action (key-entry action)
     "Run ACTION on file associated with KEY-ENTRY."
     (let* ((fn (pcase action
@@ -484,6 +396,20 @@ With prefix, rebuild the cache before offering candidates."
         (message "No associated file"))))
   )
 
+(use-package org-super-agenda
+  :config
+  (org-super-agenda-mode t)
+  (add-to-list 'org-agenda-custom-commands
+               '("r" "Categor: Research" todo ""
+                 ((org-super-agenda-groups
+                   '((:category ("research"))
+                     ;; (:category ("research"))
+                     (:discard (:anything))
+                     ))
+                  )))
+  )
+
+
 
 (use-package! lsp-pyright
   :hook (python-mode . (lambda ()
@@ -495,9 +421,8 @@ With prefix, rebuild the cache before offering candidates."
   (setq lsp-pyright-stub-path (concat (getenv "HOME") "/src/python-type-stubs"))
   )
 
-(use-package! company
+(after! company
   :config
-
   ;; completion
   (setq company-idle-delay 0.5
         company-minimum-prefix-length 2
@@ -509,26 +434,7 @@ With prefix, rebuild the cache before offering candidates."
         "M-;" #'+company/complete)
   )
 
-(use-package! poetry
-  :config
-  )
-
-
-(defun consult-find-for-minibuffer ()
-  "Search file with find, enter the result in the minibuffer."
-  (interactive)
-  (let* ((enable-recursive-minibuffers t)
-         (default-directory (file-name-directory (minibuffer-contents)))
-         (file (consult--find
-                (replace-regexp-in-string
-                 "\\s-*[:([].*"
-                 (format " (via find in %s): " default-directory)
-                 (minibuffer-prompt))
-                #'consult--find-builder
-                (file-name-nondirectory (minibuffer-contents)))))
-    (delete-minibuffer-contents)
-    (insert (expand-file-name file default-directory))
-    (exit-minibuffer)))
+(use-package! poetry)
 
 (defun define-minibuffer-key (key &rest defs)
   "Define KEY conditionally in the minibuffer.
@@ -585,7 +491,10 @@ DEFS is a plist associating completion categories to commands."
 (ispell-hunspell-add-multi-dic "en_US,hebrew"))
 
 (use-package! company-box
-  :hook (company-mode . company-box-mode))
+  :hook (company-mode . company-box-mode)
+  :config
+  (setq company-box-icons-alist 'company-box-icons-all-the-icons)
+  )
 
 
 (use-package tabspaces
@@ -799,61 +708,6 @@ DEFS is a plist associating completion categories to commands."
    consult-bookmark consult-recent-file consult-xref consult-theme
    ;; consult--source-file consult--source-project-file consult--source-bookmark
    :preview-key "C-.")
-  ;; Replace bindings. Lazily loaded due by `use-package!'.
-  ;; :bind (;; C-c bindings (mode-specific-map)
-  ;;        ("C-c h" . consult-history)
-  ;;        ("C-c m" . consult-mode-command)
-  ;;        ("C-c b" . consult-bookmark)
-  ;;        ("C-c k" . consult-kmacro)
-  ;;        ;; C-x bindings (ctl-x-map)
-  ;;        ("C-x M-:" . consult-complex-command)     ;; orig. repeat-complet-command
-  ;;        ("C-x b" . consult-buffer)                ;; orig. switch-to-buffer
-  ;;        ("s-b" . consult-buffer)                ;; orig. switch-to-buffer
-  ;;        ("C-x 4 b" . consult-buffer-other-window) ;; orig. switch-to-buffer-other-window
-  ;;        ("C-s-b" . consult-buffer-other-window)
-  ;;        ("C-x 5 b" . consult-buffer-other-frame)  ;; orig. switch-to-buffer-other-frame
-  ;;        ;; Custom M-# bindings for fast register access
-  ;;        ("M-#" . consult-register-load)
-  ;;        ("M-'" . consult-register-store)          ;; orig. abbrev-prefix-mark (unrelated)
-  ;;        ("C-M-#" . consult-register)
-  ;;        ;; Other custom bindings
-  ;;        ("M-y" . consult-yank-from-kill-ring)                ;; orig. yank-pop
-  ;;        ("<help> a" . consult-apropos)            ;; orig. apropos-command
-  ;;        ;; M-g bindings (goto-map)
-  ;;        ("M-g e" . consult-compile-error)
-  ;;        ("M-g g" . consult-goto-line)             ;; orig. goto-line
-  ;;        ("M-g M-g" . consult-goto-line)           ;; orig. goto-line
-  ;;        ("M-g o" . consult-outline)
-  ;;        ("M-g m" . consult-mark)
-  ;;        ("M-g k" . consult-global-mark)
-  ;;        ("C-x C-SPC" . consult-mark)
-  ;;        ("M-g i" . consult-imenu)
-  ;;        ("M-g I" . consult-project-imenu)
-  ;;        ;; M-s bindings (search-map)
-  ;;        ("M-s f" . consult-find)
-  ;;        ("M-s L" . consult-locate)
-  ;;        ("M-s g" . consult-grep)
-  ;;        ("M-s G" . consult-git-grep)
-  ;;        ("M-s r" . consult-ripgrep)
-  ;;        ("C-c f" . consult-ripgrep)
-  ;;        ("M-s l" . consult-line)
-  ;;        ("M-s m" . consult-multi-occur)
-  ;;        ("M-s k" . consult-to-ivy)
-  ;;        ("s-r" . consult-recent-file)
-  ;;        ("C-c o" . consult-file-externally)
-  ;;        ("s-4" . consult-bookmark)
-  ;;        ("C-y" . yank)
-  ;;        ("C-s" . consult-line) ;; I've long favored Swiper mapped to c-s
-  ;;        ("s-l" . consult-goto-line)
-  ;;        ;; Isearch integration
-  ;;        ("M-s e" . consult-isearch)
-  ;;        ;; ("s-t" . jnf/consult-find-using-fd)
-  ;;        ("s-3" . consult-imenu)
-  ;;        ("s-#" . consult-project-imenu)
-  ;;        :map isearch-mode-map
-  ;;        ("M-e" . consult-isearch)                 ;; orig. isearch-edit-string
-  ;;        ("M-s l" . consult-line)                 ;; required by consult-line to detect isearch
-         ;; ("M-e" . #'consult-isearch-forward))               ;; orig. isearch-edit-string
 
   ;; The :init configuration is always executed (Not lazy)
   :init
@@ -954,25 +808,20 @@ the directory.  `REST' is passed to the `CONSULT-RIPGREP-FUNCTION'."
   (define-key company-mode-map [remap completion-at-point] #'consult-company)
   )
 
-
-
-
 (use-package! consult-notes
-  :commands (consult-notes
-             consult-notes-search-in-all-notes
-             ;; if using org-roam
-             consult-notes-org-roam-find-node
-             consult-notes-org-roam-find-node-relation)
+  :after denote
   :init
-  (when (locate-library "denote")
-    (consult-notes-denote-mode))
+  (consult-notes-denote-mode)
+  :commands (consult-notes)
+  :config
   (setq consult-notes-denote-display-id nil)
-  (consult-customize consult-notes
-                   :preview-key "C-.")
-                   ;; '("M-."
-                   ;;   :debounce 0.5 "<up>" "<down>"
-                   ;;   :debounce 0.5 any))
-  )
+    )
+  ;; (consult-customize consult-notes
+  ;;                  :preview-key "C-.")
+  ;;                  ;; '("M-."
+  ;;                  ;;   :debounce 0.5 "<up>" "<down>"
+  ;;                  ;;   :debounce 0.5 any))
+  ;; )
 
 ;; (map! :after consult-notes :leader :prefix "n" :nv "f" #'consult-notes)
 
@@ -990,7 +839,8 @@ the directory.  `REST' is passed to the `CONSULT-RIPGREP-FUNCTION'."
                ;;          ))
          (:prefix "n"
                 :nv "o" #'denote-open-or-create
-                :nv "f" #'denote-open-or-create
+                ;; :nv "f" #'denote-open-or-create
+                :nv "f" #'my/consult-notes
                 :nv "j" #'my-denote-journal ; our custom command
                 :nv "n" #'denote
                 :nv "r" #'denote-rename-file
@@ -1134,7 +984,8 @@ the directory.  `REST' is passed to the `CONSULT-RIPGREP-FUNCTION'."
                    :desc "remove ref from this note" "k" #'citar-denote-remove-citekey
                    :desc "go to bibtex entry" "e" #'citar-denote-open-reference-entry
                    :desc "find notes citing the current ref" "r" #'citar-denote-find-reference
-                   :desc "find notes citing a ref"  "f" #'citar-denote-find-citation
+                   :desc "find notes citing a ref"  "F" #'citar-denote-find-citation
+                   :desc "find notes citing a ref"  "f" #'citar-denote-open-note
                    ;; "n" #'citar-denote-cite-nocite
                    ;; "m" #'citar-denote-reference-nocite
                    "i" #'citar-denote-link-reference
@@ -1172,8 +1023,6 @@ the directory.  `REST' is passed to the `CONSULT-RIPGREP-FUNCTION'."
 ;;         (org-transclusion-mode 1)
 ;;   )
 
-;; (flyspell-lazy-mode -1)
-
 (add-hook! 'helm-minibuffer-set-up-hook '+zen/toggle)
 ;; (use-package! org-remark)
 ;; (org-remark-global-tracking-mode +1)
@@ -1186,7 +1035,24 @@ the directory.  `REST' is passed to the `CONSULT-RIPGREP-FUNCTION'."
 
 
 (use-package! org-modern
-;; :config
-;; (setq org-modern-star '("*"))
-;; (global-org-modern-mode)
 )
+
+(use-package! captain
+        :config
+                (add-hook 'prog-mode-hook
+                        (lambda ()
+                        (setq captain-predicate (lambda () (nth 8 (syntax-ppss (point)))))))
+
+
+                (add-hook 'text-mode-hook
+                        (lambda ()
+                        (setq captain-predicate (lambda () t))))
+
+
+                (add-hook
+                'org-mode-hook
+                (lambda ()
+                (setq captain-predicate
+                        (lambda () (not (org-in-src-block-p))))))
+        (global-captain-mode)
+  )

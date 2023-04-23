@@ -84,7 +84,6 @@
 (package! consult-company)
 (package! company-statistics)
 (package! company-wordfreq)
-;; (package! flyspell-lazy)
 (package! company-box)
 (package! compat)
 

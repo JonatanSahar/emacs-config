@@ -700,3 +700,14 @@ the same coding systems as Emacs."
     (dolist (extra-env universal-coding-system-env-list)
       (setenv extra-env (symbol-name (ad-get-arg 0))))
     ad-do-it))
+
+(defun my/consult-notes (&optional sources)
+  "Find a file in a notes directory with consult-multi, or from SOURCES."
+  (interactive)
+  (setq consult-notes-denote-files-function (denote-directory-text-only-files))
+  (consult-notes--make-file-dir-sources)
+  (consult--multi (or sources consult-notes-all-sources)
+                  :require-match
+                  (confirm-nonexistent-file-or-buffer)
+                  :prompt "Notes: "
+                  :history 'consult-notes-history))
