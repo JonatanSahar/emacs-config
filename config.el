@@ -183,7 +183,7 @@
                             (setq save-buffer-coding-system 'utf-8)
                             (set-face-attribute 'fixed-pitch nil :height 1.0)
                             (set-face-attribute 'variable-pitch nil :height 1.0)
-                            ))
+                            )
 
 
 (add-hook! 'prog-mode-hook 'my-buffer-face-mode-programming)
