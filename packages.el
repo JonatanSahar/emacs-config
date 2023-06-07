@@ -138,6 +138,7 @@
 (package! emacs-aio)
 (package! corfu)
 (package! cape)
+(package! shackle)
 
 
 ;; themes
