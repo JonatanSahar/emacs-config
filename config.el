@@ -102,7 +102,7 @@
  backup-directory-alist `(("." . ,(concat user-emacs-directory "autosaved_files")))
  truncate-string-ellipsis "…")               ; Unicode ellispis are nicer than "...", and also save /precious/ space
 
-
+(add-load-path! "../doom-emacs/packages/")
 (load! "package-config.el")
 (load! "my-functions.el")
 (load! "keybindings.el")
@@ -154,22 +154,25 @@
 (add-hook! org-mode
           (sp-pair "$" "$")
                       )
-
+;; (add-hook! 'evil-normal-state-entry-hook  #'save-buffer)
+;; (add-hook! 'evil-insert-state-entry-hook #'save-buffer)
 
 ;; (add-hook! 'text-mode-hook 'my-buffer-face-mode-text)
 (add-hook! 'text-mode-hook
-                             (delete-selection-mode 1)
-                             (visual-fill-column-mode 1)
-                             (visual-line-mode 1)
-                             (abbrev-mode 1)
-                             (font-lock-mode 1)
-                             (buffer-face-mode 1)
-                             (captain-mode 1)
-                             (+zen/toggle)
-                            (setq org-modern-star nil)
-                            (setq org-hide-leading-stars t)
-                            (+word-wrap-mode 1)
-                            (flyspell-lazy-mode -1)
+							(delete-selection-mode 1)
+							(visual-fill-column-mode 1)
+							(visual-line-mode 1)
+							(abbrev-mode 1)
+							(font-lock-mode 1)
+							(buffer-face-mode 1)
+							(captain-mode 1)
+							(+zen/toggle)
+							(setq org-modern-star nil)
+							(setq org-hide-leading-stars t)
+							(+word-wrap-mode 1)
+							(flyspell-lazy-mode -1)
+							(set-face-attribute 'fixed-pitch nil :height 1.0)
+							(set-face-attribute 'variable-pitch nil :height 1.0)
                              )
 (add-hook! 'text-mode-hook
                             (setq bidi-paragraph-direction nil)
@@ -177,7 +180,8 @@
                             (setq bidi-paragraph-separate-re  "^")
                             (setq helm-ff-fuzzy-matching t)
                             (setq company-backends '((company-capf company-files company-dabbrev-code company-dabbrev)))
-                            (setq line-spacing 0.5)
+                            (setq company-frontends '(company-preview-frontend))
+                            (setq line-spacing 0.3)
                             (setq buffer-file-coding-system 'utf-8)
                             (setq save-buffer-coding-system 'utf-8)
                             )
@@ -431,3 +435,4 @@ The default tab-bar name uses the buffer name."
 
 (set-face-attribute 'fixed-pitch nil :height 1.0)
 (set-face-attribute 'variable-pitch nil :height 1.0)
+(setq +lookup-provider-url-alist '(("Doom issues" "https://github.com/orgs/doomemacs/projects/2/views/30?filterQuery=%s") ("Doom discourse" "https://discourse.doomemacs.org/search?q=%s") ("Google" +lookup--online-backend-google "https://google.com/search?q=%s") ("Google images" "https://www.google.com/images?q=%s") ("Google maps" "https://maps.google.com/maps?q=%s") ("Project Gutenberg" "http://www.gutenberg.org/ebooks/search/?query=%s") ("DuckDuckGo" +lookup--online-backend-duckduckgo "https://duckduckgo.com/?q=%s") ("DevDocs.io" "https://devdocs.io/#q=%s") ("StackOverflow" "https://stackoverflow.com/search?q=%s") ("Github" "https://github.com/search?ref=simplesearch&q=%s") ("Youtube" "https://youtube.com/results?aq=f&oq=&search_query=%s") ("Wolfram alpha" "https://wolframalpha.com/input/?i=%s") ("Wikipedia" "https://wikipedia.org/search-redirect.php?language=en&go=Go&search=%s") ("MDN" "https://developer.mozilla.org/en-US/search?q=%s") ("Internet archive" "https://web.archive.org/web/*/%s") ("Google Scholar" "https://scholar.google.com/scholar?q=%s")))

@@ -54,7 +54,7 @@
    org-id-method 'ts
    org-outline-path-complete-in-steps nil
    org-goto-interface 'outline-path-completion
-   org-cycle-separator-lines 1
+   org-cycle-separator-lines 2
    ;; org-image-actual-width nil
    org-export-with-toc 'nil
    ;; org-image-actual-width (list 550)
@@ -63,7 +63,7 @@
    ;; ➡, ⚡, ▼, ↴, ∞, ⬎, ⤷, ⤵, …
    org-deadline-warning-days 7
    org-agenda-breadcrumbs-separator " ❱ "
-   org-odd-levels-only  t
+   org-odd-levels-only  nil
    org-startup-with-inline-images t
    org-hide-emphasis-markers t
    org-list-indent-offset 2
@@ -71,6 +71,7 @@
    org-list-demote-modify-bullet
    '(("+" . "*") ("-" . "+") ("*" . "-"))
    org-capture-papers-file "~/notes/20230402T133604--interesting-papers__thesis.org"
+   org-capture-microdosing-journal-file "~/notes/20230523T162209--microdosing-journal__journal.org"
    org-agenda-files '(
                       "~/notes/20230323T113003--knowledge-base__thesis.org"
                       "~/notes/20230402T133604--interesting-papers__thesis.org")
@@ -145,6 +146,12 @@
                             entry
                             (file+headline org-capture-inbox-file "Tasks")
                             "* TODO %? %i\n** source: %l")
+
+                           ("m" "Microdosing journal entry"
+                            entry
+                            (file org-capture-microdosing-journal-file)
+                            ;; (concat "* " (format-time-string "%Y%m%d")))
+                            "* %^{תאריך}, %^{יום בשבוע}, %^{שעה}")
 
                            ("p" "Paper ref to read "
                             entry
@@ -424,11 +431,13 @@ With prefix, rebuild the cache before offering candidates."
 (after! company
   :config
   ;; completion
-  (setq company-idle-delay 0.5
+  (setq company-idle-delay 0.1
         company-minimum-prefix-length 2
         company-show-numbers t)
   (setq-default history-length 1000)
   (setq-default prescient-history-length 1000)
+  (setq company-dabbrev-other-buffers 't)
+  (setq company-dabbrev-code-other-buffers 't)
   (map! :map org-mode-map :i
         "C-;" #'+company/complete
         "M-;" #'+company/complete)
@@ -562,6 +571,7 @@ DEFS is a plist associating completion categories to commands."
           "\\*MATLAB\\*"
           "\\*Ibuffer\\*"
           "\\*denote-backlinks"
+          "\\*chatgpt "
           help-mode
           compilation-mode))
   (popper-mode +1)
@@ -613,7 +623,7 @@ DEFS is a plist associating completion categories to commands."
   :config
   ;; Remember to check the doc strings of those variables.
   (setq denote-directory (expand-file-name "~/notes/"))
-  (setq denote-known-keywords '("emacs" "philosophy" "politics" "economics"))
+  (setq denote-known-keywords '("emacs" "thesis"))
   (setq denote-infer-keywords t)
   (setq denote-sort-keywords t)
   (setq denote-file-type nil) ; Org is the default, set others here
@@ -687,19 +697,6 @@ DEFS is a plist associating completion categories to commands."
   ;; `denote-link-or-create'.  You may want to bind them to keys as well
   )
 
-(add-to-list 'load-path (concat doom-emacs-dir (file-name-as-directory "dired-plus")))
-(require 'dired+)
-(diredp-toggle-find-file-reuse-dir 1)
-
-(add-to-list 'load-path (concat doom-emacs-dir (file-name-as-directory "orgnv")))
-(require 'orgnv)
-
-
-(add-to-list 'load-path (concat doom-emacs-dir (file-name-as-directory "gptel")))
-(require 'gptel)
-(setq gptel-api-key (getenv "OPENAI_API_KEY")
-      gptel-use-curl nil
-      gptel-default-mode 'org-mode)
 
 
 (after! consult
@@ -1056,3 +1053,101 @@ the directory.  `REST' is passed to the `CONSULT-RIPGREP-FUNCTION'."
                         (lambda () (not (org-in-src-block-p))))))
         (global-captain-mode)
   )
+(use-package! tmr
+  :init
+  (setq tmr-sound-file "~/Documents/sounds/tibetian-bowl-1.wav")
+  )
+
+;; (use-package! mono-complete
+;;   :config
+;;   (setq mono-complete-fallback-command 'tab-to-tab-stop)
+;;   (define-key mono-complete-mode-map (kbd "<tab>") 'mono-complete-expand-or-fallback)
+;;   (evil-define-key* 'insert mono-complete-mode-map  "C-;" #'mono-complete-expand-or-fallback)
+;;   (map! :map mono-complete-mode-map :i "C-;" nil)
+;;   (map! :map mono-complete-mode-map :i "C-;" #'mono-complete-expand-or-fallback)
+;;   (map! :map mono-complete-mode-map :i "RET" #'mono-complete-expand-or-fallback)
+
+;;   :commands (mono-complete-mode)
+;;   ;; :hook
+;;          ;; ((prog-mode) . mono-complete-mode)
+;;          ;; ((text-mode) . mono-complete-mode)
+;;   )
+
+(setq external-packages-dir (concat doom-emacs-dir (file-name-as-directory "packages")))
+
+(add-to-list 'load-path (concat external-packages-dir (file-name-as-directory "dired-plus")))
+(require 'dired+)
+(diredp-toggle-find-file-reuse-dir 1)
+
+(add-to-list 'load-path (concat external-packages-dir (file-name-as-directory "orgnv")))
+(require 'orgnv)
+
+
+;; (add-to-list 'load-path (concat external-packages-dir (file-name-as-directory "gptel")))
+;; (require 'gptel)
+
+;; (add-to-list 'load-path (concat external-packages-dir (file-name-as-directory "chatgpt-shell")))
+;; (require 'chatgpt-shell)
+;; (setq chatgpt-shell-openai-key (getenv "OPENAI_API_KEY"))
+
+(straight-use-package 'gptel)
+(setq gptel-api-key (getenv "OPENAI_API_KEY")
+      gptel-use-curl nil
+      gptel-default-mode 'org-mode)
+(defvar gptel-quick--history nil)
+
+(defun gptel-quick (prompt)
+  (interactive (list (if (region-active-p)
+                         (buffer-substring-no-properties (region-beginning) (region-end))
+                       "")))
+  (let ((user-prompt (read-string "Ask ChatGPT: " nil 'gptel-quick--history))))
+  ;; (interactive (list (read-string "Ask ChatGPT: " nil gptel-quick--history)))
+  (when (string= prompt "") (user-error "A prompt is required."))
+  (gptel-request
+   prompt
+   :callback
+   (lambda (response info)
+     (if (not response)
+         (message "gptel-quick failed with message: %s" (plist-get info :status))
+       (with-current-buffer (get-buffer-create "*gptel-quick*")
+         (let ((inhibit-read-only t))
+           (erase-buffer)
+           (insert response))
+         (special-mode)
+         (display-buffer (current-buffer)
+                         `((display-buffer-in-side-window)
+                           (side . bottom)
+                           (window-height . ,#'fit-window-to-buffer))))))))
+(defun gptel-rewrite-and-replace (bounds &optional directive)
+  (interactive
+   (list
+    (cond
+     ((use-region-p) (cons (region-beginning) (region-end)))
+     ((derived-mode-p 'text-mode)
+      (list (bounds-of-thing-at-point 'sentence)))
+     (t (cons (line-beginning-position) (line-end-position))))
+    (and current-prefix-arg
+         (read-string "ChatGPT Directive: "
+                      "You are a prose editor. Rewrite my prompt more professionally."))))
+  (gptel-request
+   (buffer-substring-no-properties (car bounds) (cdr bounds)) ;the prompt
+   :system (or directive "You are a prose editor. Rewrite my prompt more professionally.")
+   :buffer (current-buffer)
+   :context (cons (set-marker (make-marker) (car bounds))
+                  (set-marker (make-marker) (cdr bounds)))
+   :callback
+   (lambda (response info)
+     (if (not response)
+         (message "ChatGPT response failed with: %s" (plist-get info :status))
+       (let* ((bounds (plist-get info :context))
+              (beg (car bounds))
+              (end (cdr bounds))
+              (buf (plist-get info :buffer)))
+         (with-current-buffer buf
+           (save-excursion
+             (goto-char beg)
+             (kill-region beg end)
+             (insert response)
+             (set-marker beg nil)
+             (set-marker end nil)
+             (message "Rewrote line. Original line saved to kill-ring."))))))))

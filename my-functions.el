@@ -711,3 +711,6 @@ the same coding systems as Emacs."
                   (confirm-nonexistent-file-or-buffer)
                   :prompt "Notes: "
                   :history 'consult-notes-history))
+(defun my/dired-close-buffer-prompt ()
+  (or (not (derived-mode-p 'dired-mode))
+      (y-or-n-p (format "Kill Dired buffer `%s'" (current-buffer)))))
