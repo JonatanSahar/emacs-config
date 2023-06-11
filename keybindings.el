@@ -96,7 +96,11 @@
   :i "C-S-k" (lambda nil (interactive) (scroll-down-command 1))
   :n "k" #'evil-previous-visual-line
   :n "j" #'evil-next-visual-line
-  :ni "C-c =" #'helm-flyspell-correct
+  :ni "C-c =" #'(lambda ()
+         (interactive)
+         (call-interactively #'evil-prev-flyspell-error)
+         (call-interactively #'flyspell-correct-at-point)
+         )
   :nv "C-e" #'evil-end-of-visual-line
   :i "M-h" #'org-beginning-of-line
   :i "M-l" #'org-end-of-line
@@ -111,7 +115,7 @@
   :i "C-h" #'left-char
   :i "C-S-h" #'left-word
   :nvi "C-z" #'evil-undo
-  :nvi "C-y" #'evil-redo
+  :nvi "C-y" #'evil-redo ;; TODO: fix
   )
 
  (map!
@@ -331,8 +335,6 @@
  ;;           :vn "K" #'evil-mc-skip-and-goto-prev-match)))
 
 (map! :prefix "z"
-      ;; :nv "Z" #'evil-prev-flyspell-error
-      ;; :nv "z" #'evil-next-flyspell-error
       :nv "z" (lambda ()
          (interactive)
          (call-interactively #'evil-next-flyspell-error)
@@ -755,8 +757,8 @@
 )
 
 (map! :leader :prefix "G"
-      :desc "open the GPTel buffer" "g" #'gptel
-      :desc "send the current region to GPTel" "G" #'gptel-send
+      :desc "open the GPTel buffer" "G" #'gptel
+      :desc "send the current region to GPTel" "R" #'gptel-send
       :leader :prefix "s"
       :desc "send query to gtp, include region if active" "g" #'gptel-quick)
 
@@ -765,3 +767,4 @@
       :map global-map :nvi "C-c k" #'evil-window-next)
 
 (map! :map global-map :nv "'" #'evil-goto-mark)
+(map! :map citar-embark-map :nvi "d" #'citar-org-delete-citation)
