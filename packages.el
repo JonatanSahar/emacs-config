@@ -67,8 +67,8 @@
 
 (package! nov)
 
-;; (package! org-remark)
-;; (package! org-transclusion)
+(package! org-remark)
+(package! org-transclusion)
 
 ;; denote
 (package! denote)
@@ -139,6 +139,7 @@
 (package! emacs-aio)
 (package! corfu)
 (package! cape)
+(package! shackle)
 
 
 ;; themes

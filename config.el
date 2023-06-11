@@ -184,6 +184,8 @@
                             (setq line-spacing 0.3)
                             (setq buffer-file-coding-system 'utf-8)
                             (setq save-buffer-coding-system 'utf-8)
+                            (set-face-attribute 'fixed-pitch nil :height 1.0)
+                            (set-face-attribute 'variable-pitch nil :height 1.0)
                             )
 
 
@@ -192,6 +194,7 @@
                             (setq company-backends '((company-capf company-files company-dabbrev-code company-dabbrev)))
                             (setq line-spacing 0.3)
                             (delete-selection-mode 1)
+                            (flyspell-lazy-mode -1)
                             (+word-wrap-mode 1)
                             (+zen/toggle)
                             )

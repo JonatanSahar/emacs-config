@@ -655,6 +655,12 @@
 
 
 (map! :map dired-mode-map
+      :nv "q" (lambda nil
+                (interactive)
+                (add-hook 'kill-buffer-query-functions 'my/prompt-on-dired-buffer-kill)
+                (+dired/quit-all)
+                (remove-hook 'kill-buffer-query-functions 'my/prompt-on-dired-buffer-kill)
+                )
       :n [f5] #'revert-buffer
       :n "=" #'diredp-ediff)
 

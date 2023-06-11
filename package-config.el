@@ -560,7 +560,7 @@ DEFS is a plist associating completion categories to commands."
   :bind (
          ;; ("C-`"   . popper-toggle-latest)
          ("C-`"   . #'popper-kill-latest-popup)
-         ;; ("M-`"   . popper-cycle)
+         ("M-`"   . popper-cycle)
          ("C-M-`" . popper-toggle-type))
   :init
   (setq popper-reference-buffers
@@ -697,6 +697,19 @@ DEFS is a plist associating completion categories to commands."
   ;; `denote-link-or-create'.  You may want to bind them to keys as well
   )
 
+(add-to-list 'load-path (concat doom-emacs-dir (file-name-as-directory "dired-plus")))
+(require 'dired+)
+(diredp-toggle-find-file-reuse-dir 1)
+
+(add-to-list 'load-path (concat doom-emacs-dir (file-name-as-directory "orgnv")))
+;;(require 'orgnv)
+
+
+(add-to-list 'load-path (concat doom-emacs-dir (file-name-as-directory "gptel")))
+;; (require 'gptel)
+(setq gptel-api-key (getenv "OPENAI_API_KEY")
+      gptel-use-curl nil
+      gptel-default-mode 'org-mode)
 
 
 (after! consult
@@ -980,9 +993,9 @@ the directory.  `REST' is passed to the `CONSULT-RIPGREP-FUNCTION'."
                    :desc "add ref to this note" "a" #'citar-denote-add-citekey
                    :desc "remove ref from this note" "k" #'citar-denote-remove-citekey
                    :desc "go to bibtex entry" "e" #'citar-denote-open-reference-entry
-                   :desc "find notes citing the current ref" "r" #'citar-denote-find-reference
-                   :desc "find notes citing a ref"  "F" #'citar-denote-find-citation
-                   :desc "find notes citing a ref"  "f" #'citar-denote-open-note
+                   :desc "notes citing the current ref" "r" #'citar-denote-find-reference
+                   :desc "notes citing a given ref"  "R" #'citar-denote-find-citation
+                   :desc "open a note belonging to ref"  "f" #'citar-denote-open-note
                    ;; "n" #'citar-denote-cite-nocite
                    ;; "m" #'citar-denote-reference-nocite
                    "i" #'citar-denote-link-reference
@@ -1118,6 +1131,7 @@ the directory.  `REST' is passed to the `CONSULT-RIPGREP-FUNCTION'."
                          `((display-buffer-in-side-window)
                            (side . bottom)
                            (window-height . ,#'fit-window-to-buffer))))))))
+
 (defun gptel-rewrite-and-replace (bounds &optional directive)
   (interactive
    (list
@@ -1151,3 +1165,14 @@ the directory.  `REST' is passed to the `CONSULT-RIPGREP-FUNCTION'."
              (set-marker beg nil)
              (set-marker end nil)
              (message "Rewrote line. Original line saved to kill-ring."))))))))
+
+;; (use-package! shackle
+;; :config
+;; (setq shackle-rules '(;; Customize rules here
+;;                       (compilation-mode :align below :size 0.3 :select t)
+;;                       ("*shell*" :align below :size 0.3 :select t)
+;;                       ("*MATLAB*" :align below :size 0.3 :select t)
+;;                       ("*Ibuffer*" :align below :size 0.3 :select t)
+;;                       ("*Help*" :popup t :align right :size 0.4 :select t)
+;;                       ("*Apropos*" :popup t :size 0.3 :align below)
+;;                       )))
