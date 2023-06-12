@@ -73,6 +73,7 @@
 
 ;; Load the theme of your choice.
 (load-theme 'modus-operandi-tinted :no-confirm)
+(set-face-attribute 'modus-themes-completion-match-0 nil :weight 'semibold :foreground "#808000")
 
 (set-face-attribute 'fixed-pitch nil :height 1.0)
 (set-face-attribute 'variable-pitch nil :height 1.0)

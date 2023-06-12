@@ -89,6 +89,8 @@
   :i "C-z" #'evil-undo
   :i "C-Z" #'evil-emacs-state
   :n "<down>" (lambda nil (interactive) (scroll-up-command 1))
+  :v "<down>" #'evil-better-visual-line-next-line
+  :v "<up>" #'evil-better-visual-line-previous-line
   :n "<up>"   (lambda nil (interactive) (scroll-down-command 1))
   :i "C-S-j" (lambda nil (interactive) (scroll-up-command 1))
   :i "C-S-k" (lambda nil (interactive) (scroll-down-command 1))
@@ -130,7 +132,7 @@
               (evil-normal-state)
               (save-buffer)
               )
- :i "S-SPC" #'evil-force-normal-state
+ :i "S-SPC" #'evil-normal-state
  :map evil-org-mode-map
  ;; :i "C-SPC" #'consult-company
  :ni "C-{" #'org-roam-node-insert)
@@ -301,8 +303,8 @@
  ;;              (dired-copy-filename-as-kill 0))
 
  :map org-mode-map
-        :nv "E" #'evil-org-end-of-line
-        :nv "W" #'evil-org-beginning-of-line
+        ;; :nv "E" #'evil-end-of-visual-line
+        ;; :nv "W" #'evil-beginning-of-visual-line
 
         :vn "zh" #'org-up-element
         :vn "zj" #'org-forward-heading-same-level
@@ -636,12 +638,14 @@
 ;;    :i "RETURN" #'comint-send-input)
 
 (map! :map shell-mode-map "C-l" #'comint-clear-buffer)
-;; (map! :map dired-mode-map "C-d" nil)
+
+;;(map! :map dired-mode-map "C-d" nil)
 ;; (map! :map dired-mode-map "Q" #'(lambda ()
 ;;                                   (interactive)
 ;;                                   (+dired/quit-all)
 ;;                                   (if  (not (one-window-p))
 ;;                                                   (+workspace/close-window-or-workspace))))
+
 
 (map! :map dired-mode-map
       :v "u" nil
@@ -739,6 +743,10 @@
 (map!
  "C-x  C-n" nil)
 
+(map! :map gptel-mode-map
+ "C-c  <return>" :desc "send the current region to GPTel" #'gptel-send
+)
+
 (map!
  "C-x  C-x" #'org-capture
  "C-x  C-n" #'org-capture
@@ -746,11 +754,11 @@
  "C-c  <return>" :desc "run command with encoding" (lambda nil (interactive) (universal-coding-system-argument 'utf-8))
 )
 
-(map! :leader :prefix "Gg"
+(map! :leader :prefix "G"
       :desc "open the GPTel buffer" "g" #'gptel
       :desc "send the current region to GPTel" "G" #'gptel-send
       :leader :prefix "s"
-      :desc "open the GPTel buffer" "g" #'gptel-send)
+      :desc "send query to gtp, include region if active" "g" #'gptel-quick)
 
 
 (map! :map evil-org-mode-map :nvi "C-c k" #'evil-window-next

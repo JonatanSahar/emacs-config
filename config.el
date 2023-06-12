@@ -102,7 +102,7 @@
  backup-directory-alist `(("." . ,(concat user-emacs-directory "autosaved_files")))
  truncate-string-ellipsis "…")               ; Unicode ellispis are nicer than "...", and also save /precious/ space
 
-
+(add-load-path! "../doom-emacs/packages/")
 (load! "package-config.el")
 (load! "my-functions.el")
 (load! "keybindings.el")
@@ -154,23 +154,25 @@
 (add-hook! org-mode
           (sp-pair "$" "$")
                       )
-
+;; (add-hook! 'evil-normal-state-entry-hook  #'save-buffer)
+;; (add-hook! 'evil-insert-state-entry-hook #'save-buffer)
 
 ;; (add-hook! 'text-mode-hook 'my-buffer-face-mode-text)
 (add-hook! 'text-mode-hook
-                             (delete-selection-mode 1)
-                             (visual-fill-column-mode 1)
-                             (visual-line-mode 1)
-                             (abbrev-mode 1)
-                             (font-lock-mode 1)
-                             (buffer-face-mode 1)
-                             (captain-mode 1)
-                             (+zen/toggle)
-                            (setq org-modern-star nil)
-                            (setq org-hide-leading-stars t)
-                            (flyspell-lazy-mode -1)
-                            (+word-wrap-mode 1)
-                            (flyspell-lazy-mode -1)
+							(delete-selection-mode 1)
+							(visual-fill-column-mode 1)
+							(visual-line-mode 1)
+							(abbrev-mode 1)
+							(font-lock-mode 1)
+							(buffer-face-mode 1)
+							(captain-mode 1)
+							(+zen/toggle)
+							(setq org-modern-star nil)
+							(setq org-hide-leading-stars t)
+							(+word-wrap-mode 1)
+							(flyspell-lazy-mode -1)
+							(set-face-attribute 'fixed-pitch nil :height 1.0)
+							(set-face-attribute 'variable-pitch nil :height 1.0)
                              )
 (add-hook! 'text-mode-hook
                             (setq bidi-paragraph-direction nil)
@@ -178,7 +180,8 @@
                             (setq bidi-paragraph-separate-re  "^")
                             (setq helm-ff-fuzzy-matching t)
                             (setq company-backends '((company-capf company-files company-dabbrev-code company-dabbrev)))
-                            (setq line-spacing 0.5)
+                            (setq company-frontends '(company-preview-frontend))
+                            (setq line-spacing 0.3)
                             (setq buffer-file-coding-system 'utf-8)
                             (setq save-buffer-coding-system 'utf-8)
                             (set-face-attribute 'fixed-pitch nil :height 1.0)
@@ -437,3 +440,5 @@ The default tab-bar name uses the buffer name."
 (set-face-attribute 'variable-pitch nil :height 1.0)
 (add-hook! minibuffer-setup #'+zen/toggle)
 ;; (remove-hook! minibuffer-setup #'+zen/toggle)
+
+(add-to-list +lookup-provider-url-alist ("Google Scholar" "https://scholar.google.com/scholar?q=%s"))

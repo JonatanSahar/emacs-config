@@ -106,6 +106,7 @@
 (package! ibuffer-projectile)
 (package! consult-projectile)
 (package! evil-better-visual-line)
+(package! tmr)
 
 
 ;; ivy/helm alternative
@@ -145,3 +146,13 @@
 (package! modus-themes)
 (package! ef-themes)
 (package! org-modern)
+(package! logos)
+(package! mono-complete
+  :recipe (:host codeberg
+           :repo "ideasman42/emacs-mono-complete"
+           :branch "main"))
+
+(package! chatgpt-shell
+  :recipe (:host github
+           :repo "xenodium/chatgpt-shell"
+           :branch "main"))
