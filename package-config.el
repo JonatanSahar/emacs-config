@@ -54,7 +54,7 @@
    org-id-method 'ts
    org-outline-path-complete-in-steps nil
    org-goto-interface 'outline-path-completion
-   org-cycle-separator-lines 1
+   org-cycle-separator-lines 2
    ;; org-image-actual-width nil
    org-export-with-toc 'nil
    ;; org-image-actual-width (list 550)
@@ -805,7 +805,7 @@ the directory.  `REST' is passed to the `CONSULT-RIPGREP-FUNCTION'."
 
 (use-package! consult-company
   :config
-  (define-key company-mode-map [remap completion-at-point] #'consult-company)
+  ;; (define-key company-mode-map [remap completion-at-point] #'consult-company)
   )
 
 (use-package! consult-notes

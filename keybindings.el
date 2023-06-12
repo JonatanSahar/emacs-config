@@ -132,7 +132,7 @@
               )
  :i "S-SPC" #'evil-force-normal-state
  :map evil-org-mode-map
- :i "C-SPC" #'consult-company
+ ;; :i "C-SPC" #'consult-company
  :ni "C-{" #'org-roam-node-insert)
 ;; :i "C-S-L" #'org-ref-insert-link)
 
