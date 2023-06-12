@@ -441,4 +441,4 @@ The default tab-bar name uses the buffer name."
 (add-hook! minibuffer-setup #'+zen/toggle)
 ;; (remove-hook! minibuffer-setup #'+zen/toggle)
 
-(add-to-list +lookup-provider-url-alist ("Google Scholar" "https://scholar.google.com/scholar?q=%s"))
+(add-to-list '+lookup-provider-url-alist '("Google Scholar" . "https://scholar.google.com/scholar?q=%s"))

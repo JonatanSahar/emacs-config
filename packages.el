@@ -156,3 +156,4 @@
   :recipe (:host github
            :repo "xenodium/chatgpt-shell"
            :branch "main"))
+(package! gptel)
