@@ -115,7 +115,7 @@
   :i "C-h" #'left-char
   :i "C-S-h" #'left-word
   :nvi "C-z" #'evil-undo
-  :nvi "C-y" #'evil-redo ;; TODO: fix
+  :nvi "C-y" #'evil-redo ;; TODO: test
   )
 
  (map!

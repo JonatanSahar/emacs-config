@@ -500,7 +500,7 @@ DEFS is a plist associating completion categories to commands."
 (ispell-hunspell-add-multi-dic "en_US,hebrew"))
 
 (use-package! company-box
-  :hook (company-mode . company-box-mode)
+  :hook ((prog-mode company-mode) . company-box-mode)
   :config
   (setq company-box-icons-alist 'company-box-icons-all-the-icons)
   )
