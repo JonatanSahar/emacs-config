@@ -815,7 +815,7 @@ the directory.  `REST' is passed to the `CONSULT-RIPGREP-FUNCTION'."
 
 (use-package! consult-company
   :config
-  (define-key company-mode-map [remap completion-at-point] #'consult-company)
+  ;; (define-key company-mode-map [remap completion-at-point] #'consult-company)
   )
 
 (use-package! consult-notes
@@ -849,8 +849,8 @@ the directory.  `REST' is passed to the `CONSULT-RIPGREP-FUNCTION'."
                ;;          ))
          (:prefix "n"
                 :nv "o" #'denote-open-or-create
-                ;; :nv "f" #'denote-open-or-create
-                :nv "f" #'my/consult-notes
+                :nv "f" #'denote-open-or-create
+                ;; :nv "f" #'my/consult-notes
                 :nv "j" #'my-denote-journal ; our custom command
                 :nv "n" #'denote
                 :nv "r" #'denote-rename-file
@@ -1103,10 +1103,13 @@ the directory.  `REST' is passed to the `CONSULT-RIPGREP-FUNCTION'."
 ;; (require 'chatgpt-shell)
 ;; (setq chatgpt-shell-openai-key (getenv "OPENAI_API_KEY"))
 
-(straight-use-package 'gptel)
+(use-package! gptel
+ :config
 (setq gptel-api-key (getenv "OPENAI_API_KEY")
-      gptel-use-curl nil
+      gptel-use-curl 't
       gptel-default-mode 'org-mode)
+ )
+
 (defvar gptel-quick--history nil)
 
 (defun gptel-quick (prompt)

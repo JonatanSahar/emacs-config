@@ -650,6 +650,9 @@ The default tab-bar name uses the buffer name."
   (advice-remove 'denote-file-prompt 'my/denote--find-file-with-pretty-format)
   )
 
+    ;; (advice-add #'(lambda () (add-hook! minibuffer-setup #'+zen/toggle)) :before consult-notes)
+    ;; (advice-add #'(lambda () (remove-hook! minibuffer-setup #'+zen/toggle)) :after consult-notes)
+
 (defun my/denote-link-or-create()
   (interactive)
   (let ((denote-file-prompt 'my/denote--find-file-with-pretty-format))
