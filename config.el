@@ -441,7 +441,7 @@ The default tab-bar name uses the buffer name."
 (set-face-attribute 'fixed-pitch nil :height 1.0)
 (set-face-attribute 'variable-pitch nil :height 1.0)
 (add-hook! minibuffer-setup #'+zen/toggle)
-(add-hook denote-backlinks-mode-hook #'+zen/toggle)
+(add-hook 'denote-backlinks-mode-hook #'+zen/toggle)
  (remove-hook! minibuffer-setup #'+zen/toggle)
 
 ;; (add-to-list '+lookup-provider-url-alist '("Google Scholar" . "https://scholar.google.com/scholar?q=%s"))
