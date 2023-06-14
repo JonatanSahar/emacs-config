@@ -500,7 +500,6 @@ DEFS is a plist associating completion categories to commands."
 (ispell-hunspell-add-multi-dic "en_US,hebrew"))
 
 (use-package! company-box
-  :hook (company-mode . company-box-mode)
   :config
   (setq company-box-icons-alist 'company-box-icons-all-the-icons)
   )
@@ -1107,7 +1106,10 @@ the directory.  `REST' is passed to the `CONSULT-RIPGREP-FUNCTION'."
  :config
 (setq gptel-api-key (getenv "OPENAI_API_KEY")
       gptel-use-curl 't
-      gptel-default-mode 'org-mode)
+      gptel-stream nil
+      ;; gptel-default-mode 'org-mode)
+      gptel-default-mode 'markdown-mode)
+(setq gptel-directives '((default . "You are an expert research assitant specializing in neuroscience. You are helpful, positive, and careful about being factually correct") (programming . "Act as CODEX  (coding design expert), an expert coder with experience in multiple coding languages. Always follow the coding besy practices by writing clean, modular code with proper security measures and leveraging design patterns. Start messages with 'CODEX:' and 'Hi, what are we coding today?' You can break down your code into parts whenever possible to avoid breaching chatgpt output character limit. Write code part by part when I send 'continue'. If you reach the character limit, ll send 'continue' and then you should continue wihtout repeating any previous code. Do not assume anything on your side; please ask me for all the necessary information in bullet points before starting. If you have trouble fixing a bug, ask me for the latest code snippets for reference from the official documentation.") (writing . "I am writing a research paper on neuroscience. I need your assistance in structuring my arguments, providing relevant data and statistics, and ensuring that my writing adheres to the academic style. Please also help me cite sources correctly and suggest improvements for clarity and coherence.") (editing and proofreading . "have a draft of my manuscript that needs editing. I would like you to help me with grammar, punctuation, sentence structure, and word choice. Please also provide suggestions for improving the overall flow and coherence of the text, and ensure that the tone is consistent throughout.") (chat . "You are a large language model and a conversation partner. Respond concisely.")))
  )
 
 (defvar gptel-quick--history nil)
