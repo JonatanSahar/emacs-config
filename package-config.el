@@ -698,8 +698,8 @@ DEFS is a plist associating completion categories to commands."
   )
 
 (add-to-list 'load-path (concat doom-emacs-dir (file-name-as-directory "dired-plus")))
-(require 'dired+)
-(diredp-toggle-find-file-reuse-dir 1)
+;;(require 'dired+)
+;;(diredp-toggle-find-file-reuse-dir 1)
 
 (add-to-list 'load-path (concat doom-emacs-dir (file-name-as-directory "orgnv")))
 ;;(require 'orgnv)

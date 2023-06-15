@@ -67,8 +67,8 @@
 
 (package! nov)
 
-(package! org-remark)
-(package! org-transclusion)
+;;(package! org-remark)
+;;(package! org-transclusion)
 
 ;; denote
 (package! denote)
