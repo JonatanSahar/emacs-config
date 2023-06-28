@@ -1,101 +1,21 @@
 ;;; ~/.doom.d/keybindings.el -*- lexical-binding: t; -*-
 
-(map!
-    :i "C-z" nil
-    :i  "C-k" nil
-    :nv "E" nil
-    :nv "W" nil
-    :n "gk" nil
-    :n "zj" nil
-    :n "zz" nil
-    :n "zh" nil
-    :n "zj" nil
-    :n "zk" nil
-    :n "zl" nil
-    :n "z=" nil
-    :n "gs" nil
-    :n "gf" nil
-    :vn "S" nil
-    :nvi "C-h" nil
-    :nvi "C-j" nil
-    :nvi "C-k" nil
-    :nvi "C-l" nil
-    :nvi "C-s-b" nil
-    :nvi "C-s-a" nil
-    :nvi "C-s-e" nil
-    :nvi "M-q" nil
-    :nvi "C-c p" nil
-    :nvi "M-l" nil
-    :nvi "C-v" nil
-    :nvi "C-<prior>" nil
-    :nvi "C-<next>" nil
-    :nv "gN" nil
-    :nv "gn" nil
-    :nvi "C-n" nil
-
-    (:map org-mode-map
-        :nv "j" nil
-        :nv "E" nil
-        :nv "W" nil
-        :n "gz" nil
-        :n "gh" nil
-        :n "gj" nil
-        :n "gk" nil
-        :n "gl" nil
-        :n "gJ" nil
-        :n "gK" nil
-        :n "z=" nil
-
-        :n "gf" nil
-        :n "gs" nil
-        :n "zh" nil
-        :n "zj" nil
-        :n "zk" nil
-        :n "zl" nil
-        :n "zl" nil
-
-        :nvi "C-v" nil
-        :nvi "M-l" nil
-        :nvi "C-c p" nil
-        :nvi "C-i" nil
-        :nvi "C-h" nil
-        :nvi "C-j" nil
-        :nvi "C-k" nil
-        :nvi "C-l" nil
-        :nvi "C-M-i" nil
-        :nvi "C-<prior>" nil
-        :nvi "C-<next>" nil
-        )
-    (:map org-roam-preview-map :desc "universal argument" "C-u" nil)
-    (:map org-roam-mode-map :desc "universal argument" "C-u" nil)
-
-    (:map evil-org-mode-map
-        :nvi [C-o] nil
-        :nvi [C-i] nil
-        :nvi [C-j] nil
-        :nvi [C-k] nil
-        :nvi "C-S-L" nil)
-
-    (:map helm-find-files-map
-     [control-backspace] nil)
-
-    (:map dired-mode-map
-     :n "s" nil
-     :n "/" nil)
-
-   :i "C-v" nil) ;;unmap a bunch of keys
-
 (map! :map (evil-org-mode-map emacs-lisp-mode-map prog-mode-map text-mode-map org-mode-map)
   :i "C-z" #'evil-undo
   :i "C-Z" #'evil-emacs-state
-  :n "<down>" (lambda nil (interactive) (scroll-up-command 1))
-  :v "<down>" #'evil-better-visual-line-next-line
-  :v "<up>" #'evil-better-visual-line-previous-line
   :n "<up>"   (lambda nil (interactive) (scroll-down-command 1))
+  :n "<down>" (lambda nil (interactive) (scroll-up-command 1))
+  :v "<up>" #'evil-previous-visual-line
+  :v "<down>" #'evil-next-visual-line
   :i "C-S-j" (lambda nil (interactive) (scroll-up-command 1))
   :i "C-S-k" (lambda nil (interactive) (scroll-down-command 1))
   :n "k" #'evil-previous-visual-line
   :n "j" #'evil-next-visual-line
+  :ni "C-c +" #'(lambda ()
+         (interactive)
+         (call-interactively #'evil-next-flyspell-error)
+         (call-interactively #'flyspell-correct-at-point)
+         )
   :ni "C-c =" #'(lambda ()
          (interactive)
          (call-interactively #'evil-prev-flyspell-error)
@@ -115,7 +35,7 @@
   :i "C-h" #'left-char
   :i "C-S-h" #'left-word
   :nvi "C-z" #'evil-undo
-  :nvi "C-y" #'evil-redo ;; TODO: test
+  :nvi "C-y" #'evil-redo
   )
 
  (map!
@@ -129,6 +49,7 @@
          (save-buffer)
  )
 
+
 (map!
  :nvi "C-\\" #'toggle-input-method
  :nvi "C-s" (lambda ()
@@ -138,17 +59,18 @@
               )
  :i "S-SPC" #'evil-normal-state
  :map evil-org-mode-map
- ;; :i "C-SPC" #'consult-company
- :ni "C-{" #'org-roam-node-insert)
-;; :i "C-S-L" #'org-ref-insert-link)
+ :i "C-h" #'evil-window-left
+ :i "C-l" #'evil-window-right
+ :i "C-k" #'evil-window-up
+ :i "C-j" #'evil-window-down
+)
 
 (map!
  :map pdf-view-mode-map
  :nvi "go" nil
  :nvi "C-j" nil
- :nvi "C-k" nil
+ :nvi "C-k" nil)
 
- )
 (map!
  :map pdf-occur-buffer-mode-map
 
@@ -221,15 +143,14 @@
       :nvi "j" (lambda ()
          (interactive)
          (pdf-view-scroll-up-or-next-page 1))
-      ;; :nvi "j" #'pdf-view-scroll-up-or-next-page
-      ;; :nvi "k" #'pdf-view-scroll-down-or-previous-page
-
       :nvi "h" (lambda ()
          (interactive)
          (image-backward-hscroll 25))
       :nvi "l" (lambda ()
          (interactive)
          (image-forward-hscroll 25))
+      :nvi "f" #'my/open-pdf-externally
+      :nvi "e" #'my/open-pdf-externally
       :nvi "i" #'org-noter-insert-precise-note
       :nvi "I" #'org-noter-insert-note)
 
@@ -277,13 +198,14 @@
  ;; :n "gk" #'windmove-up
  ;; :n "gl" #'windmove-right
 
- :nv "gj" #'avy-goto-char-timer
+ ;; :nv "gj" #'avy-goto-char-timer
+ :nv "gj" #'org-forward-element
  ;; :n "gh" #'
  ;; :n "gk" #'
  ;; :n "gl" #'
 
  :n "g+" #'evil-numbers/inc-at-pt
- :vn "gs" #'evil-snipe-S
+ :vn "gs" nil
  ;; :nv "gf" #'evil-repeat
  :nv "E" #'evil-forward-WORD-end
  :nv "W" #'evil-forward-WORD-begin
@@ -464,6 +386,7 @@
         :desc "refile subtree" "R" 'org-refile
         ;; :desc "paste from kill-ring" "p" #'consult-register
         :desc "register dwi" "p" #'consult-register-load
+        :desc "point to register" "p" #'point-to-register
         ;; :desc "paste from kill-ring" "p" 'helm-show-kill-ring
         ;; :desc "helm org rifle" "R" 'helm-org-rifle
         :desc "run macro" "e" #'kmacro-end-and-call-macro
@@ -767,4 +690,17 @@
       :map global-map :nvi "C-c k" #'evil-window-next)
 
 (map! :map global-map :nv "'" #'evil-goto-mark)
-(map! :map citar-embark-map :nvi "d" #'citar-org-delete-citation)
+
+ (fset 'copy-with-square-brackets
+   (kmacro-lambda-form [?y ?a ?\]] 0 "%d"))
+
+(map! :map citar-citation-map
+      :desc "copy cite link"  "c" #'copy-with-square-brackets
+      "d" #'citar-org-delete-citation)
+
+(map! :map evil-org-mode-map
+      :nv "gk" #'evil-previous-visual-line
+      :nv "gj" #'evil-next-visual-line
+      :nv "V" (lambda () (interactive (list (if current-prefix-arg
+                                                                       (evil-visual-screen-line)
+                                                                     (evil-visual-line))))))

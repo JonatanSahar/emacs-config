@@ -105,6 +105,7 @@
 (add-load-path! "../doom-emacs/packages/")
 (load! "package-config.el")
 (load! "my-functions.el")
+(load! "unbinding.el")
 (load! "keybindings.el")
 
 
@@ -160,7 +161,7 @@
 ;; (add-hook! 'text-mode-hook 'my-buffer-face-mode-text)
 (add-hook! 'text-mode-hook
                                                         (remove-hook! 'company-mode (company-box-mode))
-							(delete-selection-mode 1)
+							(global-delete-selection-mode 1)
 							(visual-fill-column-mode 1)
 							(visual-line-mode 1)
 							(abbrev-mode 1)
@@ -444,4 +445,5 @@ The default tab-bar name uses the buffer name."
 (add-hook 'denote-backlinks-mode-hook #'+zen/toggle)
  (remove-hook! minibuffer-setup #'+zen/toggle)
 
-;; (add-to-list '+lookup-provider-url-alist '("Google Scholar" . "https://scholar.google.com/scholar?q=%s"))
+(add-to-list '+lookup-provider-url-alist
+             '("google-scholar"  "https://scholar.google.com/scholar?q=%s"))

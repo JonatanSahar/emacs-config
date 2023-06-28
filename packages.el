@@ -109,7 +109,6 @@
 (package! tmr)
 
 
-;; ivy/helm alternative
 (package! consult)
 (package! consult-flycheck)
 (package! embark)
@@ -128,6 +127,7 @@
 (package!  consult-bibtex
 :recipe (:host github
          :repo "mohkale/consult-bibtex"))
+(package!  org-transclusion)
 
 ;; code related
 (package! matlab-mode)
@@ -140,6 +140,8 @@
 (package! corfu)
 (package! cape)
 (package! shackle)
+(package! git-auto-commit-mode)
+
 
 
 ;; themes
@@ -150,10 +152,5 @@
 (package! mono-complete
   :recipe (:host codeberg
            :repo "ideasman42/emacs-mono-complete"
-           :branch "main"))
-
-(package! chatgpt-shell
-  :recipe (:host github
-           :repo "xenodium/chatgpt-shell"
            :branch "main"))
 (package! gptel)

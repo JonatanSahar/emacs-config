@@ -274,25 +274,6 @@
     ("b" outline-backward-same-level)      ; Backward - same level
     ("z" nil "leave"))
 
-  (defhydra multiple-cursors-hydra (:hint nil)
-    "
-      ^Up^            ^Down^        ^Other^
- ----------------------------------------------
- [_p_]   Next    [_n_]   Next    [_l_] Edit lines
- [_P_]   Skip    [_N_]   Skip    [_a_] Mark all
- [_M-p_] Unmark  [_M-n_] Unmark  [_r_] Mark by regexp
- ^ ^             ^ ^             [_q_] Quit
- "
-    ("l" mc/edit-lines :exit t)
-    ("a" mc/mark-all-like-this :exit t)
-    ("n" mc/mark-next-like-this)
-    ("N" mc/skip-to-next-like-this)
-    ("M-n" mc/unmark-next-like-this)
-    ("p" mc/mark-previous-like-this)
-    ("P" mc/skip-to-previous-like-this)
-    ("M-p" mc/unmark-previous-like-this)
-    ("r" mc/mark-all-in-region-regexp :exit t)
-    ("q" nil))
 
   (defhydra hydra-origami (:color red)
     "
@@ -330,26 +311,16 @@
          ("C-x C-j" . consult-dir-jump-file)))
 
 (after! citar
-  (setq! citar-bibliography (my/get-bib-file-list))
-  (setq! citar-at-point-function 'embark-act)
-  (setq! citar-file-note-org-include '(org-id org-roam-ref))
-  (setq! citar-notes-paths literature-notes-dir)
-  (setq! citar-library-paths (list "~/Documents/bibliography"))
-
-(after! citar
-  (setq citar-templates '((main . "${author editor:30}     ${date year issued:4}     ${title:48}")
+  (setq! citar-bibliography (my/get-bib-file-list)
+   citar-at-point-function 'embark-act
+   citar-file-note-org-include '(org-id org-roam-ref)
+   citar-notes-paths literature-notes-dir
+   citar-library-paths (list "~/Documents/bibliography")
+  ;; (add-to-list 'citar-file-open-functions '("pdf" . citar-file-open-external))
+  citar-templates '((main . "${author editor:30}     ${date year issued:4}     ${title:48}")
                           (suffix . "         ${tags keywords keywords:*}   ${=key= id:15}    ${=type=:12}")
                           (preview . "${author editor} (${year issued date}) ${title}, ${journal journaltitle publisher container-title collection-title}.\n")
-                          (note .
-                                "Notes on \"${title}\", (${author})
-
-* Summary and short reference
-
-* Reading notes
-
-* See also (notes, tags, related papers):
-
-"))))
+                          (note . "")))
 
   (setq citar-symbols
         `((file . (,(all-the-icons-icon-for-file "foo.pdf" :face 'all-the-icons-dred) .
@@ -554,7 +525,6 @@ DEFS is a plist associating completion categories to commands."
       "Set workspace buffer list for consult-buffer.")
     (add-to-list 'consult-buffer-sources 'consult--source-workspace))
   )
-
 (use-package! popper
   :bind (
          ;; ("C-`"   . popper-toggle-latest)
@@ -570,7 +540,7 @@ DEFS is a plist associating completion categories to commands."
           "\\*MATLAB\\*"
           "\\*Ibuffer\\*"
           "\\*denote-backlinks"
-          "\\*chatgpt "
+          "\\*ChatGPT\\* "
           help-mode
           compilation-mode))
   (popper-mode +1)
@@ -621,14 +591,13 @@ DEFS is a plist associating completion categories to commands."
 (use-package! denote
   :config
   ;; Remember to check the doc strings of those variables.
-  (setq denote-directory (expand-file-name "~/notes/"))
-  (setq denote-known-keywords '("emacs" "thesis"))
-  (setq denote-infer-keywords t)
-  (setq denote-sort-keywords t)
-  (setq denote-file-type nil) ; Org is the default, set others here
-  (setq denote-prompts '(title keywords))
-  (setq denote-excluded-directories-regexp nil)
-  (setq denote-excluded-keywords-regexp nil)
+(setq! denote-directory (expand-file-name "~/notes/")
+ denote-known-keywords '("emacs" "thesis")
+ denote-infer-keywords t
+ denote-sort-keywords t
+ denote-prompts '(title keywords)
+ denote-excluded-directories-regexp nil
+ denote-excluded-keywords-regexp nil)
 
   ;; Pick dates, where relevant, with Org's advanced interface:
   (setq denote-date-prompt-use-org-read-date t)
@@ -636,7 +605,6 @@ DEFS is a plist associating completion categories to commands."
 
   ;; Read this manual for how to specify `denote-templates'.  We do not
   ;; include an example here to avoid potential confusion.
-
 
   ;; We allow multi-word keywords by default.  The author's personal
   ;; preference is for single-word keywords for a more rigid workflow.
@@ -691,9 +659,6 @@ DEFS is a plist associating completion categories to commands."
                    :immediate-finish nil
                    :kill-buffer t
                    :jump-to-captured t)))
-
-  ;; Also check the commands `denote-link-after-creating',
-  ;; `denote-link-or-create'.  You may want to bind them to keys as well
   )
 
 (add-to-list 'load-path (concat doom-emacs-dir (file-name-as-directory "dired-plus")))
@@ -848,8 +813,8 @@ the directory.  `REST' is passed to the `CONSULT-RIPGREP-FUNCTION'."
                ;;          ))
          (:prefix "n"
                 :nv "o" #'denote-open-or-create
-                :nv "f" #'denote-open-or-create
-                ;; :nv "f" #'my/consult-notes
+                ;; :nv "f" #'denote-open-or-create
+                :nv "f" #'consult-notes
                 :nv "j" #'my-denote-journal ; our custom command
                 :nv "n" #'denote
                 :nv "r" #'denote-rename-file
@@ -1103,39 +1068,43 @@ the directory.  `REST' is passed to the `CONSULT-RIPGREP-FUNCTION'."
 ;; (setq chatgpt-shell-openai-key (getenv "OPENAI_API_KEY"))
 
 (use-package! gptel
- :config
-(setq gptel-api-key (getenv "OPENAI_API_KEY")
-      gptel-use-curl 't
-      gptel-stream nil
-      ;; gptel-default-mode 'org-mode)
-      gptel-default-mode 'markdown-mode)
-(setq gptel-directives '((default . "You are an expert research assitant specializing in neuroscience. You are helpful, positive, and careful about being factually correct") (programming . "Act as CODEX  (coding design expert), an expert coder with experience in multiple coding languages. Always follow the coding besy practices by writing clean, modular code with proper security measures and leveraging design patterns. Start messages with 'CODEX:' and 'Hi, what are we coding today?' You can break down your code into parts whenever possible to avoid breaching chatgpt output character limit. Write code part by part when I send 'continue'. If you reach the character limit, ll send 'continue' and then you should continue wihtout repeating any previous code. Do not assume anything on your side; please ask me for all the necessary information in bullet points before starting. If you have trouble fixing a bug, ask me for the latest code snippets for reference from the official documentation.") (writing . "I am writing a research paper on neuroscience. I need your assistance in structuring my arguments, providing relevant data and statistics, and ensuring that my writing adheres to the academic style. Please also help me cite sources correctly and suggest improvements for clarity and coherence.") (editing and proofreading . "have a draft of my manuscript that needs editing. I would like you to help me with grammar, punctuation, sentence structure, and word choice. Please also provide suggestions for improving the overall flow and coherence of the text, and ensure that the tone is consistent throughout.") (chat . "You are a large language model and a conversation partner. Respond concisely.")))
- )
+  :init
+  (setq gptel-directives '((default . "You are an expert research assitant specializing in neuroscience. You are helpful, positive, and careful about being factually correct") (programming . "Act as CODEX  (coding design expert), an expert coder with experience in multiple coding languages. Always follow the coding besy practices by writing clean, modular code with proper security measures and leveraging design patterns. Start messages with 'CODEX:' and 'Hi, what are we coding today?' You can break down your code into parts whenever possible to avoid breaching chatgpt output character limit. Write code part by part when I send 'continue'. If you reach the character limit, ll send 'continue' and then you should continue wihtout repeating any previous code. Do not assume anything on your side; please ask me for all the necessary information in bullet points before starting. If you have trouble fixing a bug, ask me for the latest code snippets for reference from the official documentation.") (writing . "I am writing a research paper on neuroscience. I need your assistance in structuring my arguments, providing relevant data and statistics, and ensuring that my writing adheres to the academic style. Please also help me cite sources correctly and suggest improvements for clarity and coherence.") (editing and proofreading . "have a draft of my manuscript that needs editing. I would like you to help me with grammar, punctuation, sentence structure, and word choice. Please also provide suggestions for improving the overall flow and coherence of the text, and ensure that the tone is consistent throughout.") (chat . "You are a large language model and a conversation partner. Respond concisely.")))
+  :config
+  (setq gptel-api-key (getenv "OPENAI_API_KEY")
+        gptel-use-curl 'nil
+        gptel-stream nil
+        gptel-default-mode 'org-mode)
+        ;; gptel-default-mode 'markdown-mode)
+  )
 
 (defvar gptel-quick--history nil)
 
+(defvar gptel-quick--history nil)
 (defun gptel-quick (prompt)
-  (interactive (list (if (region-active-p)
-                         (buffer-substring-no-properties (region-beginning) (region-end))
-                       "")))
-  (let ((user-prompt (read-string "Ask ChatGPT: " nil 'gptel-quick--history))))
-  ;; (interactive (list (read-string "Ask ChatGPT: " nil gptel-quick--history)))
-  (when (string= prompt "") (user-error "A prompt is required."))
-  (gptel-request
-   prompt
-   :callback
-   (lambda (response info)
-     (if (not response)
-         (message "gptel-quick failed with message: %s" (plist-get info :status))
-       (with-current-buffer (get-buffer-create "*gptel-quick*")
-         (let ((inhibit-read-only t))
-           (erase-buffer)
-           (insert response))
-         (special-mode)
-         (display-buffer (current-buffer)
-                         `((display-buffer-in-side-window)
-                           (side . bottom)
-                           (window-height . ,#'fit-window-to-buffer))))))))
+  (interactive
+   (let ((region-text (if (use-region-p)
+                          (buffer-substring-no-properties (region-beginning) (region-end))
+                        "")))
+     (list (cons (read-string "Ask ChatGPT: " nil gptel-quick--history) region-text))))
+  (let ((complete-prompt (concat (car prompt) (cdr prompt))))
+    (when (string= complete-prompt "")
+      (user-error "A prompt is required."))
+    (gptel-request
+     complete-prompt
+     :callback
+     (lambda (response info)
+       (if (not response)
+           (message "gptel-quick failed with message: %s" (plist-get info :status))
+         (with-current-buffer (get-buffer-create "*gptel-quick*")
+           (let ((inhibit-read-only t))
+             (erase-buffer)
+             (insert response))
+           (special-mode)
+           (display-buffer (current-buffer)
+                           `((display-buffer-in-side-window)
+                             (side . bottom)
+                             (window-height . ,#'fit-window-to-buffer)))))))))
 
 (defun gptel-rewrite-and-replace (bounds &optional directive)
   (interactive
@@ -1181,3 +1150,15 @@ the directory.  `REST' is passed to the `CONSULT-RIPGREP-FUNCTION'."
 ;;                       ("*Help*" :popup t :align right :size 0.4 :select t)
 ;;                       ("*Apropos*" :popup t :size 0.3 :align below)
 ;;                       )))
+
+;; (use-package! git-auto-commit-mode
+;; :config
+;; (setq
+;;  gac-automatically-push-p  t
+;;  gac-debounce-interval 1800))
+
+(use-package! magit-todos
+:config
+(setq magit-todos-git-grep-extra-args (quote ("-n"))
+magit-todos-nice nil
+magit-todos-scanner (quote magit-todos--scan-with-git-grep)))
