@@ -136,8 +136,6 @@
          :italic-slant italic
          :line-spacing nil)))
 
-
-
 ;; ;; If you like two specific themes and want to switch between them, you
 ;; ;; can specify them in `ef-themes-to-toggle' and then invoke the command
 ;; ;; `ef-themes-toggle'.  All the themes are included in the variable

@@ -135,8 +135,8 @@
   (let ((org-link-frame-setup (acons 'file 'find-file-other-window org-link-frame-setup)))
     (org-open-at-point)))
 
-(map! :prefix "g" :nv "F" nil)
-(map! :prefix "g" :nv "F" 'my/org-open-other-window)
+;; (map! :prefix "g" :nv "f" nil)
+;; (map! :prefix "g" :nv "f" 'my/org-open-other-window)
 
 (defun ar/toggle-quote-wrap-all-in-region (beg end)
   "Toggle wrapping all items in region with double quotes."
@@ -443,9 +443,7 @@ https://org-roam.discourse.group/t/org-roam-major-redesign/1198/34."
 
 
 (defun open-file-in-browser (file) (browse-url-of-file file))
-;; (defun export-to-html-and-open (file)
-;;   (let* (html-filename (org-html-export-to-html file))
-;;        (open-file-in-browser html-filename)))
+
 (map! :map embark-file-map "O" #'open-file-in-browser)
 (map! :map embark-file-map "F" #'citar-file-open-external)
 (map! :map embark-file-map "f" #'citar-file-open-external)
@@ -585,15 +583,14 @@ Current pattern: %`evil-mc-pattern
 (defun my-buffer-face-mode-programming ()
   "Sets a fixed width (monospace) font in current buffer"
   (interactive)
-  (setq writeroom-width 120)
+  (setq writeroom-width 100)
   ;; (setq buffer-face-mode-face '(:extend t :family "Fira Code Retina"))
   (setq buffer-face-mode-face '(:extend t :family "Iosevka Comfy Duo"))
   (buffer-face-mode))
 
 (defun my-buffer-face-mode-text ()
   (interactive)
-  (setq writeroom-width 120)
-  ;; (setq buffer-face-mode-face '(:extend t :family "iA Writer Quattro V Regular"))
+  (setq writeroom-width 100)
   (setq buffer-face-mode-face '(:extend t :family "Iosevka Comfy Duo"))
   (buffer-face-mode)
   (set-face-attribute 'fixed-pitch nil :height 1.0)
@@ -760,3 +757,33 @@ the same coding systems as Emacs."
     (if (and file-name (string-match "\\.pdf\\'" file-name))
         (citar-file-open-external  file-name)
       (message "Not a PDF file!"))))
+(defun browse-url-chrome (url &optional _new-window)
+  "Ask the Google Chrome WWW browser to load URL.
+Default to the URL around or before point.  The strings in
+variable `browse-url-chrome-arguments' are also passed to
+Google Chrome.
+The optional argument NEW-WINDOW is not used."
+  (interactive (browse-url-interactive-arg "URL: "))
+  (setq url (browse-url-encode-url url))
+  (let* ((process-environment (browse-url-process-environment)))
+    (apply #'start-process
+	   (concat "google-chrome " url) nil
+	   browse-url-chrome-program
+	   (append
+	    browse-url-chrome-arguments
+	    (list url)))))
+
+(defun my/denote-clean-folder-after-export ()
+  "Delete all .odt files in denote-directory and
+   move .docx and .pdf files to ~/org-export."
+  (interactive)
+  (let ((target-directory (expand-file-name "~/org-export")))
+    ;; Ensure the target directory exists
+    (unless (file-exists-p target-directory)
+      (make-directory target-directory t))
+    ;; Delete all .odt files
+    (shell-command (concat "find " denote-directory " -type f -name '*.odt' -delete"))
+    ;; Move all .docx files
+    (shell-command (concat "find " denote-directory " -type f -name '*.docx' -exec mv {} " target-directory " \\;"))
+    ;; Move all .pdf files
+    (shell-command (concat "find " denote-directory " -type f -name '*.pdf' -exec mv {} " target-directory " \\;"))))

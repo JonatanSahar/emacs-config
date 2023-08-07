@@ -190,7 +190,7 @@
  :n "g]" #'kmacro-end-an-call-macro
  :n "g." #'er/expand-region
 
- :n "gh" #'execute-extended-command
+ :n "gh" #'avy-goto-char-timer
  :n "gf" #'execute-extended-command
 
  ;; :n "gh" #'windmove-left
@@ -333,9 +333,9 @@
         :nv :desc "dired in a new window" "D" #'consult-dir
         )
 
-        (:prefix "g"
-        :nv "p" #'magit-pull
-        )
+        ;; (:prefix "g"
+        ;; :nv "p" #'magit-pull
+        ;; )
         ;; (:line ("yank" . "y")
         ;;  :desc "header content" "y" #'my/visual-inside-org-header)
 

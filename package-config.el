@@ -311,10 +311,14 @@
          ("C-x C-j" . consult-dir-jump-file)))
 
 (after! citar
-  (setq! citar-bibliography (my/get-bib-file-list)
+  (setq!
+   citar-bibliography (my/get-bib-file-list)
+   org-cite-global-bibliography (my/get-bib-file-list)
    citar-at-point-function 'embark-act
    citar-file-note-org-include '(org-id org-roam-ref)
    citar-notes-paths literature-notes-dir
+   citar-citeproc-csl-styles-dir "~/notes/export-csl-style"
+   citar-citeproc-csl-style "apa.csl"
    citar-library-paths (list "~/Documents/bibliography")
   ;; (add-to-list 'citar-file-open-functions '("pdf" . citar-file-open-external))
   citar-templates '((main . "${author editor:30}     ${date year issued:4}     ${title:48}")
@@ -431,8 +435,10 @@ DEFS is a plist associating completion categories to commands."
 (define-minibuffer-key "\C-s"
   'file #'consult-find-for-minibuffer)
 
-(setq ispell-personal-dictionary-en  "C:\\Users\\Jonathan\\programs\\hunspell\\share\\hunspell\\personal.en")
-(setq ispell-personal-dictionary-heb  "C:\\Users\\Jonathan\\programs\\hunspell\\share\\hunspell\\personal.heb")
+(setq ispell-personal-dictionary-en   "~/dictionaries/personal.en")
+(setq ispell-personal-dictionary-heb  "~/dictionaries/personal.heb")
+;; (setq ispell-personal-dictionary-en  "C:\\Users\\Jonathan\\programs\\hunspell\\share\\hunspell\\personal.en")
+;; (setq ispell-personal-dictionary-heb  "C:\\Users\\Jonathan\\programs\\hunspell\\share\\hunspell\\personal.heb")
 (setq ispell-local-dictionary-alist '(("en_US"
                                        "[[:alpha:]]"
                                        "[^[:alpha:]]"
@@ -452,7 +458,7 @@ DEFS is a plist associating completion categories to commands."
                                        iso-8859-1)))
 
 (setq ispell-dictionary "en_US") ; Default dictionary to use
-(add-to-list 'exec-path "C:\\Users\\Jonathan\\programs\\hunspell\\bin")
+;; (add-to-list 'exec-path "C:\\Users\\Jonathan\\programs\\hunspell\\bin")
 
 (setq ispell-program-name (locate-file "hunspell"
                                        exec-path exec-suffixes 'file-executable-p))
@@ -545,7 +551,7 @@ DEFS is a plist associating completion categories to commands."
           compilation-mode))
   (popper-mode +1)
   (popper-echo-mode +1)
-  (map! :map popper-mode-map :nv "`" #'popper-toggle-latest)
+ ;; (map! :map prog-mode-map :nv "`" #'popper-toggle-latest)
   )                ; For echo area hints
 
 ;; (require 'conda)
@@ -592,6 +598,7 @@ DEFS is a plist associating completion categories to commands."
   :config
   ;; Remember to check the doc strings of those variables.
 (setq! denote-directory (expand-file-name "~/notes/")
+ denote-excluded-directories-regexp "export.*"
  denote-known-keywords '("emacs" "thesis")
  denote-infer-keywords t
  denote-sort-keywords t
@@ -1050,22 +1057,8 @@ the directory.  `REST' is passed to the `CONSULT-RIPGREP-FUNCTION'."
 ;;          ;; ((text-mode) . mono-complete-mode)
 ;;   )
 
-(setq external-packages-dir (concat doom-emacs-dir (file-name-as-directory "packages")))
-
-(add-to-list 'load-path (concat external-packages-dir (file-name-as-directory "dired-plus")))
-(require 'dired+)
-(diredp-toggle-find-file-reuse-dir 1)
-
-(add-to-list 'load-path (concat external-packages-dir (file-name-as-directory "orgnv")))
-(require 'orgnv)
-
-
-;; (add-to-list 'load-path (concat external-packages-dir (file-name-as-directory "gptel")))
-;; (require 'gptel)
-
-;; (add-to-list 'load-path (concat external-packages-dir (file-name-as-directory "chatgpt-shell")))
-;; (require 'chatgpt-shell)
-;; (setq chatgpt-shell-openai-key (getenv "OPENAI_API_KEY"))
+;; (add-to-list 'load-path (concat external-packages-dir (file-name-as-directory "orgnv")))
+;; (require 'orgnv)
 
 (use-package! gptel
   :init
@@ -1162,3 +1155,7 @@ the directory.  `REST' is passed to the `CONSULT-RIPGREP-FUNCTION'."
 (setq magit-todos-git-grep-extra-args (quote ("-n"))
 magit-todos-nice nil
 magit-todos-scanner (quote magit-todos--scan-with-git-grep)))
+
+;; install dired-plus
+(straight-use-package 'dired-plus)
+(diredp-toggle-find-file-reuse-dir 1)

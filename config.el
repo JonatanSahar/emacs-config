@@ -30,22 +30,13 @@
         ;; doom-variable-pitch-font (font-spec :family "Noto Sans" :size 20)
 
         ;; Iosevka Comfy font
-        doom-font  (font-spec :family "Iosevka Comfy" :weight 'regular :size 20)
-        doom-big-font  (font-spec :family "Iosevka Comfy" :weight 'regular :size 20)
-        doom-variable-pitch-font (font-spec :family "Iosevka Comfy Duo" :weight 'regular :size 20)
+        doom-font  (font-spec :family "Iosevka Comfy" :weight 'regular :size 19)
+        doom-big-font  (font-spec :family "Iosevka Comfy" :weight 'regular :size 19)
+        doom-variable-pitch-font (font-spec :family "Iosevka Comfy Duo" :weight 'regular :size 19)
 
         ;; doom-font  (font-spec :family "Iosevka Comfy" :weight 'regular :size 24)
         ;; doom-big-font  (font-spec :family "Iosevka Comfy" :weight 'regular :size 24)
         ;; doom-variable-pitch-font (font-spec :family "Iosevka Comfy Duo" :weight 'regular :size 24)
-
-        ;; iA Writer Quattro font
-        ;; doom-font  (font-spec :family "iA Writer Mono V Regular" :weight 'regular :size 18)
-        ;; doom-big-font  (font-spec :family "iA Writer Quattro V Regular" :weight 'regular :size 18)
-        ;; doom-variable-pitch-font (font-spec :family "iA Writer Quattro V Regular" :weight 'regular :size 18)
-
-        ;; doom-font  (font-spec :family "iA Writer Quattro V Regular" :weight 'regular :size 24)
-        ;; doom-big-font  (font-spec :family "iA Writer Quattro V Regular" :weight 'regular :size 24)
-        ;; doom-variable-pitch-font (font-spec :family "iA Writer Quattro V Regular" :weight 'regular :size 24)
  )
 
 (load! "themes-and-fonts.el")
@@ -160,29 +151,30 @@
 
 ;; (add-hook! 'text-mode-hook 'my-buffer-face-mode-text)
 (add-hook! 'text-mode-hook
-                                                        (remove-hook! 'company-mode (company-box-mode))
-							(global-delete-selection-mode 1)
-							(visual-fill-column-mode 1)
-							(visual-line-mode 1)
-							(abbrev-mode 1)
-							(font-lock-mode 1)
-							(buffer-face-mode 1)
-							(captain-mode 1)
-							(+zen/toggle)
-							(setq org-modern-star nil)
-							(setq org-hide-leading-stars t)
-							(+word-wrap-mode 1)
-							(flyspell-lazy-mode -1)
-							(set-face-attribute 'fixed-pitch nil :height 1.0)
-							(set-face-attribute 'variable-pitch nil :height 1.0)
-                             )
+        (remove-hook! 'company-mode (company-box-mode))
+        (global-delete-selection-mode 1)
+        (visual-fill-column-mode 1)
+        (visual-line-mode 1)
+        (abbrev-mode 1)
+        (font-lock-mode 1)
+        (buffer-face-mode 1)
+        (captain-mode 1)
+        (hl-todo-mode 1)
+        (+zen/toggle)
+        (setq org-modern-star nil)
+        (setq org-hide-leading-stars t)
+        (+word-wrap-mode 1)
+        (flyspell-lazy-mode -1)
+        (set-face-attribute 'fixed-pitch nil :height 1.0)
+        (set-face-attribute 'variable-pitch nil :height 1.0))
+
 (add-hook! 'text-mode-hook
                             (setq bidi-paragraph-direction nil)
                             (setq bidi-paragraph-start-re  "^")
                             (setq bidi-paragraph-separate-re  "^")
                             (setq helm-ff-fuzzy-matching t)
                             (setq company-backends '((company-capf company-files company-dabbrev-code company-dabbrev)))
-                            (setq company-frontends '(company-preview-frontend))
+                            (setq-local company-frontends '(company-preview-frontend))
                             (setq line-spacing 0.3)
                             (setq buffer-file-coding-system 'utf-8)
                             (setq save-buffer-coding-system 'utf-8)
@@ -190,13 +182,18 @@
                             (set-face-attribute 'variable-pitch nil :height 1.0)
                             )
 
-
+(defun company-prog-mode-hook ()
+  (when (and (boundp 'company-mode) company-mode)
+  (company-box-mode)
+  ))
 (add-hook! 'prog-mode-hook 'my-buffer-face-mode-programming)
 (add-hook! 'prog-mode-hook
-                            (add-hook! 'company-mode (company-box-mode))
+                            (company-prog-mode-hook)
                             (setq company-backends '((company-capf company-files company-dabbrev-code company-dabbrev)))
+                            (setq-local company-frontends '(company-box-frontend))
                             (setq line-spacing 0.3)
                             (delete-selection-mode 1)
+                            (hl-todo-mode 1)
                             (flyspell-lazy-mode -1)
                             (+word-wrap-mode 1)
                             (+zen/toggle)
@@ -245,8 +242,27 @@
 (defun my/make-small-frame () (interactive) (set-frame-size (selected-frame) 50 42))
 (defun my/make-medium-frame () (interactive) (set-frame-size (selected-frame) 100 35))
 (defun my/make-large-frame () (interactive) (set-frame-size (selected-frame) 100 45))
-(add-to-list 'default-frame-alist '(height . 38))
-(add-to-list 'default-frame-alist '(width . 50))
+
+(setq default-frame-alist '(
+ (height . 38)
+ (width . 50)
+ (vertical-scroll-bars)
+ (tool-bar-lines . 0)
+ (menu-bar-lines . 0)
+ (left-fringe . 8)
+ (right-fringe . 8)))
+
+
+(setq initial-frame-alist '(
+ (top . 60)
+ (left . 60)
+ (height . 35)
+ (width . 100)
+ (vertical-scroll-bars)
+ (tool-bar-lines . 0)
+ (menu-bar-lines . 0)
+ (left-fringe . 8)
+ (right-fringe . 8)))
 
 (setq org-id-link-to-org-use-id 'create-if-interactive)
 (setq python-shell-prompt-detect-failure-warning nil)
@@ -447,3 +463,16 @@ The default tab-bar name uses the buffer name."
 
 (add-to-list '+lookup-provider-url-alist
              '("google-scholar"  "https://scholar.google.com/scholar?q=%s"))
+
+(setq doom-projectile-fd-binary "fdfind")
+
+(global-hl-todo-mode 1)
+(setq browse-url-chrome-program "/usr/bin/chrome")
+(setq browse-url-browser-function 'browse-url-chrome)
+;; (defvar org-export-output-directory-prefix "export_" "prefix of directory used for org-mode export")
+;; (defadvice org-export-output-file-name (before org-add-export-dir activate)
+;;   "Modifies org-export to place exported files in a different directory"
+;;   (when (not pub-dir)
+;;       (setq pub-dir (concat org-export-output-directory-prefix (substring extension 1)))
+;;       (when (not (file-directory-p pub-dir))
+;;        (make-directory pub-dir))))
