@@ -48,6 +48,7 @@
   (setq my-org-refile-maxlevel 1)
   :config
   (setq
+   org-image-align 'center
    bidi-paragraph-direction nil
    org-id-link-to-org-use-id 'create-if-interactive
    org-id-method 'ts
@@ -72,8 +73,7 @@
    org-capture-papers-file "~/notes/20230402T133604--interesting-papers__thesis.org"
    org-capture-microdosing-journal-file "~/notes/20230523T162209--microdosing-journal__journal.org"
    org-agenda-files '(
-                      "~/notes/20230323T113003--knowledge-base__thesis.org"
-                      "~/notes/20230402T133604--interesting-papers__thesis.org")
+                      "~/notes/20230323T113003--knowledge-base__thesis.org")
 
    org-refile-targets '(
                         ;; ( org-capture-projects-file :maxlevel . 1)

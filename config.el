@@ -93,12 +93,13 @@
  backup-directory-alist `(("." . ,(concat user-emacs-directory "autosaved_files")))
  truncate-string-ellipsis "…")               ; Unicode ellispis are nicer than "...", and also save /precious/ space
 
-(add-load-path! "../doom-emacs/packages/")
+(add-load-path! "../doom-emacs-packages-manual/")
 (load! "package-config.el")
 (load! "my-functions.el")
 (load! "unbinding.el")
 (load! "keybindings.el")
 
+;; (load! "../doom-emacs-packages-manual/org-image-preview.el")
 
 (setq which-key-idle-delay 0.2
       which-key-idle-secondary-delay 0.1
@@ -182,10 +183,14 @@
                             (set-face-attribute 'variable-pitch nil :height 1.0)
                             )
 
+(add-hook! 'org-agenda-mode-hook
+           (+zen/toggle))
+
 (defun company-prog-mode-hook ()
   (when (and (boundp 'company-mode) company-mode)
   (company-box-mode)
   ))
+
 (add-hook! 'prog-mode-hook 'my-buffer-face-mode-programming)
 (add-hook! 'prog-mode-hook
                             (company-prog-mode-hook)
@@ -480,39 +485,6 @@ The default tab-bar name uses the buffer name."
 ;;        (make-directory pub-dir))))
 (setq org-image-actual-width nil)
 
-;; silly tea timer
-(defvar my-tea-timer-icon-path "~/doom-emacs-config/cup.png"
-  "Path to the tea timer icon.")
-(defun my-load-and-resize-tea-timer-icon ()
-  "Load and resize the tea timer icon."
-  (create-image my-tea-timer-icon-path 'png nil :width 4 :height 4))
-
-(defvar my-tea-timer-icon (my-load-and-resize-tea-timer-icon)
-  "The resized tea timer icon.")
-
-(defun my-org-timer-start-with-icon ()
-  "Start org-timer and add icon to mode line."
-  (interactive)
-  (org-timer-start)
-  (setq global-mode-string
-        (append global-mode-string
-                (list (propertize " " 'display my-tea-timer-icon)))))
-
-(defun my-org-timer-stop ()
- "Stop org-timer and remove icon from mode line."
-  (interactive)
-  (org-timer-stop)
-  ;; Remove the icon from the global mode string
-  (setq global-mode-string
-        (delq nil
-              (mapcar (lambda (item)
-                        (if (and (consp item) (eq (cdr item) my-tea-timer-icon))
-                            nil
-                          item))
-                      global-mode-string))))
-
-(global-set-key (kbd "<f5>") 'my-org-timer-start-with-icon)
-(global-set-key (kbd "<f6>") 'my-org-timer-stop)
 (setq sentence-end "\\(\n\\|\’\’\\|[.?!][]\"’)}]*\\($\\|[ \t]\\)\\)[ \t\n]*")
 ;; mandatory, as the dictionary misbehaves!
 (setq switch-to-buffer-obey-display-actions t)

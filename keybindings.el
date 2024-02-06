@@ -65,6 +65,12 @@
  :i "C-j" #'evil-window-down
 )
 
+(map! :map evil-org-mode-map
+      :nv "gk" #'evil-previous-visual-line
+      :nv "gj" #'evil-next-visual-line
+      :nv "V" #'evil-visual-screen-line
+      :nv "U" #'evil-visual-line)
+
 (map!
  :map pdf-view-mode-map
  :nvi "go" nil
@@ -73,32 +79,31 @@
 
 (map!
  :map pdf-occur-buffer-mode-map
-
  :nv "C-j" #'next-error-no-select
  :nv "C-k" #'previous-error-no-select
+
  :map pdf-view-mode-map
  :nvi "C-c O" (lambda () (interactive) (dired-jump) (dired-open))
  :nvi "go" (kbd "SPC o - & RET")
  :vin "gl" nil
  :nvi "C-j" #'windmove-down
- :nvi "C-k" #'windmove-upnil
- :map company-active-map "C-s" #'my/save-and-change-to-normal
- )
+ :nvi "C-k" #'windmove-upnil)
+
+ (map! :map company-active-map "C-s" #'my/save-and-change-to-normal)
 
 (map!
  (:map matlab-mode-map
  :nv "C-S-m" (lambda ()
          (interactive)
          (org-switch-to-buffer-other-window "*MATLAB*"))
-  :ni "C-c h" #'matlab-shell-help-at-point
- )
+  :ni "C-c h" #'matlab-shell-help-at-point)
+
  (:map matlab-shell-mode-map
   :ni "C-c l" #'comint-clear-buffer
   :nv "C-l" #'windmove-right
   :nv "C-h" #'windmove-left
   :nv "C-j" #'windmove-down
-  :nv "C-k" #'windmove-up
-  )
+  :nv "C-k" #'windmove-up)
 )
 
 
@@ -700,9 +705,3 @@
       :desc "copy cite link"  "c" #'copy-with-square-brackets
       "d" #'citar-org-delete-citation)
 
-(map! :map evil-org-mode-map
-      :nv "gk" #'evil-previous-visual-line
-      :nv "gj" #'evil-next-visual-line
-      :nv "V" #'evil-visual-screen-line
-      :nv "U" #'evil-visual-line
-      )
