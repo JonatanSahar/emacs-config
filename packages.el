@@ -132,6 +132,7 @@
 :recipe (:host github
          :repo "mohkale/consult-bibtex"))
 (package!  org-transclusion)
+(package!  org-remark)
 
 ;; code related
 (package! matlab-mode)

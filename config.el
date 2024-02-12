@@ -33,6 +33,7 @@
         doom-font  (font-spec :family "Iosevka Comfy" :weight 'regular :size 19)
         doom-big-font  (font-spec :family "Iosevka Comfy" :weight 'regular :size 19)
         doom-variable-pitch-font (font-spec :family "Iosevka Comfy Duo" :weight 'regular :size 19)
+        doom-fix (font-spec :family "Iosevka Comfy Duo" :weight 'regular :size 19)
 
         ;; doom-font  (font-spec :family "Iosevka Comfy" :weight 'regular :size 24)
         ;; doom-big-font  (font-spec :family "Iosevka Comfy" :weight 'regular :size 24)
