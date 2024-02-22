@@ -800,4 +800,4 @@ The optional argument NEW-WINDOW is not used."
     (shell-command (concat "find " denote-directory " -type f -name '*.docx' -exec mv {} " target-directory " \\;"))
 
     ;; Move all .pdf files
-    (shell-command (concat "find " denote-directory " -type f -name '*.pdf' -exec mv {} " target-directory " \\;"))))
+    ))

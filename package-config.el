@@ -609,6 +609,8 @@ DEFS is a plist associating completion categories to commands."
  denote-excluded-directories-regexp nil
  denote-excluded-keywords-regexp nil)
 
+(setq! denote-excluded-directories-regexp "images")
+
   ;; Pick dates, where relevant, with Org's advanced interface:
   (setq denote-date-prompt-use-org-read-date t)
 
