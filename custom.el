@@ -6,7 +6,10 @@
  '(custom-safe-themes
    '("5718ea4d49350ab88e353fd66f3d4d3954e890b4d3dd7928f9b6dcb0e76ac8bd" "929d5aa75ac40de51b6fccc766f5d431c16306c754e8dde599bd8d5623ff0ced" default))
  '(evil-digit-bound-motions '(evil-beginning-of-visual-line))
+ '(helm-ag-base-command "rg --no-heading")
+ '(helm-ag-success-exit-status '(0 2))
  '(linum-format 'dynamic)
+ '(magit-todos-insert-after '(bottom) nil nil "Changed by setter of obsolete option `magit-todos-insert-at'")
  '(matlab-shell-command-switches '("-nodesktop -nosplash ") t)
  '(org-agenda-files
    '("~/notes/20230323T111555--paper-summaries-from-guy__thesis.org"))
@@ -14,6 +17,7 @@
  '(org-refile-use-outline-path 'file)
  '(org-safe-remote-resources
    '("\\`https://fniessen\\.github\\.io\\(?:/\\|\\'\\)" "\\`https://fniessen\\.github\\.io/org-html-themes/org/theme-readtheorg\\.setup\\'"))
+ '(package-selected-packages '(zmq request))
  '(tab-bar-new-tab-choice "*doom*")
  '(tab-bar-tab-name-function 'my/name-tab-by-project-or-default)
  '(warning-suppress-log-types '(((yasnippet zombie)) ((yasnippet zombie)) (defvaralias)))

@@ -93,6 +93,7 @@
  backup-directory-alist `(("." . ,(concat user-emacs-directory "autosaved_files")))
  truncate-string-ellipsis "…")               ; Unicode ellispis are nicer than "...", and also save /precious/ space
 
+
 (add-load-path! "../doom-emacs/packages/")
 (load! "package-config.el")
 (load! "my-functions.el")
@@ -284,10 +285,10 @@ Return the errors parsed with the error patterns of CHECKER."
 
 (setq lsp-typescript-npm "c:/Program Files/nodejs/npm")
 
-(setq lsp-python-ms-python-executable-cmd "/home/yonatan/miniforge3/bin/python")
-(setq lsp-pyright-python-executable-cmd "/home/yonatan/miniforge3/bin/python")
-(setq flycheck-python-pycompile-executable "/home/yonatan/miniforge3/bin/python")
-(setq python-shell-interpreter "/home/yonatan/miniforge3/bin/python")
+;; (setq lsp-python-ms-python-executable-cmd "/home/yonatan/miniforge3/bin/python")
+;; (setq lsp-pyright-python-executable-cmd "/home/yonatan/miniforge3/bin/python")
+;; (setq flycheck-python-pycompile-executable "/home/yonatan/miniforge3/bin/python")
+;; (setq python-shell-interpreter "/home/yonatan/miniforge3/bin/python")
 
 
 (setq +zen-text-scale nil)

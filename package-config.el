@@ -156,7 +156,7 @@
                            ("p" "Paper ref to read "
                             entry
                             (file org-capture-papers-file)
-"* SKIM %^{title?|%i}
+                            "* SKIM %^{title?|%i}
 - link/cite: %^{link/DOI?}
 - type of paper: %^{type?|study|review|theoretical|theory & study}
 - why read it?
@@ -165,16 +165,16 @@
 
 %^{a short summary?}"
 
-:empty-lines-after 1)
+                            :empty-lines-after 1)
 
-;;                          ("n" "Note"
-;;                           entry
-;;                           (file+headline org-capture-writing-inbox-file "Notes")
-;;                           "* NOTE %? \n")
+                           ;;                          ("n" "Note"
+                           ;;                           entry
+                           ;;                           (file+headline org-capture-writing-inbox-file "Notes")
+                           ;;                           "* NOTE %? \n")
 
-;;                          ("j" "Journal entry" entry (function org-journal-find-location)
-;;                           "* %(format-time-string org-journal-time-format)%^{Title}\n%i%?")
-;;
+                           ;;                          ("j" "Journal entry" entry (function org-journal-find-location)
+                           ;;                           "* %(format-time-string org-journal-time-format)%^{Title}\n%i%?")
+                           ;;
                            ("i" "Interesting things"
                             entry
                             (file+headline org-capture-someday-file "To read/watch")
@@ -186,6 +186,15 @@
         (quote
          (:foreground default :background default :scale 2.5 :html-foreground "Black" :html-background "Transparent" :html-scale 1.0 :matchers
           ("begin" "$1" "$" "$$" "\\(" "\\["))))
+
+  (org-babel-do-load-languages
+   'org-babel-load-languages
+   '((emacs-lisp . t) ;; Other languages
+     (shell . t)
+     ;; Python & Jupyter
+     (python . t)
+     (ipython . t)
+     (jupyter . t)))
   )
 
 
@@ -320,11 +329,11 @@
    citar-citeproc-csl-styles-dir "~/notes/export-csl-style"
    citar-citeproc-csl-style "apa.csl"
    citar-library-paths (list "~/Documents/bibliography")
-  ;; (add-to-list 'citar-file-open-functions '("pdf" . citar-file-open-external))
-  citar-templates '((main . "${author editor:30}     ${date year issued:4}     ${title:48}")
-                          (suffix . "         ${tags keywords keywords:*}   ${=key= id:15}    ${=type=:12}")
-                          (preview . "${author editor} (${year issued date}) ${title}, ${journal journaltitle publisher container-title collection-title}.\n")
-                          (note . "")))
+   ;; (add-to-list 'citar-file-open-functions '("pdf" . citar-file-open-external))
+   citar-templates '((main . "${author editor:30}     ${date year issued:4}     ${title:48}")
+                     (suffix . "         ${tags keywords keywords:*}   ${=key= id:15}    ${=type=:12}")
+                     (preview . "${author editor} (${year issued date}) ${title}, ${journal journaltitle publisher container-title collection-title}.\n")
+                     (note . "")))
 
   (setq citar-symbols
         `((file . (,(all-the-icons-icon-for-file "foo.pdf" :face 'all-the-icons-dred) .
@@ -341,7 +350,7 @@
     "Face for obscuring/dimming icons"
     :group 'all-the-icons-faces)
 
- (defun citar-open-library-file (key-entry)
+  (defun citar-open-library-file (key-entry)
     "Open library file associated with the KEY-ENTRY.
 
 With prefix, rebuild the cache before offering candidates."
@@ -393,15 +402,15 @@ With prefix, rebuild the cache before offering candidates."
 
 
 
-(use-package! lsp-pyright
-  :hook (python-mode . (lambda ()
-                         (require 'lsp-pyright)
-                         (lsp)))  ; or lsp-
-  :config
+;; (after! lsp-pyright
+;;   :hook (python-mode . (lambda ()
+;;                          (require 'lsp-pyright)
+;;                          (lsp)))  ; or lsp-
+;;   :config
 
-  (setq lsp-pyright-use-library-code-for-types t) ;; set this to nil if getting too many false positive type errors
-  (setq lsp-pyright-stub-path (concat (getenv "HOME") "/src/python-type-stubs"))
-  )
+;;   (setq lsp-pyright-use-library-code-for-types t) ;; set this to nil if getting too many false positive type errors
+;;   (setq lsp-pyright-stub-path (concat (getenv "HOME") "/src/python-type-stubs"))
+;;   )
 
 (after! company
   :config
@@ -424,16 +433,16 @@ With prefix, rebuild the cache before offering candidates."
   "Define KEY conditionally in the minibuffer.
 DEFS is a plist associating completion categories to commands."
   (define-key minibuffer-local-map key
-    (list 'menu-item nil defs :filter
-          (lambda (d)
-            (plist-get d (completion-metadata-get
-                          (completion-metadata (minibuffer-contents)
-                                               minibuffer-completion-table
-                                               minibuffer-completion-predicate)
-                          'category))))))
+              (list 'menu-item nil defs :filter
+                    (lambda (d)
+                      (plist-get d (completion-metadata-get
+                                    (completion-metadata (minibuffer-contents)
+                                                         minibuffer-completion-table
+                                                         minibuffer-completion-predicate)
+                                    'category))))))
 
 (define-minibuffer-key "\C-s"
-  'file #'consult-find-for-minibuffer)
+                       'file #'consult-find-for-minibuffer)
 
 (setq ispell-personal-dictionary-en   "~/Documents/dictionaries/personal.en")
 (setq ispell-personal-dictionary-heb  "~/Documents/dictionaries/personal.heb")
@@ -470,11 +479,11 @@ DEFS is a plist associating completion categories to commands."
 
 
 (defun init-spellchecker()
-;; ispell-set-spellchecker-params has to be called
-;; before ispell-hunspell-add-multi-dic will work
-(setq ispell-dictionary "en_US,hebrew") ; Default dictionary to use
-(ispell-set-spellchecker-params)
-(ispell-hunspell-add-multi-dic "en_US,hebrew"))
+  ;; ispell-set-spellchecker-params has to be called
+  ;; before ispell-hunspell-add-multi-dic will work
+  (setq ispell-dictionary "en_US,hebrew") ; Default dictionary to use
+  (ispell-set-spellchecker-params)
+  (ispell-hunspell-add-multi-dic "en_US,hebrew"))
 
 (use-package! company-box
   :config
@@ -551,7 +560,7 @@ DEFS is a plist associating completion categories to commands."
           compilation-mode))
   (popper-mode +1)
   (popper-echo-mode +1)
- ;; (map! :map prog-mode-map :nv "`" #'popper-toggle-latest)
+  ;; (map! :map prog-mode-map :nv "`" #'popper-toggle-latest)
   )                ; For echo area hints
 
 ;; (require 'conda)
@@ -560,8 +569,10 @@ DEFS is a plist associating completion categories to commands."
 ;; (conda-env-autoactivate-mode t)
 ;; (add-hook 'find-file-hook (lambda () (when (bound-and-true-p conda-project-env-path)
 ;;                                          (conda-env-activate-for-buffer))))
-;; (custom-set-variables
-;;  '(conda-anaconda-home "c:/Users/Jonathan/miniconda3/"))
+(after! conda
+  (setq! conda-anaconda-home (expand-file-name "~/miniforge3/bin/conda"))
+  (setq-default mode-line-format (cons '(:exec conda-env-current-name) mode-line-format))
+  )
 
 (defun centaur-tabs-hide-tab (x)
   "Do no to show buffer X in tabs."
@@ -597,14 +608,14 @@ DEFS is a plist associating completion categories to commands."
 (use-package! denote
   :config
   ;; Remember to check the doc strings of those variables.
-(setq! denote-directory (expand-file-name "~/notes/")
- denote-excluded-directories-regexp "export.*"
- denote-known-keywords '("emacs" "thesis")
- denote-infer-keywords t
- denote-sort-keywords t
- denote-prompts '(title keywords)
- denote-excluded-directories-regexp nil
- denote-excluded-keywords-regexp nil)
+  (setq! denote-directory (expand-file-name "~/Documents/notes")
+         denote-excluded-directories-regexp "export.*"
+         denote-known-keywords '("emacs" "thesis")
+         denote-infer-keywords t
+         denote-sort-keywords t
+         denote-prompts '(title keywords)
+         denote-excluded-directories-regexp nil
+         denote-excluded-keywords-regexp nil)
 
   ;; Pick dates, where relevant, with Org's advanced interface:
   (setq denote-date-prompt-use-org-read-date t)
@@ -780,8 +791,8 @@ the directory.  `REST' is passed to the `CONSULT-RIPGREP-FUNCTION'."
   (autoload 'projectile-project-root "projectile")
   (setq consult-project-function (lambda (_) (projectile-project-root)))
   (map! :map evil-normal-state-map
-   "M-e" #'consult-isearch-forward
-   )
+        "M-e" #'consult-isearch-forward
+        )
   )
 
 (use-package! consult-company
@@ -796,111 +807,111 @@ the directory.  `REST' is passed to the `CONSULT-RIPGREP-FUNCTION'."
   :commands (consult-notes)
   :config
   (setq consult-notes-denote-display-id nil)
-    )
-  ;; (consult-customize consult-notes
-  ;;                  :preview-key "C-.")
-  ;;                  ;; '("M-."
-  ;;                  ;;   :debounce 0.5 "<up>" "<down>"
-  ;;                  ;;   :debounce 0.5 any))
-  ;; )
+  )
+;; (consult-customize consult-notes
+;;                  :preview-key "C-.")
+;;                  ;; '("M-."
+;;                  ;;   :debounce 0.5 "<up>" "<down>"
+;;                  ;;   :debounce 0.5 any))
+;; )
 
 ;; (map! :after consult-notes :leader :prefix "n" :nv "f" #'consult-notes)
 
 (map!
-   ;; :after denote
-   (:map org-mode-map :leader
-         (:map org-mode-map :leader
-               ;; (:prefix "n"
-               ;;          (:prefix ("d" ."dired")
-               ;;           :nv "r" #'denote-rename-file
-               ;;           :nv "R" #'denote-rename-file-using-front-matter)
-               ;;          (:prefix ("k" . "keywords")
-               ;;                   "a" #'denote-keywords-add
-               ;;                   "r" #'denote-keywords-remove)
-               ;;          ))
-         (:prefix "n"
-                :nv "o" #'denote-open-or-create
-                ;; :nv "f" #'denote-open-or-create
-                :nv "f" #'consult-notes
-                :nv "j" #'my-denote-journal ; our custom command
-                :nv "n" #'denote
-                :nv "r" #'denote-rename-file
-                :nv "R" #'denote-rename-file-using-front-matter
-                :nv "k" #'denote-keywords-add
-                :nv "K" #'denote-keywords-remove
-                :nv "D" #'denote-date
-                :nv "z" #'denote-signature ; "zettelkasten" mnemonic
-                :nv "s" #'denote-subdirectory
-                :nv "t" #'denote-template
-                :nv "i" #'denote-link-or-create ; denote-link ; "insert" mnemonic
-                :nv "I" #'denote-link
-                :nv "a" #'denote-link-add-links
-                :nv "b" (lambda nil (interactive) (denote-link-backlinks) (windmove-down)) ;;(revert-buffer-with-coding-system 'utf-8))
-                :nv "F" #'denote-link-find-file
-                :nv "B" #'denote-link-find-backlink))
-   )
+ ;; :after denote
+ (:map org-mode-map :leader
+       (:map org-mode-map :leader
+             ;; (:prefix "n"
+             ;;          (:prefix ("d" ."dired")
+             ;;           :nv "r" #'denote-rename-file
+             ;;           :nv "R" #'denote-rename-file-using-front-matter)
+             ;;          (:prefix ("k" . "keywords")
+             ;;                   "a" #'denote-keywords-add
+             ;;                   "r" #'denote-keywords-remove)
+             ;;          ))
+             (:prefix "n"
+              :nv "o" #'denote-open-or-create
+              ;; :nv "f" #'denote-open-or-create
+              :nv "f" #'consult-notes
+              :nv "j" #'my-denote-journal ; our custom command
+              :nv "n" #'denote
+              :nv "r" #'denote-rename-file
+              :nv "R" #'denote-rename-file-using-front-matter
+              :nv "k" #'denote-keywords-add
+              :nv "K" #'denote-keywords-remove
+              :nv "D" #'denote-date
+              :nv "z" #'denote-signature ; "zettelkasten" mnemonic
+              :nv "s" #'denote-subdirectory
+              :nv "t" #'denote-template
+              :nv "i" #'denote-link-or-create ; denote-link ; "insert" mnemonic
+              :nv "I" #'denote-link
+              :nv "a" #'denote-link-add-links
+              :nv "b" (lambda nil (interactive) (denote-link-backlinks) (windmove-down)) ;;(revert-buffer-with-coding-system 'utf-8))
+              :nv "F" #'denote-link-find-file
+              :nv "B" #'denote-link-find-backlink))
+       )
 
-   (:map org-mode-map :nvi
-         "C-c n j" #'my-denote-journal ; our custom command
-         "C-c n o" #'denote-open-or-create
-         "C-c n n" #'denote
-         "C-c n N" #'denote-type
-         "C-c n d" #'denote-date
-         "C-c n z" #'denote-signature ; "zettelkasten" mnemonic
-         "C-c n s" #'denote-subdirectory
-         "C-c n t" #'denote-template
-         ;; If you intend to use Denote with a variety of file types, it is
-         ;; easier to bind the link-related commands to the `global-map', as
-         ;; shown here.  Otherwise follow the same pattern for `org-mode-map',
-         ;; `markdown-mode-map', and/or `text-mode-map'.
-         "C-c n I" #'denote-link; "insert" mnemonic
-         "C-c n i" #'denote-link-or-create ; "insert" mnemonic
-         "[[" #'denote-link-or-create
-         "C-c n a" #'denote-link-add-links
-         "C-c n b" #'denote-link-backlinks
-         "C-c n f f" #'denote-link-find-file
-         "C-c n f b" #'denote-link-find-backlink
-         "C-c n k a" #'denote-keywords-add
-         "C-c n k r" #'denote-keywords-remove
-         ;; Note that `denote-rename-file' can work from any context, not just
-         ;; Dired bufffers.  That is why we bind it here to the `global-map'.
-         "C-c n r" #'denote-rename-file
-         "C-c n R" #'denote-rename-file-using-front-matter)
+ (:map org-mode-map :nvi
+       "C-c n j" #'my-denote-journal ; our custom command
+       "C-c n o" #'denote-open-or-create
+       "C-c n n" #'denote
+       "C-c n N" #'denote-type
+       "C-c n d" #'denote-date
+       "C-c n z" #'denote-signature ; "zettelkasten" mnemonic
+       "C-c n s" #'denote-subdirectory
+       "C-c n t" #'denote-template
+       ;; If you intend to use Denote with a variety of file types, it is
+       ;; easier to bind the link-related commands to the `global-map', as
+       ;; shown here.  Otherwise follow the same pattern for `org-mode-map',
+       ;; `markdown-mode-map', and/or `text-mode-map'.
+       "C-c n I" #'denote-link; "insert" mnemonic
+       "C-c n i" #'denote-link-or-create ; "insert" mnemonic
+       "[[" #'denote-link-or-create
+       "C-c n a" #'denote-link-add-links
+       "C-c n b" #'denote-link-backlinks
+       "C-c n f f" #'denote-link-find-file
+       "C-c n f b" #'denote-link-find-backlink
+       "C-c n k a" #'denote-keywords-add
+       "C-c n k r" #'denote-keywords-remove
+       ;; Note that `denote-rename-file' can work from any context, not just
+       ;; Dired bufffers.  That is why we bind it here to the `global-map'.
+       "C-c n r" #'denote-rename-file
+       "C-c n R" #'denote-rename-file-using-front-matter)
 
-   ;; Key bindings specifically for Dired.
-   (:map dired-mode-map
-         "C-c C-d C-i" #'denote-link-dired-marked-notes
-         "C-c C-d C-r" #'denote-dired-rename-marked-files
-         "C-c C-d C-R" #'denote-dired-rename-marked-files-using-front-matter)
+ ;; Key bindings specifically for Dired.
+ (:map dired-mode-map
+       "C-c C-d C-i" #'denote-link-dired-marked-notes
+       "C-c C-d C-r" #'denote-dired-rename-marked-files
+       "C-c C-d C-R" #'denote-dired-rename-marked-files-using-front-matter)
 
-   (:map evil-org-mode-map :prefix "C-n" :nvi
-         "j" #'my-denote-journal ; our custom command
+ (:map evil-org-mode-map :prefix "C-n" :nvi
+       "j" #'my-denote-journal ; our custom command
 
-         "o" #'denote-open-or-create
-         "n" #'denote
-         "N" #'denote-type
-         "d" #'denote-date
-         "z" #'denote-signature ; "zettelkasten" mnemonic
-         "s" #'denote-subdirectory
-         "t" #'denote-template
-         ;; If you intend to use Denote with a variety of file types, it is
-         ;; easier to bind the link-related commands to the `global-map', as
-         ;; shown here.  Otherwise follow the same pattern for `org-mode-map',
-         ;; `markdown-mode-map', and/or `text-mode-map'.
-         "I" #'denote-link; "insert" mnemonic
-         "i" #'denote-link-or-create ; "insert" mnemonic
-         "[[" #'denote-link-or-create
-         "]]" #'denote-link-or-create
-         "a" #'denote-link-add-links
-         "b" #'denote-link-backlinks
-         "f f" #'denote-link-find-file
-         "f b" #'denote-link-find-backlink
-         "k a" #'denote-keywords-add
-         "k r" #'denote-keywords-remove
-         ;; Note that `denote-rename-file' can work from any context, not just
-         ;; Dired bufffers.  That is why we bind it here to the `global-map'.
-         "r" #'denote-rename-file
-         "R" #'denote-rename-file-using-front-matter))
+       "o" #'denote-open-or-create
+       "n" #'denote
+       "N" #'denote-type
+       "d" #'denote-date
+       "z" #'denote-signature ; "zettelkasten" mnemonic
+       "s" #'denote-subdirectory
+       "t" #'denote-template
+       ;; If you intend to use Denote with a variety of file types, it is
+       ;; easier to bind the link-related commands to the `global-map', as
+       ;; shown here.  Otherwise follow the same pattern for `org-mode-map',
+       ;; `markdown-mode-map', and/or `text-mode-map'.
+       "I" #'denote-link; "insert" mnemonic
+       "i" #'denote-link-or-create ; "insert" mnemonic
+       "[[" #'denote-link-or-create
+       "]]" #'denote-link-or-create
+       "a" #'denote-link-add-links
+       "b" #'denote-link-backlinks
+       "f f" #'denote-link-find-file
+       "f b" #'denote-link-find-backlink
+       "k a" #'denote-keywords-add
+       "k r" #'denote-keywords-remove
+       ;; Note that `denote-rename-file' can work from any context, not just
+       ;; Dired bufffers.  That is why we bind it here to the `global-map'.
+       "r" #'denote-rename-file
+       "R" #'denote-rename-file-using-front-matter))
 
 (use-package! citar-denote
   :init
@@ -957,20 +968,20 @@ the directory.  `REST' is passed to the `CONSULT-RIPGREP-FUNCTION'."
  :map evil-org-mode-map
  (:prefix "n"
           (:prefix "c"
-                   :desc "opent the bibliography list" "c" #'citar-open
-                   :desc "create a note for ref" "n" #'citar-create-note
-                   :desc "open a note belonging to ref" "o" #'citar-denote-open-note
-                   :desc "act on this note's ref" "d" #'citar-denote-dwim
-                   :desc "add ref to this note" "a" #'citar-denote-add-citekey
-                   :desc "remove ref from this note" "k" #'citar-denote-remove-citekey
-                   :desc "go to bibtex entry" "e" #'citar-denote-open-reference-entry
-                   :desc "notes citing the current ref" "r" #'citar-denote-find-reference
-                   :desc "notes citing a given ref"  "R" #'citar-denote-find-citation
-                   :desc "open a note belonging to ref"  "f" #'citar-denote-open-note
-                   ;; "n" #'citar-denote-cite-nocite
-                   ;; "m" #'citar-denote-reference-nocite
-                   "i" #'citar-denote-link-reference
-                   "I" #'org-cite-insert)))
+           :desc "opent the bibliography list" "c" #'citar-open
+           :desc "create a note for ref" "n" #'citar-create-note
+           :desc "open a note belonging to ref" "o" #'citar-denote-open-note
+           :desc "act on this note's ref" "d" #'citar-denote-dwim
+           :desc "add ref to this note" "a" #'citar-denote-add-citekey
+           :desc "remove ref from this note" "k" #'citar-denote-remove-citekey
+           :desc "go to bibtex entry" "e" #'citar-denote-open-reference-entry
+           :desc "notes citing the current ref" "r" #'citar-denote-find-reference
+           :desc "notes citing a given ref"  "R" #'citar-denote-find-citation
+           :desc "open a note belonging to ref"  "f" #'citar-denote-open-note
+           ;; "n" #'citar-denote-cite-nocite
+           ;; "m" #'citar-denote-reference-nocite
+           "i" #'citar-denote-link-reference
+           "I" #'org-cite-insert)))
 
 ;; (use-package! org-transclusion
 ;;   :after org
@@ -1016,26 +1027,26 @@ the directory.  `REST' is passed to the `CONSULT-RIPGREP-FUNCTION'."
 
 
 (use-package! org-modern
-)
+  )
 
 (use-package! captain
-        :config
-                (add-hook 'prog-mode-hook
-                        (lambda ()
-                        (setq captain-predicate (lambda () (nth 8 (syntax-ppss (point)))))))
+  :config
+  (add-hook 'prog-mode-hook
+            (lambda ()
+              (setq captain-predicate (lambda () (nth 8 (syntax-ppss (point)))))))
 
 
-                (add-hook 'text-mode-hook
-                        (lambda ()
-                        (setq captain-predicate (lambda () t))))
+  (add-hook 'text-mode-hook
+            (lambda ()
+              (setq captain-predicate (lambda () t))))
 
 
-                (add-hook
-                'org-mode-hook
-                (lambda ()
-                (setq captain-predicate
-                        (lambda () (not (org-in-src-block-p))))))
-        (global-captain-mode)
+  (add-hook
+   'org-mode-hook
+   (lambda ()
+     (setq captain-predicate
+           (lambda () (not (org-in-src-block-p))))))
+  (global-captain-mode)
   )
 (use-package! tmr
   :init
@@ -1068,7 +1079,7 @@ the directory.  `REST' is passed to the `CONSULT-RIPGREP-FUNCTION'."
         gptel-use-curl 'nil
         gptel-stream nil
         gptel-default-mode 'org-mode)
-        ;; gptel-default-mode 'markdown-mode)
+  ;; gptel-default-mode 'markdown-mode)
   )
 
 (defvar gptel-quick--history nil)
@@ -1084,20 +1095,20 @@ the directory.  `REST' is passed to the `CONSULT-RIPGREP-FUNCTION'."
     (when (string= complete-prompt "")
       (user-error "A prompt is required."))
     (gptel-request
-     complete-prompt
-     :callback
-     (lambda (response info)
-       (if (not response)
-           (message "gptel-quick failed with message: %s" (plist-get info :status))
-         (with-current-buffer (get-buffer-create "*gptel-quick*")
-           (let ((inhibit-read-only t))
-             (erase-buffer)
-             (insert response))
-           (special-mode)
-           (display-buffer (current-buffer)
-                           `((display-buffer-in-side-window)
-                             (side . bottom)
-                             (window-height . ,#'fit-window-to-buffer)))))))))
+        complete-prompt
+      :callback
+      (lambda (response info)
+        (if (not response)
+            (message "gptel-quick failed with message: %s" (plist-get info :status))
+          (with-current-buffer (get-buffer-create "*gptel-quick*")
+            (let ((inhibit-read-only t))
+              (erase-buffer)
+              (insert response))
+            (special-mode)
+            (display-buffer (current-buffer)
+                            `((display-buffer-in-side-window)
+                              (side . bottom)
+                              (window-height . ,#'fit-window-to-buffer)))))))))
 
 (defun gptel-rewrite-and-replace (bounds &optional directive)
   (interactive
@@ -1111,27 +1122,27 @@ the directory.  `REST' is passed to the `CONSULT-RIPGREP-FUNCTION'."
          (read-string "ChatGPT Directive: "
                       "You are a prose editor. Rewrite my prompt more professionally."))))
   (gptel-request
-   (buffer-substring-no-properties (car bounds) (cdr bounds)) ;the prompt
-   :system (or directive "You are a prose editor. Rewrite my prompt more professionally.")
-   :buffer (current-buffer)
-   :context (cons (set-marker (make-marker) (car bounds))
-                  (set-marker (make-marker) (cdr bounds)))
-   :callback
-   (lambda (response info)
-     (if (not response)
-         (message "ChatGPT response failed with: %s" (plist-get info :status))
-       (let* ((bounds (plist-get info :context))
-              (beg (car bounds))
-              (end (cdr bounds))
-              (buf (plist-get info :buffer)))
-         (with-current-buffer buf
-           (save-excursion
-             (goto-char beg)
-             (kill-region beg end)
-             (insert response)
-             (set-marker beg nil)
-             (set-marker end nil)
-             (message "Rewrote line. Original line saved to kill-ring."))))))))
+      (buffer-substring-no-properties (car bounds) (cdr bounds)) ;the prompt
+    :system (or directive "You are a prose editor. Rewrite my prompt more professionally.")
+    :buffer (current-buffer)
+    :context (cons (set-marker (make-marker) (car bounds))
+                   (set-marker (make-marker) (cdr bounds)))
+    :callback
+    (lambda (response info)
+      (if (not response)
+          (message "ChatGPT response failed with: %s" (plist-get info :status))
+        (let* ((bounds (plist-get info :context))
+               (beg (car bounds))
+               (end (cdr bounds))
+               (buf (plist-get info :buffer)))
+          (with-current-buffer buf
+            (save-excursion
+              (goto-char beg)
+              (kill-region beg end)
+              (insert response)
+              (set-marker beg nil)
+              (set-marker end nil)
+              (message "Rewrote line. Original line saved to kill-ring."))))))))
 
 ;; (use-package! shackle
 ;; :config
@@ -1151,11 +1162,42 @@ the directory.  `REST' is passed to the `CONSULT-RIPGREP-FUNCTION'."
 ;;  gac-debounce-interval 1800))
 
 (use-package! magit-todos
-:config
-(setq magit-todos-git-grep-extra-args (quote ("-n"))
-magit-todos-nice nil
-magit-todos-scanner (quote magit-todos--scan-with-git-grep)))
+  :config
+  (setq magit-todos-git-grep-extra-args (quote ("-n"))
+        magit-todos-nice nil
+        magit-todos-scanner (quote magit-todos--scan-with-git-grep)))
 
 ;; install dired-plus
 (straight-use-package 'dired-plus)
 (diredp-toggle-find-file-reuse-dir 1)
+
+;;ein
+(use-package! ein)
+
+;; jupyter
+(use-package jupyter
+  :config
+  (defun my/jupyter-refresh-kernelspecs ()
+    "Refresh Jupyter kernelspecs"
+    (interactive)
+    (jupyter-available-kernelspecs t)))
+
+;; code cells
+(use-package code-cells
+  :load-path "~/.config/doom/external-lisp/code-cells.el/"
+  :config
+  (let ((map code-cells-mode-map))
+    (define-key map (kbd "C-c <up>") 'code-cells-backward-cell)
+    (define-key map (kbd "C-c <down>") 'code-cells-forward-cell)
+    (define-key map (kbd "M-<up>") 'code-cells-move-cell-up)
+    (define-key map (kbd "M-<down>") 'code-cells-move-cell-down)
+    (define-key map (kbd "C-c C-c") 'code-cells-eval)
+    ;; Overriding other minor mode bindings requires some insistence...
+    (define-key map [remap jupyter-eval-line-or-region] 'code-cells-eval))
+
+  ;; (setq code-cells-convert-ipynb-style '(
+  ;;       ("pandoc" "--to" "ipynb" "--from" "org")
+  ;;       ("pandoc" "--to" "org" "--from" "ipynb")
+  ;;       org-mode))
+
+  )
