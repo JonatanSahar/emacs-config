@@ -144,7 +144,7 @@
 
 
 ;; python
-(package! ein)
+(package! ob-ipython)
 (package! jupyter)
 
 

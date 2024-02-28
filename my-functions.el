@@ -649,8 +649,8 @@ The default tab-bar name uses the buffer name."
   (advice-remove 'denote-file-prompt 'my/denote--find-file-with-pretty-format)
   )
 
-    ;; (advice-add #'(lambda () (add-hook! minibuffer-setup #'+zen/toggle)) :before consult-notes)
-    ;; (advice-add #'(lambda () (remove-hook! minibuffer-setup #'+zen/toggle)) :after consult-notes)
+;; (advice-add #'(lambda () (add-hook! minibuffer-setup #'+zen/toggle)) :before consult-notes)
+;; (advice-add #'(lambda () (remove-hook! minibuffer-setup #'+zen/toggle)) :after consult-notes)
 
 (defun my/denote-link-or-create()
   (interactive)
@@ -787,3 +787,15 @@ The optional argument NEW-WINDOW is not used."
     (shell-command (concat "find " denote-directory " -type f -name '*.docx' -exec mv {} " target-directory " \\;"))
     ;; Move all .pdf files
     (shell-command (concat "find " denote-directory " -type f -name '*.pdf' -exec mv {} " target-directory " \\;"))))
+
+(defun my/toggle-org-timer ()
+  "Toggle org timer on or off. If a timer is running, stop it. Otherwise, start a new timer."
+  (interactive)
+  (if (and (boundp 'org-timer-start-time )
+           org-timer-start-time)
+      (progn
+        (org-timer-stop)
+        (message "Org timer stopped."))
+    (progn
+      (org-timer-start)
+      (message "Org timer started."))))

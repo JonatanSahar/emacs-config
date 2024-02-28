@@ -24,19 +24,19 @@
 ;; (setq doom-font
 ;;
 (setq
-        ;; Roboto Mono font
-        ;; doom-font  (font-spec :family "Roboto Mono" :weight 'regular :size 20)
-        ;; doom-big-font  (font-spec :family "Roboto Mono" :weight 'regular :size 20)
-        ;; doom-variable-pitch-font (font-spec :family "Noto Sans" :size 20)
+ ;; Roboto Mono font
+ ;; doom-font  (font-spec :family "Roboto Mono" :weight 'regular :size 20)
+ ;; doom-big-font  (font-spec :family "Roboto Mono" :weight 'regular :size 20)
+ ;; doom-variable-pitch-font (font-spec :family "Noto Sans" :size 20)
 
-        ;; Iosevka Comfy font
-        doom-font  (font-spec :family "Iosevka Comfy" :weight 'regular :size 19)
-        doom-big-font  (font-spec :family "Iosevka Comfy" :weight 'regular :size 19)
-        doom-variable-pitch-font (font-spec :family "Iosevka Comfy Duo" :weight 'regular :size 19)
+ ;; Iosevka Comfy font
+ doom-font  (font-spec :family "Iosevka Comfy" :weight 'regular :size 16)
+ doom-big-font  (font-spec :family "Iosevka Comfy" :weight 'regular :size 16)
+ doom-variable-pitch-font (font-spec :family "Iosevka Comfy Duo" :weight 'regular :size 16)
 
-        ;; doom-font  (font-spec :family "Iosevka Comfy" :weight 'regular :size 24)
-        ;; doom-big-font  (font-spec :family "Iosevka Comfy" :weight 'regular :size 24)
-        ;; doom-variable-pitch-font (font-spec :family "Iosevka Comfy Duo" :weight 'regular :size 24)
+ ;; doom-font  (font-spec :family "Iosevka Comfy" :weight 'regular :size 24)
+ ;; doom-big-font  (font-spec :family "Iosevka Comfy" :weight 'regular :size 24)
+ ;; doom-variable-pitch-font (font-spec :family "Iosevka Comfy Duo" :weight 'regular :size 24)
  )
 
 (load! "themes-and-fonts.el")
@@ -73,7 +73,7 @@
  literature-notes-dir (list (concat (file-name-as-directory slip-box-dir)  (file-name-as-directory "literature-notes")))
  emacs-directory doom-emacs-dir
  org-capture-writing-inbox-file (concat (file-name-as-directory notes-dir) "writing_inbox.org")
-)
+ )
 
 (setq package-gnupghome-dir ".local/elpa/gnupg")
 (setq-default line-spacing 0.1)
@@ -145,60 +145,68 @@
 
 (font-lock-add-keywords nil '(("\"\\(\\(?:.\\|\n\\)*?[^\\]\\)\"" 0 font-lock-string-face)))
 (add-hook! org-mode
-          (sp-pair "$" "$")
-                      )
+  (sp-pair "$" "$")
+  )
 ;; (add-hook! 'evil-normal-state-entry-hook  #'save-buffer)
 ;; (add-hook! 'evil-insert-state-entry-hook #'save-buffer)
 
 ;; (add-hook! 'text-mode-hook 'my-buffer-face-mode-text)
 (add-hook! 'text-mode-hook
-        (remove-hook! 'company-mode (company-box-mode))
-        (global-delete-selection-mode 1)
-        (visual-fill-column-mode 1)
-        (visual-line-mode 1)
-        (abbrev-mode 1)
-        (font-lock-mode 1)
-        (buffer-face-mode 1)
-        (captain-mode 1)
-        (hl-todo-mode 1)
-        (+zen/toggle)
-        (setq org-modern-star nil)
-        (setq org-hide-leading-stars t)
-        (+word-wrap-mode 1)
-        (flyspell-lazy-mode -1)
-        (set-face-attribute 'fixed-pitch nil :height 1.0)
-        (set-face-attribute 'variable-pitch nil :height 1.0))
+  (remove-hook! 'company-mode (company-box-mode))
+  (global-delete-selection-mode 1)
+  (visual-fill-column-mode 1)
+  (visual-line-mode 1)
+  (abbrev-mode 1)
+  (font-lock-mode 1)
+  (buffer-face-mode 1)
+  (captain-mode 1)
+  (hl-todo-mode 1)
+  (+zen/toggle)
+  (setq org-modern-star nil)
+  (setq org-hide-leading-stars t)
+  (+word-wrap-mode 1)
+  (flyspell-lazy-mode -1)
+  (set-face-attribute 'fixed-pitch nil :height 1.0)
+  (set-face-attribute 'variable-pitch nil :height 1.0))
+
+(add-hook! 'inferior-python-mode-hook
+  (+zen/toggle)
+  (+word-wrap-mode 1)
+  (set-face-attribute 'fixed-pitch nil :height 1.0)
+  (set-face-attribute 'variable-pitch nil :height 1.0))
+
 
 (add-hook! 'text-mode-hook
-                            (setq bidi-paragraph-direction nil)
-                            (setq bidi-paragraph-start-re  "^")
-                            (setq bidi-paragraph-separate-re  "^")
-                            (setq helm-ff-fuzzy-matching t)
-                            (setq company-backends '((company-capf company-files company-dabbrev-code company-dabbrev)))
-                            (setq-local company-frontends '(company-preview-frontend))
-                            (setq line-spacing 0.3)
-                            (setq buffer-file-coding-system 'utf-8)
-                            (setq save-buffer-coding-system 'utf-8)
-                            (set-face-attribute 'fixed-pitch nil :height 1.0)
-                            (set-face-attribute 'variable-pitch nil :height 1.0)
-                            )
+  (setq bidi-paragraph-direction nil)
+  (setq bidi-paragraph-start-re  "^")
+  (setq bidi-paragraph-separate-re  "^")
+  (setq helm-ff-fuzzy-matching t)
+  (setq company-backends '((company-capf company-files company-dabbrev-code company-dabbrev)))
+  (setq-local company-frontends '(company-preview-frontend))
+  (setq line-spacing 0.3)
+  (setq buffer-file-coding-system 'utf-8)
+  (setq save-buffer-coding-system 'utf-8)
+  (set-face-attribute 'fixed-pitch nil :height 1.0)
+  (set-face-attribute 'variable-pitch nil :height 1.0)
+  )
+
 
 (defun company-prog-mode-hook ()
   (when (and (boundp 'company-mode) company-mode)
-  (company-box-mode)
-  ))
+    (company-box-mode)
+    ))
 (add-hook! 'prog-mode-hook 'my-buffer-face-mode-programming)
 (add-hook! 'prog-mode-hook
-                            (company-prog-mode-hook)
-                            (setq company-backends '((company-capf company-files company-dabbrev-code company-dabbrev)))
-                            (setq-local company-frontends '(company-box-frontend))
-                            (setq line-spacing 0.3)
-                            (delete-selection-mode 1)
-                            (hl-todo-mode 1)
-                            (flyspell-lazy-mode -1)
-                            (+word-wrap-mode 1)
-                            (+zen/toggle)
-                            )
+  (company-prog-mode-hook)
+  (setq company-backends '((company-capf company-files company-dabbrev-code company-dabbrev)))
+  (setq-local company-frontends '(company-box-frontend))
+  (setq line-spacing 0.3)
+  (delete-selection-mode 1)
+  (hl-todo-mode 1)
+  (flyspell-lazy-mode -1)
+  (+word-wrap-mode 1)
+  (+zen/toggle)
+  )
 
 
 (evil-snipe-override-mode 1)
@@ -216,7 +224,7 @@
     (apply fun args)))
 
 
- (setq-default prescient-history-length 1000)
+(setq-default prescient-history-length 1000)
 
 (add-hook 'bibtex-mode-hook 'my/fix-windows-bib-file)
 
@@ -245,25 +253,25 @@
 (defun my/make-large-frame () (interactive) (set-frame-size (selected-frame) 100 45))
 
 (setq default-frame-alist '(
- (height . 38)
- (width . 50)
- (vertical-scroll-bars)
- (tool-bar-lines . 0)
- (menu-bar-lines . 0)
- (left-fringe . 8)
- (right-fringe . 8)))
+                            (height . 38)
+                            (width . 50)
+                            (vertical-scroll-bars)
+                            (tool-bar-lines . 0)
+                            (menu-bar-lines . 0)
+                            (left-fringe . 8)
+                            (right-fringe . 8)))
 
 
 (setq initial-frame-alist '(
- (top . 60)
- (left . 60)
- (height . 35)
- (width . 100)
- (vertical-scroll-bars)
- (tool-bar-lines . 0)
- (menu-bar-lines . 0)
- (left-fringe . 8)
- (right-fringe . 8)))
+                            (top . 60)
+                            (left . 60)
+                            (height . 35)
+                            (width . 100)
+                            (vertical-scroll-bars)
+                            (tool-bar-lines . 0)
+                            (menu-bar-lines . 0)
+                            (left-fringe . 8)
+                            (right-fringe . 8)))
 
 (setq org-id-link-to-org-use-id 'create-if-interactive)
 (setq python-shell-prompt-detect-failure-warning nil)
@@ -288,6 +296,7 @@ Return the errors parsed with the error patterns of CHECKER."
 ;; (setq lsp-python-ms-python-executable-cmd "/home/yonatan/miniforge3/bin/python")
 ;; (setq lsp-pyright-python-executable-cmd "/home/yonatan/miniforge3/bin/python")
 ;; (setq flycheck-python-pycompile-executable "/home/yonatan/miniforge3/bin/python")
+
 ;; (setq python-shell-interpreter "/home/yonatan/miniforge3/bin/python")
 
 
@@ -296,44 +305,44 @@ Return the errors parsed with the error patterns of CHECKER."
 (setq +bidi-hebrew-font (font-spec :family "Heebo"))
 
 (add-hook! (text-mode) :local (lambda ()
-                            (add-hook! after-save-hook #'my/fix-hebrew-hyphen)
+                                (add-hook! after-save-hook #'my/fix-hebrew-hyphen)
 
-                            ))
+                                ))
 
 ;; (setq mouse-wheel-scroll-amount '(2 (1)))
 (setq mouse-wheel-scroll-amount '(2 (hscroll)))
 
 
 ;;; Ibuffer and extras (dired-like buffer list manager)
-  (setq ibuffer-expert t)
-  (setq ibuffer-display-summary nil)
-  (setq ibuffer-use-other-window nil)
-  (setq ibuffer-show-empty-filter-groups nil)
-  (setq ibuffer-movement-cycle nil)
-  (setq ibuffer-default-sorting-mode 'filename/process)
-  (setq ibuffer-use-header-line t)
-  (setq ibuffer-default-shrink-to-minimum-size nil)
-  (setq ibuffer-formats
-        '((mark modified read-only locked " "
-                (name 40 40 :left :elide)
-                " "
-                (size 9 -1 :right)
-                " "
-                (mode 16 16 :left :elide)
-                " " filename-and-process)
-          (mark " "
-                (name 16 -1)
-                " " filename)))
-  (setq ibuffer-saved-filter-groups nil)
-  (setq ibuffer-old-time 48)
-  (add-hook 'ibuffer-mode-hook #'hl-line-mode)
-  (define-key global-map (kbd "C-x C-b") #'ibuffer)
-  ;; (let ((map ibuffer-mode-map))
-  ;;   (define-key map (kbd "* f") #'ibuffer-mark-by-file-name-regexp)
-  ;;   (define-key map (kbd "* g") #'ibuffer-mark-by-content-regexp) ; "g" is for "grep"
-  ;;   (define-key map (kbd "* n") #'ibuffer-mark-by-name-regexp)
-  ;;   (define-key map (kbd "s n") #'ibuffer-do-sort-by-alphabetic)  ; "sort name" mnemonic
-  ;;   (define-key map (kbd "/ g") #'ibuffer-filter-by-content))
+(setq ibuffer-expert t)
+(setq ibuffer-display-summary nil)
+(setq ibuffer-use-other-window nil)
+(setq ibuffer-show-empty-filter-groups nil)
+(setq ibuffer-movement-cycle nil)
+(setq ibuffer-default-sorting-mode 'filename/process)
+(setq ibuffer-use-header-line t)
+(setq ibuffer-default-shrink-to-minimum-size nil)
+(setq ibuffer-formats
+      '((mark modified read-only locked " "
+         (name 40 40 :left :elide)
+         " "
+         (size 9 -1 :right)
+         " "
+         (mode 16 16 :left :elide)
+         " " filename-and-process)
+        (mark " "
+              (name 16 -1)
+              " " filename)))
+(setq ibuffer-saved-filter-groups nil)
+(setq ibuffer-old-time 48)
+(add-hook 'ibuffer-mode-hook #'hl-line-mode)
+(define-key global-map (kbd "C-x C-b") #'ibuffer)
+;; (let ((map ibuffer-mode-map))
+;;   (define-key map (kbd "* f") #'ibuffer-mark-by-file-name-regexp)
+;;   (define-key map (kbd "* g") #'ibuffer-mark-by-content-regexp) ; "g" is for "grep"
+;;   (define-key map (kbd "* n") #'ibuffer-mark-by-name-regexp)
+;;   (define-key map (kbd "s n") #'ibuffer-do-sort-by-alphabetic)  ; "sort name" mnemonic
+;;   (define-key map (kbd "/ g") #'ibuffer-filter-by-content))
 
 
 
@@ -416,8 +425,8 @@ The default tab-bar name uses the buffer name."
 (setq remote-file-name-inhibit-cache nil)
 (setq vc-ignore-dir-regexp
       (format "%s\\|%s"
-                    vc-ignore-dir-regexp
-                    tramp-file-name-regexp))
+              vc-ignore-dir-regexp
+              tramp-file-name-regexp))
 (setq tramp-verbose 1)
 (setq projectile-mode-line "Projectile")
 
@@ -427,7 +436,7 @@ The default tab-bar name uses the buffer name."
 ;; (map! :leader :map org-mode-map :v "nk"  #'insert-link-to-new-note-thesis)
 
 (fset 'make-region-bold
-   (kmacro-lambda-form [?S ?*] 0 "%d"))
+      (kmacro-lambda-form [?S ?*] 0 "%d"))
 (map! :map evil-org-mode-map :v "C-b"  #'make-region-bold)
 ;; (map! :map evil-org-mode-map :v "C-u"  #'make-region-underline)
 ;; (map! :map evil-org-mode-map :v "C-i"  #'make-region-italic)
@@ -435,10 +444,10 @@ The default tab-bar name uses the buffer name."
 
 ;; *****************************************
 ;; never collect garbage. use with caution!~
-  ;; (setq gc-cons-threshold 5000000000)
-  ;; (defun garbage-collect (&rest args)
-  ;;   (message "trying to garbage collect. probably you want to quit emacs."))
-  (setq garbage-collection-messages nil)
+;; (setq gc-cons-threshold 5000000000)
+;; (defun garbage-collect (&rest args)
+;;   (message "trying to garbage collect. probably you want to quit emacs."))
+(setq garbage-collection-messages nil)
 ;; *****************************************
 
 ;; UTF-8 as default encoding
@@ -457,7 +466,7 @@ The default tab-bar name uses the buffer name."
 (set-face-attribute 'variable-pitch nil :height 1.0)
 (add-hook! minibuffer-setup #'+zen/toggle)
 (add-hook 'denote-backlinks-mode-hook #'+zen/toggle)
- (remove-hook! minibuffer-setup #'+zen/toggle)
+(remove-hook! minibuffer-setup #'+zen/toggle)
 
 (add-to-list '+lookup-provider-url-alist
              '("google-scholar"  "https://scholar.google.com/scholar?q=%s"))

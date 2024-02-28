@@ -30,11 +30,10 @@
 (use-package! dired-ranger
   :config
   (map! :map dired-mode-map :n "c" nil)
-  (evil-define-key* 'normal dired-mode-map "cz" #'dired-do-compress-to)
-  (map! :map dired-mode-map :prefix "c" :n
-        :desc "add file(s) to copy/move clipboard" "c" #'dired-ranger-copy
-        :desc "paste file(s) from clipboard" "p" #'dired-ranger-paste
-        :desc "move file(s) from clipboard" "r" #'dired-ranger-move)
+  (evil-define-key* 'normal dired-mode-map "zz" #'dired-do-compress-to)
+  (evil-define-key* 'normal dired-mode-map "c" #'dired-ranger-copy)
+  (evil-define-key* 'normal dired-mode-map "p" #'dired-ranger-paste)
+  (evil-define-key* 'normal dired-mode-map "r" #'dired-ranger-move)
   )
 
 (use-package! org-superstar
@@ -194,7 +193,10 @@
      ;; Python & Jupyter
      (python . t)
      (ipython . t)
-     (jupyter . t)))
+     ))
+
+  (map! :map org-mode-map :n "<return>" #'org-open-at-point)
+
   )
 
 
@@ -571,7 +573,7 @@ DEFS is a plist associating completion categories to commands."
 ;;                                          (conda-env-activate-for-buffer))))
 (after! conda
   (setq! conda-anaconda-home (expand-file-name "~/miniforge3/bin/conda"))
-  (setq-default mode-line-format (cons '(:exec conda-env-current-name) mode-line-format))
+  (setq-default mode-line-format (cons  '(:exec conda-env-current-name) mode-line-format))
   )
 
 (defun centaur-tabs-hide-tab (x)
@@ -1195,9 +1197,20 @@ the directory.  `REST' is passed to the `CONSULT-RIPGREP-FUNCTION'."
     ;; Overriding other minor mode bindings requires some insistence...
     (define-key map [remap jupyter-eval-line-or-region] 'code-cells-eval))
 
+  (let ((map code-cells-mode-map))
+    (define-key map (kbd "a") (code-cells-speed-key 'code-cells-forward-cell)) ;; n
+    (define-key map (kbd "s") (code-cells-speed-key 'code-cells-backward-cell)) ;; p
+    (define-key map (kbd "E") (code-cells-speed-key 'code-cells-eval-above)) ;; b
+    (define-key map (kbd "e") (code-cells-speed-key 'code-cells-eval)) ;; e
+    (define-key map (kbd "<tab>") (code-cells-speed-key 'outline-cycle))) ;; TAB
   ;; (setq code-cells-convert-ipynb-style '(
   ;;       ("pandoc" "--to" "ipynb" "--from" "org")
   ;;       ("pandoc" "--to" "org" "--from" "ipynb")
   ;;       org-mode))
 
+  )
+
+(use-package! ob-ipython
+  :config
+  (setq python-shell-interpreter "ipython")
   )
