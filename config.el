@@ -30,13 +30,9 @@
  ;; doom-variable-pitch-font (font-spec :family "Noto Sans" :size 20)
 
  ;; Iosevka Comfy font
- doom-font  (font-spec :family "Iosevka Comfy" :weight 'regular :size 16)
- doom-big-font  (font-spec :family "Iosevka Comfy" :weight 'regular :size 16)
- doom-variable-pitch-font (font-spec :family "Iosevka Comfy Duo" :weight 'regular :size 16)
-
- ;; doom-font  (font-spec :family "Iosevka Comfy" :weight 'regular :size 24)
- ;; doom-big-font  (font-spec :family "Iosevka Comfy" :weight 'regular :size 24)
- ;; doom-variable-pitch-font (font-spec :family "Iosevka Comfy Duo" :weight 'regular :size 24)
+ doom-font  (font-spec :family "Iosevka Comfy" :weight 'regular :size 15)
+ doom-big-font  (font-spec :family "Iosevka Comfy" :weight 'regular :size 15)
+ doom-variable-pitch-font (font-spec :family "Iosevka Comfy Duo" :weight 'regular :size 15)
  )
 
 (load! "themes-and-fonts.el")
@@ -94,7 +90,6 @@
  truncate-string-ellipsis "…")               ; Unicode ellispis are nicer than "...", and also save /precious/ space
 
 
-(add-load-path! "../doom-emacs/packages/")
 (load! "package-config.el")
 (load! "my-functions.el")
 (load! "unbinding.el")

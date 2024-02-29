@@ -191,11 +191,14 @@
    '((emacs-lisp . t) ;; Other languages
      (shell . t)
      ;; Python & Jupyter
+     (jupyter . t)
      (python . t)
      (ipython . t)
      ))
 
-  (map! :map org-mode-map :n "<return>" #'org-open-at-point)
+  (map! :map org-mode-map
+        :ni "C-c C-c" #'org-babel-execute-maybe
+        :n "<return>" #'org-open-at-point)
 
   )
 
@@ -404,10 +407,10 @@ With prefix, rebuild the cache before offering candidates."
 
 
 
-;; (after! lsp-pyright
-;;   :hook (python-mode . (lambda ()
-;;                          (require 'lsp-pyright)
-;;                          (lsp)))  ; or lsp-
+(after! lsp-pyright
+  :hook (python-mode . (lambda ()
+                         (require 'lsp-pyright)
+                         (lsp))))  ; or lsp-
 ;;   :config
 
 ;;   (setq lsp-pyright-use-library-code-for-types t) ;; set this to nil if getting too many false positive type errors
@@ -544,7 +547,6 @@ DEFS is a plist associating completion categories to commands."
   )
 (use-package! popper
   :bind (
-         ;; ("C-`"   . popper-toggle-latest)
          ("C-`"   . #'popper-kill-latest-popup)
          ("M-`"   . popper-cycle)
          ("C-M-`" . popper-toggle-type))
@@ -554,6 +556,7 @@ DEFS is a plist associating completion categories to commands."
           "Output\\*$"
           "\\*Async Shell Command\\*"
           "\\*Python\\*"
+          "^*jupyter"
           "\\*MATLAB\\*"
           "\\*Ibuffer\\*"
           "\\*denote-backlinks"
@@ -1178,7 +1181,17 @@ the directory.  `REST' is passed to the `CONSULT-RIPGREP-FUNCTION'."
 
 ;; jupyter
 (use-package jupyter
+  :demand t
+  :after (:all org python ob-jupyter ob-python)
   :config
+
+  (org-babel-jupyter-override-src-block 'python)
+
+  (map! :map jupyter-repl-mode-map
+        :i "<up>" #'jupyter-repl-history-previous
+        :i "<down>" #'jupyter-repl-history-next
+        )
+
   (defun my/jupyter-refresh-kernelspecs ()
     "Refresh Jupyter kernelspecs"
     (interactive)
@@ -1188,21 +1201,19 @@ the directory.  `REST' is passed to the `CONSULT-RIPGREP-FUNCTION'."
 (use-package code-cells
   :load-path "~/.config/doom/external-lisp/code-cells.el/"
   :config
-  (let ((map code-cells-mode-map))
-    (define-key map (kbd "C-c <up>") 'code-cells-backward-cell)
-    (define-key map (kbd "C-c <down>") 'code-cells-forward-cell)
-    (define-key map (kbd "M-<up>") 'code-cells-move-cell-up)
-    (define-key map (kbd "M-<down>") 'code-cells-move-cell-down)
-    (define-key map (kbd "C-c C-c") 'code-cells-eval)
-    ;; Overriding other minor mode bindings requires some insistence...
-    (define-key map [remap jupyter-eval-line-or-region] 'code-cells-eval))
 
-  (let ((map code-cells-mode-map))
-    (define-key map (kbd "a") (code-cells-speed-key 'code-cells-forward-cell)) ;; n
-    (define-key map (kbd "s") (code-cells-speed-key 'code-cells-backward-cell)) ;; p
-    (define-key map (kbd "E") (code-cells-speed-key 'code-cells-eval-above)) ;; b
-    (define-key map (kbd "e") (code-cells-speed-key 'code-cells-eval)) ;; e
-    (define-key map (kbd "<tab>") (code-cells-speed-key 'outline-cycle))) ;; TAB
+  ;; Overriding other minor mode bindings requires some insistence...
+  ;; (define-key map [remap jupyter-eval-line-or-region] 'code-cells-eval)
+
+  (map! :map code-cells-mode-map
+        :ni "C-c C-k" 'code-cells-backward-cell
+        :ni "C-c C-j" 'code-cells-forward-cell
+        :ni "C-c C-<up>" 'code-cells-move-cell-up
+        :ni "C-c C-<down>" 'code-cells-move-cell-down
+        :ni "C-c E" 'code-cells-eval-above
+        :ni "C-c C-c" 'code-cells-eval
+        :ni "C-c C-v" 'code-cells-mark-cell)
+
   ;; (setq code-cells-convert-ipynb-style '(
   ;;       ("pandoc" "--to" "ipynb" "--from" "org")
   ;;       ("pandoc" "--to" "org" "--from" "ipynb")
@@ -1210,7 +1221,7 @@ the directory.  `REST' is passed to the `CONSULT-RIPGREP-FUNCTION'."
 
   )
 
-(use-package! ob-ipython
-  :config
-  (setq python-shell-interpreter "ipython")
-  )
+;; (use-package! ob-ipython
+;;   :config
+;;   (setq python-shell-interpreter "ipython")
+;;   )

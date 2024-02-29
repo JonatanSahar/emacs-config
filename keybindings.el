@@ -58,6 +58,7 @@
               (save-buffer)
               )
  :i "C-M-SPC" #'evil-normal-state
+ :i "S-<return>" #'evil-normal-state
  :map evil-org-mode-map
  :i "C-h" #'evil-window-left
  :i "C-l" #'evil-window-right
@@ -293,14 +294,6 @@
 (map! :map (python-mode-map python-ts-mode-map)
       :nv "C-<return>"  nil)
 
-(map! :map (python-mode-map python-ts-mode-map)
-      :ni "C-c C-k" 'code-cells-backward-cell
-      :ni "C-c C-j" 'code-cells-forward-cell
-      :ni "C-c C-<up>" 'code-cells-move-cell-up
-      :ni "C-c C-<down>" 'code-cells-move-cell-down
-      :ni "C-c C-c" 'code-cells-eval
-      :ni "C-c C-v" 'code-cells-mark-cell)
-
 (map! :map (inferior-python-mode)
       :nv "C-k" #'windmove-up
       :nv "C-h" #'windmove-left
@@ -331,8 +324,8 @@
 
       (:prefix "t"
        :nv "T" #'treemacs
-       :nv "t" #'popper-toggle-latest
-       :nv "<return>" #'popper-toggle-latest
+       :nv "t" #'popper-toggle
+       :nv "<return>" #'popper-toggle
        :nv "s" #'shell
        :nv "i" #'my/toggle-org-timer
        )
@@ -710,8 +703,8 @@
       "d" #'citar-org-delete-citation)
 
 (map! :map evil-org-mode-map
+      :nv "k" #'evil-previous-visual-line
+      :nv "j" #'evil-next-visual-line
       :nv "gk" #'evil-previous-visual-line
       :nv "gj" #'evil-next-visual-line
-      :nv "V" (lambda () (interactive (list (if current-prefix-arg
-                                                (evil-visual-screen-line)
-                                              (evil-visual-line))))))
+      :nv "V" #'evil-visual-screen-line)

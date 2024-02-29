@@ -34,4 +34,5 @@
  ;; If there is more than one, they won't work right.
  '(line-number ((t (:inherit default :foreground "steel blue" :strike-through nil :underline nil :slant normal :weight semi-bold :family "Roboto Mono"))))
  '(line-number-current-line ((t (:inherit (hl-line default) :foreground "light steel blue" :strike-through nil :underline nil :slant normal :weight semi-bold :family "Roboto Mono"))))
- '(org-default ((t (:family "Heebo")))))
+ '(org-default ((t (:family "Heebo"))))
+ '(org-verbatim ((t (:inherit modus-themes-prose-verbatim :background "lavender")))))

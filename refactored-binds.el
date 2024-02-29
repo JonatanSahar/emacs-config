@@ -55,7 +55,7 @@
   (interactive)
   (evil-normal-state)
   (save-buffer)
- )
+  )
 
 (map!
  :nvi "C-\\" #'toggle-input-method
@@ -65,13 +65,14 @@
               (save-buffer)
               )
  :i "S-SPC" #'evil-normal-state
+ :i "S-<return>" #'evil-normal-state
 
  :map evil-org-mode-map
  :i "C-h" #'evil-window-left
  :i "C-l" #'evil-window-right
  :i "C-k" #'evil-window-up
  :i "C-j" #'evil-window-down
-)
+ )
 (map!
  :map pdf-view-mode-map
  :nvi "go" nil
@@ -223,143 +224,143 @@
  :nv "z" (lambda ()
            (interactive)
            (call-interactively #'evil-next-flyspell-error
-(defun my-shell nil (interactive) (shell) (popper-toggle-type) (evil-normal-state))
+                               (defun my-shell nil (interactive) (shell) (popper-toggle-type) (evil-normal-state))
 
-(map! :leader
-      (:prefix ("j" . "navigation")
-               :desc "avy timer" "j" 'evil-avy-goto-char-timer
-               :desc "avy line" "l" 'evil-avy-goto-line)
+                               (map! :leader
+                                     (:prefix ("j" . "navigation")
+                                      :desc "avy timer" "j" 'evil-avy-goto-char-timer
+                                      :desc "avy line" "l" 'evil-avy-goto-line)
 
-      (:prefix "t"
-               :nv "T" #'treemacs
-               :nv "t" #'popper-toggle-latest
-               :nv "<return>" #'popper-toggle-latest
-               :nv "s" #'shell)
+                                     (:prefix "t"
+                                      :nv "T" #'treemacs
+                                      :nv "t" #'popper-toggle-latest
+                                      :nv "<return>" #'popper-toggle-latest
+                                      :nv "s" #'shell)
 
-      (:prefix "o"
-               :nv :desc "windows cmd" "w" #'shell
-               :nv :desc "eshell" "s" #'my-shell
-               :nv :desc "dired in some dir" "d" #'consult-dir
-               :nv :desc "dired in a new window" "D" #'consult-dir)
+                                     (:prefix "o"
+                                      :nv :desc "windows cmd" "w" #'shell
+                                      :nv :desc "eshell" "s" #'my-shell
+                                      :nv :desc "dired in some dir" "d" #'consult-dir
+                                      :nv :desc "dired in a new window" "D" #'consult-dir)
 
-      (:prefix "g"
-               :nv "p" #'magit-pull)
+                                     (:prefix "g"
+                                      :nv "p" #'magit-pull)
 
-      (:prefix "b"
-               :desc "reload buffer" "r" #'my/revert-buffer-no-confirm
-               :desc "revert buffer" "R" #'revert-buffer)
+                                     (:prefix "b"
+                                      :desc "reload buffer" "r" #'my/revert-buffer-no-confirm
+                                      :desc "revert buffer" "R" #'revert-buffer)
 
-      (:prefix ("i" . "insert stuff")
-               :nv :desc "copy and comment line(s)" "C" #'evilnc-copy-and-comment-lines
-               :desc "make evil-mc-cursor here" "c" #'my/make-cursor-here
-               :desc "add line above" "k" #'+evil/insert-newline-above
-               :desc "add line below" "j" #'+evil/insert-newline-below
+                                     (:prefix ("i" . "insert stuff")
+                                      :nv :desc "copy and comment line(s)" "C" #'evilnc-copy-and-comment-lines
+                                      :desc "make evil-mc-cursor here" "c" #'my/make-cursor-here
+                                      :desc "add line above" "k" #'+evil/insert-newline-above
+                                      :desc "add line below" "j" #'+evil/insert-newline-below
 
-               (:prefix ("a" . "anki cloze")
-                        :map org-mode-map
-                        :nv "0" #'anki-editor-reset-cloze-number
-                        :nv "C" #'anki-editor-cloze-region-auto-incr
-                        :nv "c" #'anki-editor-cloze-region-dont-incr
-                        :nv "w" #'anki-editor-cloze-word-under-cursor-auto-incr)
+                                      (:prefix ("a" . "anki cloze")
+                                       :map org-mode-map
+                                       :nv "0" #'anki-editor-reset-cloze-number
+                                       :nv "C" #'anki-editor-cloze-region-auto-incr
+                                       :nv "c" #'anki-editor-cloze-region-dont-incr
+                                       :nv "w" #'anki-editor-cloze-word-under-cursor-auto-incr)
 
-               (:prefix ("l" . "latex symbols")
-                        :desc "right double arrow"  "r" (kbd "$\\Rightarrow$"))
+                                      (:prefix ("l" . "latex symbols")
+                                       :desc "right double arrow"  "r" (kbd "$\\Rightarrow$"))
 
-               (:prefix ("s" . "surround stuff")
-                        :desc "surround object with bold"  "*" (kbd "ysio*")
-                        :desc "surround object with quotes"  "\"" (kbd "ysio\"")
-                        :desc "surround object with single quotes"  "\'" (kbd "ysio\'")
-                        :desc "surround object with parens" "\)" (kbd "ysio\)")
-                        :desc "surround object with brackets" "\]" (kbd "ysio\]")))
+                                      (:prefix ("s" . "surround stuff")
+                                       :desc "surround object with bold"  "*" (kbd "ysio*")
+                                       :desc "surround object with quotes"  "\"" (kbd "ysio\"")
+                                       :desc "surround object with single quotes"  "\'" (kbd "ysio\'")
+                                       :desc "surround object with parens" "\)" (kbd "ysio\)")
+                                       :desc "surround object with brackets" "\]" (kbd "ysio\]")))
 
-      (:prefix ("k" . "my commands")
-               :desc "embark act" "a" #'embark-act
-               :desc "select header content" "y" #'my/visual-inside-org-header
-               :desc "copy header content" "h" #'my/yank-org-headline
-               :desc "orgnv" "g" #'orgnv-browse
-               :desc "orgnv + rebuild DB" "G" #'(lambda () (interactive) (my/orgnv-update-db) (orgnv-browse))
-               :desc "kill all other windows" "o" 'delete-other-windows
-               :desc "resize window to small" "f" 'my/make-small-frameHere's the rest of your code:
+                                     (:prefix ("k" . "my commands")
+                                      :desc "embark act" "a" #'embark-act
+                                      :desc "select header content" "y" #'my/visual-inside-org-header
+                                      :desc "copy header content" "h" #'my/yank-org-headline
+                                      :desc "orgnv" "g" #'orgnv-browse
+                                      :desc "orgnv + rebuild DB" "G" #'(lambda () (interactive) (my/orgnv-update-db) (orgnv-browse))
+                                      :desc "kill all other windows" "o" 'delete-other-windows
+                                      :desc "resize window to small" "f" 'my/make-small-frameHere's the rest of your code:
 
-```elisp
-               :desc "resize window to medium" "m" 'my/make-medium-frame
-               :desc "make new frame" "F" 'make-frame-command
-               :desc "writeroom mode" "w" #'writeroom-mode
-               :desc "kill buffer and window" "D" #'kill-buffer-and-window
-               :desc "kill buffer" "d" 'kill-current-buffer
-               :desc "switch to previous buffer" "k" 'evil-switch-to-windows-last-buffer
-               :desc "search and replace vim style" "s" #'my/search-replace
-               :desc "search and replace vim style - in region" "S" #'my/search-replace-in-region
-               :desc "refile subtree" "R" 'org-refile
-               :desc "register dwi" "p" #'consult-register-load
-               :desc "point to register" "p" #'point-to-register
-               :desc "run macro" "e" #'kmacro-end-and-call-macro
-               :desc "generate laTex previews" "L" #'org-latex-preview
+                                      ```elisp
+                                      :desc "resize window to medium" "m" 'my/make-medium-frame
+                                      :desc "make new frame" "F" 'make-frame-command
+                                      :desc "writeroom mode" "w" #'writeroom-mode
+                                      :desc "kill buffer and window" "D" #'kill-buffer-and-window
+                                      :desc "kill buffer" "d" 'kill-current-buffer
+                                      :desc "switch to previous buffer" "k" 'evil-switch-to-windows-last-buffer
+                                      :desc "search and replace vim style" "s" #'my/search-replace
+                                      :desc "search and replace vim style - in region" "S" #'my/search-replace-in-region
+                                      :desc "refile subtree" "R" 'org-refile
+                                      :desc "register dwi" "p" #'consult-register-load
+                                      :desc "point to register" "p" #'point-to-register
+                                      :desc "run macro" "e" #'kmacro-end-and-call-macro
+                                      :desc "generate laTex previews" "L" #'org-latex-preview
 
-               (:prefix ("r" . "rectangle operations")
-                        "r" #'replace-rectangle
-                        :desc "paste rectangle" "p" #'yank-rectangle
-                        :desc "copy rectangle" "y"  #'copy-rectangle-as-kill
-                        :desc "cut rectangle" "x"  #'kill-rectangle
-                        :desc "push rectangle right" "r"  #'open-rectangle
-                        :desc "delete rectangle" "d"  #'clear-rectangle)
+                                      (:prefix ("r" . "rectangle operations")
+                                       "r" #'replace-rectangle
+                                       :desc "paste rectangle" "p" #'yank-rectangle
+                                       :desc "copy rectangle" "y"  #'copy-rectangle-as-kill
+                                       :desc "cut rectangle" "x"  #'kill-rectangle
+                                       :desc "push rectangle right" "r"  #'open-rectangle
+                                       :desc "delete rectangle" "d"  #'clear-rectangle)
 
-               (:prefix ("b" . "references")
-                        :desc "refresh bibliography" "r" #'citar-refresh
-                        :desc "open bibliography" "b" #'citar-open)
-               )
-      )
-;; Avy settings
-(setq avy-style 'at-full
-      avy-all-windows 't
-      avy-single-candidate-jump 't)
+                                      (:prefix ("b" . "references")
+                                       :desc "refresh bibliography" "r" #'citar-refresh
+                                       :desc "open bibliography" "b" #'citar-open)
+                                      )
+                                     )
+                               ;; Avy settings
+                               (setq avy-style 'at-full
+                                     avy-all-windows 't
+                                     avy-single-candidate-jump 't)
 
-;; Hydra for window management
-(defhydra hydra-window (:color red
-                        :columns 3)
-  ("h" windmove-left "window-left")
-  ("j" windmove-down "window-down")
-  ("k" windmove-up "window-up")
-  ("l" windmove-right "right-left")
-  (">" (window-resize nil 15 1) "increase window size horizontally")
-  ("<" (window-resize nil -15 1) "decrease window size horizontally")
-  ("+" (window-resize nil 15 nil) "increase window size vertically")
-  ("-" (window-resize nil -15 nil) "increase window size vertically")
-  ("|" (lambda ()
-         (interactive)
-         (split-window-right)
-         (windmove-right)) "split right")
-  ("_" (lambda ()
-         (interactive)
-         (split-window-below)
-         (windmove-down)) "split down")
-  ("q" nil "quit" :color blue))
+                               ;; Hydra for window management
+                               (defhydra hydra-window (:color red
+                                                       :columns 3)
+                                 ("h" windmove-left "window-left")
+                                 ("j" windmove-down "window-down")
+                                 ("k" windmove-up "window-up")
+                                 ("l" windmove-right "right-left")
+                                 (">" (window-resize nil 15 1) "increase window size horizontally")
+                                 ("<" (window-resize nil -15 1) "decrease window size horizontally")
+                                 ("+" (window-resize nil 15 nil) "increase window size vertically")
+                                 ("-" (window-resize nil -15 nil) "increase window size vertically")
+                                 ("|" (lambda ()
+                                        (interactive)
+                                        (split-window-right)
+                                        (windmove-right)) "split right")
+                                 ("_" (lambda ()
+                                        (interactive)
+                                        (split-window-below)
+                                        (windmove-down)) "split down")
+                                 ("q" nil "quit" :color blue))
 
-;; Leader key mappings
-(map! :leader
-      :desc "window resize hydra" "w." 'hydra-window-resize/body
-      :desc "Open project buffer in other window" "pF" #'projectile-find-file-dwim-other-window
-      :desc "open a buffer and switch to its tabspace" "bt" #'tabspaces-switch-buffer-and-tab
-      :desc "consult buffer" "z" #'consult-buffer
-      :desc "consult buffer to new window" "Z" #'consult-buffer-other-window
-      :desc "consult buffer" "SPC" #'consult-buffer
-      :desc "consult buffer to new window" "S-SPC" #'consult-buffer-other-window)
+                               ;; Leader key mappings
+                               (map! :leader
+                                     :desc "window resize hydra" "w." 'hydra-window-resize/body
+                                     :desc "Open project buffer in other window" "pF" #'projectile-find-file-dwim-other-window
+                                     :desc "open a buffer and switch to its tabspace" "bt" #'tabspaces-switch-buffer-and-tab
+                                     :desc "consult buffer" "z" #'consult-buffer
+                                     :desc "consult buffer to new window" "Z" #'consult-buffer-other-window
+                                     :desc "consult buffer" "SPC" #'consult-buffer
+                                     :desc "consult buffer to new window" "S-SPC" #'consult-buffer-other-window)
 
-;; Key mappings for evil-normal-state
-(define-key evil-normal-state-map (kbd "J") 'evil-join)
-(define-key evil-normal-state-map (kbd "K") 'join-line)
+                               ;; Key mappings for evil-normal-state
+                               (define-key evil-normal-state-map (kbd "J") 'evil-join)
+                               (define-key evil-normal-state-map (kbd "K") 'join-line)
 
-;; Key mappings for wordnut-mode
-(evil-define-key 'normal wordnut-mode-map (kbd "q") 'quit-window)
-(evil-define-key 'normal wordnut-mode-map (kbd "RET") 'wordnut-lookup-current-word)
-(evil-define-key 'normal wordnut-mode-map (kbd "h") 'wordnut-history-backward)
-(evil-define-key 'normal wordnut-mode-map (kbd "l") 'wordnut-history-forward)
-(evil-define-key 'normal wordnut-mode-map (kbd "H") 'wordnut-history-lookup)
-(evil-define-key 'normal wordnut-mode-map (kbd "/") 'wordnut-search)
-(evil-define-key 'normal wordnut-mode-map (kbd "o") 'wordnut-show-overview)
+                               ;; Key mappings for wordnut-mode
+                               (evil-define-key 'normal wordnut-mode-map (kbd "q") 'quit-window)
+                               (evil-define-key 'normal wordnut-mode-map (kbd "RET") 'wordnut-lookup-current-word)
+                               (evil-define-key 'normal wordnut-mode-map (kbd "h") 'wordnut-history-backward)
+                               (evil-define-key 'normal wordnut-mode-map (kbd "l") 'wordnut-history-forward)
+                               (evil-define-key 'normal wordnut-mode-map (kbd "H") 'wordnut-history-lookup)
+                               (evil-define-key 'normal wordnut-mode-map (kbd "/") 'wordnut-search)
+                               (evil-define-key 'normal wordnut-mode-map (kbd "o") 'wordnut-show-overview)
 
-;; Some more mappings
-(global-set-key [f11] 'flyspell-correct-at-point)
+                               ;; Some more mappings
+                               (global-set-key [f11] 'flyspell-correct-at-point)
 
-;; Minibuffer mappings
-(map! :map minibuffer-mode-map :nvi ";" #'embark-act)
+                               ;; Minibuffer mappings
+                               (map! :map minibuffer-mode-map :nvi ";" #'embark-act)
