@@ -380,6 +380,7 @@
        :desc "kill all other windows" "o" 'delete-other-windows
        :desc "resize window to small" "f" 'my/make-small-frame
        :desc "resize window to medium" "m" 'my/make-medium-frame
+       :desc "resize window to large" "M" 'my/make-large-frame
        :desc "make new frame" "F" 'make-frame-command
        :desc "writeroom mode" "w" #'writeroom-mode
        :desc "kill buffer and window" "D" #'kill-buffer-and-window
@@ -512,9 +513,6 @@
  :nvi "M-n" #'evil-paste-pop-next
  :nvi "C-p" #'projectile-find-file
 
- ;; :nvi "C-c  c" #'org-capture
- :nvi "C-c  m" #'my/evil-mc-make-vertical-cursors
- :nvi "C-c  H" #'my/visual-inside-org-header
  :nvi "C-c  h" #'org-toggle-heading
  :nvi "C-c  i" #'org-toggle-item
  ;; :nvi "C-c  i" #'(lambda () (interactive) ((org-toggle-item) (org-end-of-line)))

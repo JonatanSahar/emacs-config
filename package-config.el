@@ -410,10 +410,10 @@ With prefix, rebuild the cache before offering candidates."
 (after! lsp-pyright
   :hook (python-mode . (lambda ()
                          (require 'lsp-pyright)
-                         (lsp))))  ; or lsp-
-;;   :config
+                         (eglot))) ; or lsp-
+  :config
 
-;;   (setq lsp-pyright-use-library-code-for-types t) ;; set this to nil if getting too many false positive type errors
+  (setq lsp-pyright-use-library-code-for-types t)) ;; set this to nil if getting too many false positive type errors
 ;;   (setq lsp-pyright-stub-path (concat (getenv "HOME") "/src/python-type-stubs"))
 ;;   )
 
@@ -1187,7 +1187,14 @@ the directory.  `REST' is passed to the `CONSULT-RIPGREP-FUNCTION'."
 
   (org-babel-jupyter-override-src-block 'python)
 
+  (map! :map python-mode-map
+        :nvi "C-<return>" #'jupyter-eval-line-or-region
+        )
+
   (map! :map jupyter-repl-mode-map
+        :i "C-k" #'jupyter-repl-history-previous
+        :nvi "C-e" #'evil-end-of-line-or-visual-line
+        :i "C-j" #'jupyter-repl-history-next
         :i "<up>" #'jupyter-repl-history-previous
         :i "<down>" #'jupyter-repl-history-next
         )
@@ -1204,21 +1211,65 @@ the directory.  `REST' is passed to the `CONSULT-RIPGREP-FUNCTION'."
 
   ;; Overriding other minor mode bindings requires some insistence...
   ;; (define-key map [remap jupyter-eval-line-or-region] 'code-cells-eval)
+  (defun my/insert-code-cell()
+    (interactive)
+    (evil-open-above 1)
+    (insert "#%%")
+    )
+
+  (defun my/insert-markdown-cell()
+    (interactive)
+    (evil-open-above 1)
+    (insert "#%% [markdown]")
+    )
+
+  (defun my/delete-code-cell()
+    (interactive)
+    (code-cells-mark-cell)
+    (let ((beg (region-beginning))
+          (end (region-end)))
+      (evil-delete beg end)))
+
+  (defun my/code-cell-to-md()
+    (interactive)
+    (code-cells-backward-cell)
+    (evil-append-line 1)
+    (insert " [markdown]")
+    (evil-normal-state)
+    )
+
+  (defun my/md-cell-to-code()
+    (interactive)
+    (code-cells-backward-cell)
+    (evil-end-of-visual-line)
+    (save-excursion
+      (beginning-of-line)
+      (when (re-search-forward "\\[markdown\\]" (line-end-position) t)
+        (replace-match ""))))
+
 
   (map! :map code-cells-mode-map
-        :ni "C-c C-k" 'code-cells-backward-cell
-        :ni "C-c C-j" 'code-cells-forward-cell
-        :ni "C-c C-<up>" 'code-cells-move-cell-up
-        :ni "C-c C-<down>" 'code-cells-move-cell-down
-        :ni "C-c E" 'code-cells-eval-above
-        :ni "C-c C-c" 'code-cells-eval
-        :ni "C-c C-v" 'code-cells-mark-cell)
+        :ni "C-c C-k" #'code-cells-backward-cell
+        :ni "C-c C-j" #'code-cells-forward-cell
+        :ni "C-c C-<up>" #'code-cells-move-cell-up
+        :ni "C-c C-<down>" #'code-cells-move-cell-down
+        :ni "C-c E" #'code-cells-eval-above
+        :ni "C-c C-c" #'code-cells-eval
+        :ni "C-<return>" #'code-cells-eval
+        :ni "S-<return>" #'my/eval-code-cell-and-next
+        :ni "C-c C-o" #'jupyter-eval-line-or-region
+        :ni "C-c i" #'my/insert-code-cell
+        :ni "C-c I" #'my/insert-markdown-cell
+        :ni "C-c k" #'jupyter-repl-pop-to-buffer
+        :ni "C-c m" #'my/code-cell-to-md
+        :ni "C-c M" #'my/md-cell-to-code
+        :ni "C-c d" #'my/delete-code-cell
+        :ni "C-c C-v" #'code-cells-mark-cell)
 
   ;; (setq code-cells-convert-ipynb-style '(
   ;;       ("pandoc" "--to" "ipynb" "--from" "org")
   ;;       ("pandoc" "--to" "org" "--from" "ipynb")
   ;;       org-mode))
-
   )
 
 ;; (use-package! ob-ipython

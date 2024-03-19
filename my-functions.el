@@ -4,22 +4,6 @@
   (unless (= (line-number-at-pos) orig-line)
     (evil-mc-make-cursor-here))
   )
-    ;;; During visual selection point has +1 value
-(defun my/evil-mc-make-vertical-cursors (beg end)
-  (interctive (list (region-beginning) (- (region-end) 1)))
-  (evil-exit-visual-state)
-  (evil-mc-pause-cursors)
-      ;;; Because `evil-mc-resume-cursors` produces a cursor,
-      ;;; we have to skip a current line here to avoid having +1 cursor
-  (apply-on-rectangle #'evil--mc-make-cursor-at-col
-                      beg end (line-number-at-pos))
-  (evil-mc-resume-cursors)
-      ;;; Because `evil-mc-resume-cursors` produces a cursor, we need to place it on on the
-      ;;; same column as the others
-  (move-to-column (evil-mc-column-number end))
-  ;; (evil-digit-argument-or-evil-beginning-of-line)
-  ;; (evil-beginning-of-visual-line)
-  )
 
 (defun org-journal-find-location ()
   ;; Open today's journal, but specify a non-nil prefix argument in order to
@@ -799,3 +783,36 @@ The optional argument NEW-WINDOW is not used."
     (progn
       (org-timer-start)
       (message "Org timer started."))))
+
+(defun my/set-font-size(size)
+  (setq
+   ;; Iosevka Comfy font
+   doom-font  (font-spec :family "Iosevka Comfy" :weight 'regular :size size)
+   doom-big-font  (font-spec :family "Iosevka Comfy" :weight 'regular :size size)
+   doom-variable-pitch-font (font-spec :family "Iosevka Comfy Duo" :weight 'regular :size size))
+  doom-fi (font-spec :family "Iosevka Comfy Duo" :weight 'regular :size size))
+
+(defun my/export-jupyter-notebook-to-html ()
+  "Convert the current Jupyter notebook to an HTML file using nbconvert, prompting for a suffix to append to the filename."
+  (interactive)
+  (let ((filename (buffer-file-name)))
+    (if (and filename (string-match "\\.ipynb\\'" filename))
+        (let* ((default-directory (file-name-directory filename))
+               (base-name (file-name-sans-extension (file-name-nondirectory filename)))
+               (suffix (read-string "Enter suffix: "))
+               (new-filename (format "%s-%s.html" base-name suffix)))
+          (shell-command (format "jupyter nbconvert --execute --no-input --to html \"%s\" --output \"%s\"" filename new-filename))
+          (message "Conversion started in background. Check *Messages* or *Shell Command Output* for progress."))
+      (message "Not a Jupyter notebook!"))))
+
+(defun _export-file-to-docx (file)
+  "Export FILE to DOCX using Pandoc."
+  (let ((cmd (format "pandoc --bibliography ~/Documents/bibliography/thesis-materials.bib -o %s.docx %s" (file-name-sans-extension file) file)))
+    (shell-command cmd)))
+
+(defun export-file-to-docx ()
+  "Export a file to DOCX using Pandoc."
+  (interactive)
+  (let* ((current-dir default-directory)
+         (file (completing-read "Choose file: " (directory-files current-dir nil "\\.docx$"))))
+    (export-file-to-docx file)))

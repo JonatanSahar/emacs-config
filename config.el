@@ -243,9 +243,11 @@
                                        (no-delete-other-windows . t))))))
 
 (setq org-odt-preferred-output-format "docx")
+
+;; width x hight
 (defun my/make-small-frame () (interactive) (set-frame-size (selected-frame) 50 42))
-(defun my/make-medium-frame () (interactive) (set-frame-size (selected-frame) 100 35))
-(defun my/make-large-frame () (interactive) (set-frame-size (selected-frame) 100 45))
+(defun my/make-medium-frame () (interactive) (set-frame-size (selected-frame) 110 40))
+(defun my/make-large-frame () (interactive) (set-frame-size (selected-frame) 140 47))
 
 (setq default-frame-alist '(
                             (height . 38)
@@ -353,7 +355,7 @@ Return the errors parsed with the error patterns of CHECKER."
   (lambda () (delete-selection-mode 1)))
 
 ;; (global-delete-selection-mode 1)
-;; (global-zen-mode 1)
+(global-zen-mode 1)
 
 (defmacro define-and-bind-text-object (key start-regex end-regex)
   (let ((inner-name (make-symbol "inner-name"))
