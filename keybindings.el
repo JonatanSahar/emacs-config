@@ -337,11 +337,10 @@
        :nv :desc "dired in a new window" "D" #'consult-dir
        )
 
-      ;; (:prefix "g"
-      ;; :nv "p" #'magit-pull
-      ;; )
-      ;; (:line ("yank" . "y")
-      ;;  :desc "header content" "y" #'my/visual-inside-org-header)
+      (:prefix "g"
+       :nv "F" #'magit-pull
+       :nv "p" #'magit-push
+       )
 
       (:prefix ("b")
        :desc "reload buffer" "r" #'my/revert-buffer-no-confirm

@@ -1276,3 +1276,15 @@ the directory.  `REST' is passed to the `CONSULT-RIPGREP-FUNCTION'."
 ;;   :config
 ;;   (setq python-shell-interpreter "ipython")
 ;;   )
+
+(use-package org-download
+  :after org
+  :config
+  (setq org-download-method 'directory
+        org-download-image-dir "images"
+        org-download-heading-lvl nil
+        org-download-timestamp "%Y%m%d-%H%M%S_"
+        org-image-actual-width 400
+        org-download-screenshot-method "xclip -selection clipboard -t image/png -o > '%s'")
+  :bind
+  ("C-M-p" . org-download-screenshot))

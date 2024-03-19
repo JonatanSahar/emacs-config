@@ -567,14 +567,14 @@ Current pattern: %`evil-mc-pattern
 (defun my-buffer-face-mode-programming ()
   "Sets a fixed width (monospace) font in current buffer"
   (interactive)
-  (setq writeroom-width 100)
+  (setq writeroom-width 120)
   ;; (setq buffer-face-mode-face '(:extend t :family "Fira Code Retina"))
   (setq buffer-face-mode-face '(:extend t :family "Iosevka Comfy Duo"))
   (buffer-face-mode))
 
 (defun my-buffer-face-mode-text ()
   (interactive)
-  (setq writeroom-width 100)
+  (setq writeroom-width 120)
   (setq buffer-face-mode-face '(:extend t :family "Iosevka Comfy Duo"))
   (buffer-face-mode)
   (set-face-attribute 'fixed-pitch nil :height 1.0)

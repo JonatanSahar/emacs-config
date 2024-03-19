@@ -107,6 +107,7 @@
 (package! consult-projectile)
 (package! evil-better-visual-line)
 (package! tmr)
+(package! org-download)
 
 
 (package! consult)
