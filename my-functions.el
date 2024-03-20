@@ -816,3 +816,12 @@ The optional argument NEW-WINDOW is not used."
   (let* ((current-dir default-directory)
          (file (completing-read "Choose file: " (directory-files current-dir nil "\\.docx$"))))
     (export-file-to-docx file)))
+
+(defun open-html-file-in-eww ()
+  "Open the selected HTML file in eww."
+  (interactive)
+  (let ((file (dired-get-filename)))
+    (when (string= (file-name-extension file) "html")
+      (eww-open-file file)
+      (doom/window-enlargen))))
+(define-key dired-mode-map (kbd "C-c C-o") 'open-html-file-in-eww)
