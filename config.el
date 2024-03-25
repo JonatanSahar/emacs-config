@@ -471,8 +471,6 @@ The default tab-bar name uses the buffer name."
 (setq doom-projectile-fd-binary "fdfind")
 
 (global-hl-todo-mode 1)
-(setq browse-url-chrome-program "/usr/bin/chrome")
-(setq browse-url-browser-function 'browse-url-chrome)
 ;; (defvar org-export-output-directory-prefix "export_" "prefix of directory used for org-mode export")
 ;; (defadvice org-export-output-file-name (before org-add-export-dir activate)
 ;;   "Modifies org-export to place exported files in a different directory"

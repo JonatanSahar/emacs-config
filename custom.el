@@ -12,7 +12,7 @@
  '(magit-todos-insert-after '(bottom) nil nil "Changed by setter of obsolete option `magit-todos-insert-at'")
  '(matlab-shell-command-switches '("-nodesktop -nosplash ") t)
  '(org-agenda-files
-   '("~/notes/20230323T111555--paper-summaries-from-guy__thesis.org"))
+   '("~/Documents/notes/20240219T111038--analysis-log-vaccine-response__work.org"))
  '(org-outline-path-complete-in-steps nil)
  '(org-refile-use-outline-path 'file)
  '(org-safe-remote-resources

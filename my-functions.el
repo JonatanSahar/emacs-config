@@ -741,6 +741,8 @@ the same coding systems as Emacs."
     (if (and file-name (string-match "\\.pdf\\'" file-name))
         (citar-file-open-external  file-name)
       (message "Not a PDF file!"))))
+
+(setq browse-url-chrome-program "/usr/bin/google-chrome")
 (defun browse-url-chrome (url &optional _new-window)
   "Ask the Google Chrome WWW browser to load URL.
 Default to the URL around or before point.  The strings in
@@ -756,6 +758,7 @@ The optional argument NEW-WINDOW is not used."
 	   (append
 	    browse-url-chrome-arguments
 	    (list url)))))
+(setq browse-url-browser-function 'browse-url-chrome)
 
 (defun my/denote-clean-folder-after-export ()
   "Delete all .odt files in denote-directory and
@@ -825,3 +828,4 @@ The optional argument NEW-WINDOW is not used."
       (eww-open-file file)
       (doom/window-enlargen))))
 (define-key dired-mode-map (kbd "C-c C-o") 'open-html-file-in-eww)
+

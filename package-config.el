@@ -1232,7 +1232,9 @@ the directory.  `REST' is passed to the `CONSULT-RIPGREP-FUNCTION'."
 
   (defun my/code-cell-to-md()
     (interactive)
-    (code-cells-backward-cell)
+      (beginning-of-line)
+      (when (not (looking-at "^#%%.*"))
+        (code-cells-backward-cell))
     (evil-append-line 1)
     (insert " [markdown]")
     (evil-normal-state)
@@ -1240,13 +1242,39 @@ the directory.  `REST' is passed to the `CONSULT-RIPGREP-FUNCTION'."
 
   (defun my/md-cell-to-code()
     (interactive)
-    (code-cells-backward-cell)
+      (beginning-of-line)
+      (when (not (looking-at "^#%%.*"))
+        (code-cells-backward-cell))
     (evil-end-of-visual-line)
     (save-excursion
       (beginning-of-line)
       (when (re-search-forward "\\[markdown\\]" (line-end-position) t)
         (replace-match ""))))
 
+
+  (defun my/tag-cell ()
+    (interactive)
+      (beginning-of-line)
+      (when (not (looking-at "^#%%.*"))
+        (code-cells-backward-cell))
+    (let* ((tag-regex "# %%.*tags=\\[\\(.*?\\)\\]")
+           (all-tags (save-excursion
+                       (goto-char (point-min))
+                       (let (tags)
+                         (while (re-search-forward tag-regex nil t)
+                           (let ((tag-str (match-string 1)))
+                             (setq tags (append tags (split-string tag-str ", " t "\"")))))
+                         tags)))
+           (tag (completing-read "Enter tag: " (delete-dups all-tags))))
+      (save-excursion
+        (end-of-line)
+        (if (looking-back "# %% tags=\\[\\(.*?\\)\\]" (line-beginning-position))
+            (progn
+              (backward-char 1)
+              (unless (looking-back "\\[" (1- (point)))
+                (insert ", "))
+              (insert (format "\"%s\"" tag)))
+          (insert (format " tags=[\"%s\"]" tag))))))
 
   (map! :map code-cells-mode-map
         :ni "C-c C-k" #'code-cells-backward-cell
@@ -1264,6 +1292,7 @@ the directory.  `REST' is passed to the `CONSULT-RIPGREP-FUNCTION'."
         :ni "C-c m" #'my/code-cell-to-md
         :ni "C-c M" #'my/md-cell-to-code
         :ni "C-c d" #'my/delete-code-cell
+        :ni "C-c t" #'my/tag-cell
         :ni "C-c C-v" #'code-cells-mark-cell)
 
   ;; (setq code-cells-convert-ipynb-style '(
