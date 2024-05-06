@@ -18,6 +18,13 @@
  '(org-safe-remote-resources
    '("\\`https://fniessen\\.github\\.io\\(?:/\\|\\'\\)" "\\`https://fniessen\\.github\\.io/org-html-themes/org/theme-readtheorg\\.setup\\'"))
  '(package-selected-packages '(zmq request))
+ '(safe-local-variable-values
+   '((elisp-lint-indent-specs
+      (describe . 1)
+      (it . 1)
+      (thread-first . 0)
+      (cl-flet . 1)
+      (cl-flet* . 1))))
  '(tab-bar-new-tab-choice "*doom*")
  '(tab-bar-tab-name-function 'my/name-tab-by-project-or-default)
  '(warning-suppress-log-types '(((yasnippet zombie)) ((yasnippet zombie)) (defvaralias)))
@@ -32,7 +39,5 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(line-number ((t (:inherit default :foreground "steel blue" :strike-through nil :underline nil :slant normal :weight semi-bold :family "Roboto Mono"))))
- '(line-number-current-line ((t (:inherit (hl-line default) :foreground "light steel blue" :strike-through nil :underline nil :slant normal :weight semi-bold :family "Roboto Mono"))))
  '(org-default ((t (:family "Heebo"))))
  '(org-verbatim ((t (:inherit modus-themes-prose-verbatim :background "lavender")))))

@@ -89,6 +89,7 @@
  backup-directory-alist `(("." . ,(concat user-emacs-directory "autosaved_files")))
  truncate-string-ellipsis "…")               ; Unicode ellispis are nicer than "...", and also save /precious/ space
 
+(setq global-hl-line-modes '(prog-mode))
 
 (load! "package-config.el")
 (load! "my-functions.el")
@@ -230,6 +231,7 @@
 
 (remove-hook 'after-save-hook #'ws-butler-after-save)
 
+  (add-to-list 'magit-todos-exclude-globs '"*.html")
 (defun my/dedicate-org-roam-buffer ()
   (interactive)
   (add-to-list 'display-buffer-alist
@@ -467,6 +469,16 @@ The default tab-bar name uses the buffer name."
 
 (add-to-list '+lookup-provider-url-alist
              '("google-scholar"  "https://scholar.google.com/scholar?q=%s"))
+
+(defun my/eww-google (query)
+  "Search Google for QUERY using eww."
+  (interactive (list (read-string "Google Search Query: ")))
+  (eww (concat "https://www.google.com/search?q=" query)))
+
+;; Add the custom lookup provider to +lookup-online service
+(after! lookup
+  (setq +lookup-provider-url-alist
+        (cons '("Google" my/eww-google) +lookup-provider-url-alist)))
 
 (setq doom-projectile-fd-binary "fdfind")
 

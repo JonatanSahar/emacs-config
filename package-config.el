@@ -72,7 +72,7 @@
    org-capture-papers-file "~/notes/20230402T133604--interesting-papers__thesis.org"
    org-capture-microdosing-journal-file "~/notes/20230523T162209--microdosing-journal__journal.org"
    org-agenda-files '(
-                      "~/notes/20230323T113003--knowledge-base__thesis.org"
+                      "~/Documents/notes/20240219T111038--analysis-log-vaccine-response__work.org"
                       "~/notes/20230402T133604--interesting-papers__thesis.org")
 
    org-refile-targets '(
@@ -100,6 +100,21 @@
                           (org-agenda-prefix-format (concat "  %-2i  %t%s" ))
                           ;; (org-agenda-prefix-format (concat "  %-2i %-13b" ))
                           (org-agenda-todo-keyword-format "")))
+
+       (todo "TODO|HOLD" (
+                          (org-agenda-overriding-header "\n⚡ All queued tasks:\n")
+                          (org-agenda-remove-tags t)
+                          (org-agenda-prefix-format (concat "  %-2i  %t%s" ))
+                          ;; (org-agenda-prefix-format (concat "  %-2i %-13b" ))
+                          (org-agenda-todo-keyword-format "")))
+
+       (todo "READ" (
+                          (org-agenda-overriding-header "\n⚡ Reading list:\n")
+                          (org-agenda-remove-tags t)
+                          (org-agenda-prefix-format (concat "  %-2i  %t%s" ))
+                          ;; (org-agenda-prefix-format (concat "  %-2i %-13b" ))
+                          (org-agenda-todo-keyword-format "")))
+
        (agenda "" (
                    (org-agenda-overriding-header "⚡ Schedule:\n")
                    (org-agenda-start-day "+0d")
@@ -197,9 +212,10 @@
      ))
 
   (map! :map org-mode-map
+        :nvi "C-c C-k" #'org-previous-visible-heading
+        :nvi "C-c C-j" #'org-next-visible-heading
         :ni "C-c C-c" #'org-babel-execute-maybe
         :n "<return>" #'org-open-at-point)
-
   )
 
 
@@ -339,6 +355,9 @@
                      (suffix . "         ${tags keywords keywords:*}   ${=key= id:15}    ${=type=:12}")
                      (preview . "${author editor} (${year issued date}) ${title}, ${journal journaltitle publisher container-title collection-title}.\n")
                      (note . "")))
+
+  ;; open PDFs with system viewer instead of pdf-tools
+  (add-to-list 'citar-file-open-functions (cons "pdf" #'citar-file-open-external))
 
   (setq citar-symbols
         `((file . (,(all-the-icons-icon-for-file "foo.pdf" :face 'all-the-icons-dred) .
@@ -826,14 +845,6 @@ the directory.  `REST' is passed to the `CONSULT-RIPGREP-FUNCTION'."
  ;; :after denote
  (:map org-mode-map :leader
        (:map org-mode-map :leader
-             ;; (:prefix "n"
-             ;;          (:prefix ("d" ."dired")
-             ;;           :nv "r" #'denote-rename-file
-             ;;           :nv "R" #'denote-rename-file-using-front-matter)
-             ;;          (:prefix ("k" . "keywords")
-             ;;                   "a" #'denote-keywords-add
-             ;;                   "r" #'denote-keywords-remove)
-             ;;          ))
              (:prefix "n"
               :nv "o" #'denote-open-or-create
               ;; :nv "f" #'denote-open-or-create
@@ -850,6 +861,7 @@ the directory.  `REST' is passed to the `CONSULT-RIPGREP-FUNCTION'."
               :nv "t" #'denote-template
               :nv "i" #'denote-link-or-create ; denote-link ; "insert" mnemonic
               :nv "I" #'denote-link
+              :nv "L" #'denote-link-after-creating
               :nv "a" #'denote-link-add-links
               :nv "b" (lambda nil (interactive) (denote-link-backlinks) (windmove-down)) ;;(revert-buffer-with-coding-system 'utf-8))
               :nv "F" #'denote-link-find-file
@@ -870,6 +882,7 @@ the directory.  `REST' is passed to the `CONSULT-RIPGREP-FUNCTION'."
        ;; shown here.  Otherwise follow the same pattern for `org-mode-map',
        ;; `markdown-mode-map', and/or `text-mode-map'.
        "C-c n I" #'denote-link; "insert" mnemonic
+       "C-c n L" #'denote-link-after-creating
        "C-c n i" #'denote-link-or-create ; "insert" mnemonic
        "[[" #'denote-link-or-create
        "C-c n a" #'denote-link-add-links
@@ -1251,6 +1264,12 @@ the directory.  `REST' is passed to the `CONSULT-RIPGREP-FUNCTION'."
       (when (re-search-forward "\\[markdown\\]" (line-end-position) t)
         (replace-match ""))))
 
+  (defun my/eval-code-cell-and-next()
+    (interactive)
+    (call-interactively #'code-cells-eval)
+    (call-interactively #'windmove-up)
+    (call-interactively #'code-cells-forward-cell)
+)
 
   (defun my/tag-cell ()
     (interactive)

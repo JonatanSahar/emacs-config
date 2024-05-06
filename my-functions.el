@@ -429,10 +429,11 @@ https://org-roam.discourse.group/t/org-roam-major-redesign/1198/34."
 (defun open-file-in-browser (file) (browse-url-of-file file))
 
 (map! :map embark-file-map "O" #'open-file-in-browser)
-(map! :map embark-file-map "F" #'citar-file-open-external)
+;; (map! :map embark-file-map "F" #'citar-file-open-external)
 (map! :map embark-file-map "f" #'citar-file-open-external)
 (map! :map embark-file-map "C-o" #'find-file-other-frame)
 (map! :map embark-general-map "W" #'widen)
+
 (map! :map citar-citation-map "f" #'citar-file-open-external)
 
 ;; (defun my/set-writeroom-width ()
@@ -829,3 +830,48 @@ The optional argument NEW-WINDOW is not used."
       (doom/window-enlargen))))
 (define-key dired-mode-map (kbd "C-c C-o") 'open-html-file-in-eww)
 
+(defun my/eww-copy-url-at-point ()
+  "Copy the url at point in eww mode."
+  (interactive)
+  (let ((url (get-text-property (point) 'shr-url)))
+    (if url
+        (progn
+          (kill-new url)
+          (message "URL '%s' copied to clipboard" url))
+      (message "No URL found at point - copying current URL instead")
+      (eww-copy-page-url))))
+
+(map! :map eww-mode-map :desc "copy url at point" :n "C-c C-y" 'my/eww-copy-url-at-point)
+
+(defun my/eww-open-url-at-point ()
+  "Copy the url at point in eww mode."
+  (interactive)
+  (let ((url (get-text-property (point) 'shr-url)))
+    (if url
+        (progn
+          (browse-url-chrome url))
+        (message "No URL found at point - opening current URL instead")
+        (browse-url-chrome (eww-current-url)))))
+
+(map! :map eww-mode-map :desc "open url at point with chrome" :n "C-c C-o" 'my/eww-open-url-at-point)
+
+(defun get-citation-at-point ()
+  "Get the citation at the current point in the buffer."
+  (interactive)
+  (save-excursion
+    (let ((citation-regexp "\\[cite:@[^\]]+\\]"))
+      (if (re-search-backward citation-regexp nil t)
+          (buffer-substring (match-beginning 0) (match-end 0))
+        (message "No citation found at point.")))))
+
+(defun my/citar-open-citation-file ()
+  "Open the file associated with the current citation."
+  (interactive)
+  (let* ((citation (get-citation-at-point)) ; Assuming this function exists
+         (files (citar-file--get-library-files (citar--entry-keys citation))))
+    (when files
+      (citar-file-open-external (car files)))))
+
+(defun my/citar-refresh-bibliography ()
+  (interactive)
+  (setq! citar-bibliography (my/get-bib-file-list)))

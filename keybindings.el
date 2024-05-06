@@ -272,11 +272,12 @@
 
 (map! :leader
       :nv
-      :desc "search org outline" "sG" #'+lookup/online
+      :desc "searcj online" "sG" #'+lookup/online
       :desc "search org outline" "so" #'consult-outline
       :desc "search project/dir" "sp" #'consult-ripgrep
       :desc "search project/dir" "sd" #'consult-ripgrep
       :desc "search buffer"  "ss" #'consult-line
+      :desc "search for file in dir"  "sf" #'consult-fd
       :desc "equate window sizes" "we" #'balance-windows
       :desc "minimize window" "wmm" #'minimize-window
       :desc "minimize window" "wO" #'minimize-window
@@ -292,7 +293,19 @@
       :nv :desc "eval region" "er" #'python-shell-send-region
       )
 (map! :map (python-mode-map python-ts-mode-map)
-      :nv "C-<return>"  nil)
+      :nv "C-<return>"  nil
+      :v "C-c <return>" #'python-shell-send-region)
+
+(map! :map (inferior-python-mode)
+      :nvi "C-k" nil
+      :nvi "C-j" nil)
+
+(map! :map (inferior-python-mode)
+      :nvi "C-k" #'windmove-up
+      :nvi "C-j" #'windmove-down
+      ;; :nvi "C-K" #'evil-mc-make-cursor-move-prev-line
+      ;; :nvi "C-J" #'evil-mc-make-cursor-move-next-line
+      )
 
 (map! :map (inferior-python-mode)
       :nv "C-k" #'windmove-up
@@ -581,12 +594,14 @@
 
 
 (map! :map dired-mode-map
-      :nv "q" (lambda nil
-                (interactive)
-                (add-hook 'kill-buffer-query-functions 'my/prompt-on-dired-buffer-kill)
-                (+dired/quit-all)
-                (remove-hook 'kill-buffer-query-functions 'my/prompt-on-dired-buffer-kill)
-                )
+      :nv "C-c C-y" #'diredp-copy-abs-filenames-as-kill
+      ;; :nv "q" (lambda nil
+      ;;           (interactive)
+      ;;           (add-hook 'kill-buffer-query-functions 'my/prompt-on-dired-buffer-kill)
+      ;;           (+dired/quit-all)
+      ;;           (remove-hook 'kill-buffer-query-functions 'my/prompt-on-dired-buffer-kill)
+      ;;           )
+      :nv "q" #'+dired/quit-all
       :n [f5] #'revert-buffer
       :n "=" #'diredp-ediff)
 
@@ -677,7 +692,7 @@
  "C-x  C-x" #'org-capture
  "C-x  C-n" #'org-capture
  "C-c  C-<return>" :desc "send the current region to GPTel" #'gptel-send
- "C-c  <return>" :desc "run command with encoding" (lambda nil (interactive) (universal-coding-system-argument 'utf-8))
+ ;; "C-c  <return>" :desc "run command with encoding" (lambda nil (interactive) (universal-coding-system-argument 'utf-8))
  )
 
 (map! :leader :prefix "G"
@@ -686,14 +701,13 @@
       :leader :prefix "s"
       :desc "send query to gtp, include region if active" "g" #'gptel-quick)
 
-
 (map! :map evil-org-mode-map :nvi "C-c k" #'evil-window-next
       :map global-map :nvi "C-c k" #'evil-window-next)
 
 (map! :map global-map :nv "'" #'evil-goto-mark)
 
 (fset 'copy-with-square-brackets
-      (kmacro-lambda-form [?y ?a ?\]] 0 "%d"))
+      (kmacro [?y ?a ?\]] 0 "%d"))
 
 (map! :map citar-citation-map
       :desc "copy cite link"  "c" #'copy-with-square-brackets
