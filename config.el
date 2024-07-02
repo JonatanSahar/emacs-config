@@ -393,7 +393,8 @@ Return the errors parsed with the error patterns of CHECKER."
                  (split-string (eshell/pwd) "/"))
                 (if (= (user-uid) 0) " # " " $ "))))
 
-(setq tramp-default-method "plink -share")
+;; (setq tramp-default-method "plink -share")
+(setq! tramp-default-remote-shell "/bin/bash")
 
 (put 'tab-bar-tab-inactive 'face-alias 'tab-bar)
 

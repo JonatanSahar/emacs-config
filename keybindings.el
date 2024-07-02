@@ -507,6 +507,10 @@
 
 (map! :map minibuffer-mode-map :nvi ";" #'embark-act)
 (map!
+ :i "C-S-j" nil
+ :i "C-S-k" nil
+ )
+(map!
  :nvi "C-;" #'embark-act
  :nvi "C-c  c" #'evil-yank
  :nvi "C-c  v" #'consult-yank-from-kill-ring
@@ -538,11 +542,16 @@
  :ni "C-c [" #'denote-link-or-create
  ;; :ni "C-c I" #'org-cite-insert
 
- :n "C-S-j" #'evil-mc-make-cursor-move-next-line
- :n "C-S-k" #'evil-mc-make-cursor-move-prev-line
+ :ni "C-S-j" #'evil-mc-make-cursor-move-next-line
+ :ni "C-S-k" #'evil-mc-make-cursor-move-prev-line
  :nvi "M-j" #'drag-stuff-down
  :nvi "M-k" #'drag-stuff-up
  )
+
+(evil-define-key 'insert jupyter-repl-mode-map (kbd "C-j") nil)
+(evil-define-key 'insert jupyter-repl-mode-map (kbd "C-k") nil)
+(evil-define-key 'insert jupyter-repl-mode-map (kbd "C-S-j") #'evil-mc-make-cursor-move-next-line)
+(evil-define-key 'insert jupyter-repl-mode-map (kbd "C-S-k") #'evil-mc-make-cursor-move-prev-line)
 
 (map! :map vertico-map
       ;; "C-." #'embark-act

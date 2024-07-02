@@ -68,7 +68,12 @@
 
 ;; Optionally define a key to switch between Modus themes.  Also check
 ;; the user option `modus-themes-to-toggle'.
-(define-key global-map (kbd "<f5>") #'modus-themes-toggle)
+(define-key global-map (kbd "<f6>") #'modus-themes-toggle)
+(define-key global-map (kbd "<f5>") #'revert-buffer)
+(setq modus-themes-to-toggle '(modus-operandi-tinted modus-vivendi-tinted))
+
+;; Load the theme of your choice.
+(load-theme 'modus-operandi-tinted :no-confirm)
 (setq modus-themes-to-toggle '(modus-operandi-tinted modus-vivendi-tinted))
 
 ;; Load the theme of your choice.

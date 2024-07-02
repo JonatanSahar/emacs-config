@@ -71,15 +71,15 @@
    '(("+" . "*") ("-" . "+") ("*" . "-"))
    org-capture-papers-file "~/notes/20230402T133604--interesting-papers__thesis.org"
    org-capture-microdosing-journal-file "~/notes/20230523T162209--microdosing-journal__journal.org"
-   org-agenda-files '(
-                      "~/Documents/notes/20240219T111038--analysis-log-vaccine-response__work.org"
-                      "~/notes/20230402T133604--interesting-papers__thesis.org")
 
    org-refile-targets '(
                         ;; ( org-capture-projects-file :maxlevel . 1)
                         ;; ( org-capture-someday-file :level . 1)
                         ;; ( org-capture-inbox-file :maxlevel . 2)
-                        ("~/notes/20230323T113003--knowledge-base__thesis.org" :level . 1)
+                        ;; ((concat denote-directory "20240417T172124--analysis-log-spatial-pipeline__work.org") :level . 1)
+                        ;; ((concat denote-directory "20240219T111038--analysis-log-vaccine-response__work.org") :level . 1)
+                        ("~/Documents/notes/20240219T111038--analysis-log-vaccine-response__work.org" :level . 1)
+                        ("~/Documents/notes/20240417T172124--analysis-log-spatial-pipeline__work.org" :level . 1)
                         (nil . (:maxlevel . 9)) ;; current buffer
                         ;; ( org-capture-reminders-file :maxlevel . 1)
                         )
@@ -631,6 +631,7 @@ DEFS is a plist associating completion categories to commands."
 
 (use-package! denote
   :config
+  (setq org-agenda-files (list (concat (file-name-as-directory denote-directory) "20240219T111038--analysis-log-vaccine-response__work.org") (concat (file-name-as-directory denote-directory) "20240417T172124--analysis-log-spatial-pipeline__work.org")))
   ;; Remember to check the doc strings of those variables.
   (setq! denote-directory (expand-file-name "~/Documents/notes")
          denote-excluded-directories-regexp "export.*"
@@ -1091,12 +1092,19 @@ the directory.  `REST' is passed to the `CONSULT-RIPGREP-FUNCTION'."
 
 (use-package! gptel
   :init
-  (setq gptel-directives '((default . "You are an expert research assitant specializing in neuroscience. You are helpful, positive, and careful about being factually correct") (programming . "Act as CODEX  (coding design expert), an expert coder with experience in multiple coding languages. Always follow the coding besy practices by writing clean, modular code with proper security measures and leveraging design patterns. Start messages with 'CODEX:' and 'Hi, what are we coding today?' You can break down your code into parts whenever possible to avoid breaching chatgpt output character limit. Write code part by part when I send 'continue'. If you reach the character limit, ll send 'continue' and then you should continue wihtout repeating any previous code. Do not assume anything on your side; please ask me for all the necessary information in bullet points before starting. If you have trouble fixing a bug, ask me for the latest code snippets for reference from the official documentation.") (writing . "I am writing a research paper on neuroscience. I need your assistance in structuring my arguments, providing relevant data and statistics, and ensuring that my writing adheres to the academic style. Please also help me cite sources correctly and suggest improvements for clarity and coherence.") (editing and proofreading . "have a draft of my manuscript that needs editing. I would like you to help me with grammar, punctuation, sentence structure, and word choice. Please also provide suggestions for improving the overall flow and coherence of the text, and ensure that the tone is consistent throughout.") (chat . "You are a large language model and a conversation partner. Respond concisely.")))
+  (setq gptel-directives '((default . "You are an expert research assitant specializing in immunology You are helpful, positive, and careful about being factually correct") (programming . "Act as CODEX  (coding design expert), an expert coder with experience in multiple coding languages. Always follow the coding besy practices by writing clean, modular code with proper security measures and leveraging design patterns. Start messages with 'CODEX:' and 'Hi, what are we coding today?' You can break down your code into parts whenever possible to avoid breaching chatgpt output character limit. Write code part by part when I send 'continue'. If you reach the character limit, ll send 'continue' and then you should continue wihtout repeating any previous code. Do not assume anything on your side; please ask me for all the necessary information in bullet points before starting. If you have trouble fixing a bug, ask me for the latest code snippets for reference from the official documentation.") (writing . "I am writing a research paper on neuroscience. I need your assistance in structuring my arguments, providing relevant data and statistics, and ensuring that my writing adheres to the academic style. Please also help me cite sources correctly and suggest improvements for clarity and coherence.") (editing and proofreading . "have a draft of my manuscript that needs editing. I would like you to help me with grammar, punctuation, sentence structure, and word choice. Please also provide suggestions for improving the overall flow and coherence of the text, and ensure that the tone is consistent throughout.") (chat . "You are a large language model and a conversation partner. Respond concisely.")))
   :config
   (setq gptel-api-key (getenv "OPENAI_API_KEY")
         gptel-use-curl 'nil
         gptel-stream nil
         gptel-default-mode 'org-mode)
+
+  (gptel-make-openai "llama"          ;Any name
+  :stream t                             ;Stream responses
+  :protocol "http"
+  :host "192.114.18.118:8080/"                ;Llama.cpp server location
+  :models '("8b-instrucy-fp16"))                    ;Any names, doesn't matter for Llama
+
   ;; gptel-default-mode 'markdown-mode)
   )
 
@@ -1193,29 +1201,57 @@ the directory.  `REST' is passed to the `CONSULT-RIPGREP-FUNCTION'."
 (use-package! ein)
 
 ;; jupyter
+;; (use-package jupyter
+;;   :demand t
+;;   :after (:all org python ob-jupyter ob-python)
+;;   :config
+
+;;   (org-babel-jupyter-override-src-block 'python)
+;;   (add-hook! jupyter-repl-mode #'electric-pair-mode)
+;;   (map! :map python-mode-map
+;;         :nvi "C-<return>" #'jupyter-eval-line-or-region
+;;         )
+
+;;   (map! :map jupyter-repl-mode-map
+;;         :i "C-k" #'jupyter-repl-history-previous
+;;         :nvi "C-e" #'evil-end-of-line-or-visual-line
+;;         :i "C-j" #'jupyter-repl-history-next
+;;         :i "<up>" #'jupyter-repl-history-previous
+;;         :i "<down>" #'jupyter-repl-history-next
+;;         )
+
+;;   (defun my/jupyter-refresh-kernelspecs ()
+;;     "Refresh Jupyter kernelspecs"
+;;     (interactive)
+;;     (jupyter-available-kernelspecs t)))
+
 (use-package jupyter
   :demand t
   :after (:all org python ob-jupyter ob-python)
   :config
 
   (org-babel-jupyter-override-src-block 'python)
+  (add-hook 'jupyter-repl-mode-hook #'electric-pair-mode)
 
-  (map! :map python-mode-map
-        :nvi "C-<return>" #'jupyter-eval-line-or-region
-        )
+  ;; Ensuring evil-mode is loaded before adding keybindings
+  (with-eval-after-load 'evil
+    (evil-define-key 'normal python-mode-map (kbd "C-<return>") #'jupyter-eval-line-or-region)
+    (evil-define-key 'visual python-mode-map (kbd "C-<return>") #'jupyter-eval-line-or-region)
+    (evil-define-key 'insert python-mode-map (kbd "C-<return>") #'jupyter-eval-line-or-region)
 
-  (map! :map jupyter-repl-mode-map
-        :i "C-k" #'jupyter-repl-history-previous
-        :nvi "C-e" #'evil-end-of-line-or-visual-line
-        :i "C-j" #'jupyter-repl-history-next
-        :i "<up>" #'jupyter-repl-history-previous
-        :i "<down>" #'jupyter-repl-history-next
-        )
+    (evil-define-key 'insert jupyter-repl-mode-map (kbd "C-k") #'jupyter-repl-history-previous)
+    (evil-define-key 'insert jupyter-repl-mode-map (kbd "C-j") #'jupyter-repl-history-next)
+    (evil-define-key 'insert jupyter-repl-mode-map (kbd "<up>") #'jupyter-repl-history-previous)
+    (evil-define-key 'insert jupyter-repl-mode-map (kbd "<down>") #'jupyter-repl-history-next)
 
-  (defun my/jupyter-refresh-kernelspecs ()
-    "Refresh Jupyter kernelspecs"
-    (interactive)
-    (jupyter-available-kernelspecs t)))
+    (evil-define-key 'normal jupyter-repl-mode-map (kbd "C-e") #'evil-end-of-line-or-visual-line)
+    (evil-define-key 'visual jupyter-repl-mode-map (kbd "C-e") #'evil-end-of-line-or-visual-line)
+    (evil-define-key 'insert jupyter-repl-mode-map (kbd "C-e") #'evil-end-of-line-or-visual-line)))
+
+
+;; Ensuring the hooks are applied correctly
+(add-hook 'jupyter-repl-mode-hook #'electric-pair-mode)
+
 
 ;; code cells
 (use-package code-cells
@@ -1336,3 +1372,68 @@ the directory.  `REST' is passed to the `CONSULT-RIPGREP-FUNCTION'."
         org-download-screenshot-method "xclip -selection clipboard -t image/png -o > '%s'")
   :bind
   ("C-M-p" . org-download-screenshot))
+
+
+(after! jupyter
+  (add-hook! jupyter-repl-mode #'electric-pair-mode)
+  (map! :map jupyter-repl-mode-map
+        :i "C-k" #'jupyter-repl-history-previous
+        :nvi "C-e" #'evil-end-of-line-or-visual-line
+        :i "C-j" #'jupyter-repl-history-next
+        :i "<up>" #'jupyter-repl-history-previous
+        :i "<down>" #'jupyter-repl-history-next
+        )
+
+;; adding an indicator
+(defvar jupyter-eval-indicator ""
+  "Indicator for mode line to show when Jupyter is evaluating.")
+
+(put 'jupyter-eval-indicator 'risky-local-variable t)
+
+;; Update your mode line format to include this indicator
+(setq mode-line-format
+      (cons '(:eval jupyter-eval-indicator) mode-line-format))
+
+(defun jupyter-before-eval (&rest args)
+  "Function to run before jupyter-eval-region."
+  (setq jupyter-eval-indicator "[Kernel active]")
+  (force-mode-line-update)
+  )
+
+(defun jupyter-after-eval (&rest args)
+  "Function to run after jupyter-eval-region."
+  (setq jupyter-eval-indicator "")
+  (force-mode-line-update)
+  )
+
+(advice-add 'jupyter-eval-region :before #'jupyter-before-eval)
+(advice-add 'jupyter-eval-region :after #'jupyter-after-eval)
+)
+
+(use-package ess
+  :init
+  (setq ess-style 'RStudio)
+  :mode
+  (("\\.[rR]" . ess-r-mode)
+   ;; If you also use julia or some other language
+   ("\\.[jJ][lL]" . ess-julia-mode))
+  ;; Add my personal key-map
+  :config
+  ;; ESS process (print all)
+  (setq ess-eval-visibly-p t)
+  ;; Silence asking for aprenth directory
+  (setq ess-ask-for-ess-directory nil)
+  ;; Syntax highlights
+  (setq ess-R-font-lock-keywords
+	'((ess-R-fl-keyword:keywords . t)
+	  (ess-R-fl-keyword:constants . t)
+	  (ess-R-fl-keyword:modifiers . t)
+	  (ess-R-fl-keyword:fun-defs . t)
+	  (ess-R-fl-keyword:assign-ops . t)
+	  (ess-R-fl-keyword:%op% . t)
+	  (ess-fl-keyword:fun-calls . t)
+	  (ess-fl-keyword:numbers . t)
+	  (ess-fl-keyword:operators)
+	  (ess-fl-keyword:delimiters)
+	  (ess-fl-keyword:=)
+	  (ess-R-fl-keyword:F&T . t))))

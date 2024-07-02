@@ -875,3 +875,8 @@ The optional argument NEW-WINDOW is not used."
 (defun my/citar-refresh-bibliography ()
   (interactive)
   (setq! citar-bibliography (my/get-bib-file-list)))
+
+(defun my/org-download-clipboard ()
+  (interactive)
+  (let ((org-download-screenshot-basename (read-string "Enter Filename: ")))
+    (org-download-screenshot)))
