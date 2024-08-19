@@ -728,3 +728,6 @@
       :nv "gk" #'evil-previous-visual-line
       :nv "gj" #'evil-next-visual-line
       :nv "V" #'evil-visual-screen-line)
+
+ (map! :map treemacs-mode-map
+       :nvi "C-l" #'windmove-right)

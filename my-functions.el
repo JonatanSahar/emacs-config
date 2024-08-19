@@ -880,3 +880,13 @@ The optional argument NEW-WINDOW is not used."
   (interactive)
   (let ((org-download-screenshot-basename (read-string "Enter Filename: ")))
     (org-download-screenshot)))
+
+(defun sync-aux-file-to-chronos ()
+  "Sync the current buffer's file to a remote location using rsync."
+  (interactive)
+  (when (and buffer-file-name
+             (file-exists-p buffer-file-name))
+    (let ((remote-path "yonatan@192.114.18.118:/home/yonatan/UserSpace/spatial/code/aux.py"))
+      (shell-command
+       (format "scp %s %s" buffer-file-name remote-path))
+      (message "File synced to remote location."))))

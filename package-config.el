@@ -85,7 +85,7 @@
                         )
 
    org-todo-keywords '(
-                       (sequence "TODO(t)" "NEXT(n)" "SKIM(s)" "READ(r)" "NOTE(N)" "|" "DONE(d)")
+                       (sequence "TODO(t)" "NEXT(n)" "HOLD(h)" "SKIM(s)" "READ(r)" "NOTE(N)" "|" "DONE(d)")
                        (sequence "[ ](T)" "[-](S)" "[?](W)" "|" "[X](D)"))
 
    org-agenda-block-separator " "
@@ -94,11 +94,16 @@
    '(
      ("o" "my agenda"
       (
-       (todo "NEXT|HOLD" (
+       (todo "NEXT" (
                           (org-agenda-overriding-header "\n⚡ Next up:\n")
                           (org-agenda-remove-tags t)
                           (org-agenda-prefix-format (concat "  %-2i  %t%s" ))
-                          ;; (org-agenda-prefix-format (concat "  %-2i %-13b" ))
+                          (org-agenda-todo-keyword-format "")))
+
+       (todo "HOLD" (
+                          (org-agenda-overriding-header "\n⚡ Stuck tasks (on HOLD):\n")
+                          (org-agenda-remove-tags t)
+                          (org-agenda-prefix-format (concat "  %-2i  %t%s" ))
                           (org-agenda-todo-keyword-format "")))
 
        (todo "TODO|HOLD" (
@@ -112,7 +117,6 @@
                           (org-agenda-overriding-header "\n⚡ Reading list:\n")
                           (org-agenda-remove-tags t)
                           (org-agenda-prefix-format (concat "  %-2i  %t%s" ))
-                          ;; (org-agenda-prefix-format (concat "  %-2i %-13b" ))
                           (org-agenda-todo-keyword-format "")))
 
        (agenda "" (
@@ -121,7 +125,6 @@
                    (org-agenda-span 5)
                    (org-agenda-remove-tags t)
                    (org-agenda-prefix-format   (concat "  %-3i  %t%s"))
-                   ;; (org-agenda-prefix-format   (concat "  %-3i  %-15b %t%s"))
                    (org-agenda-current-time-string "⟸ now")
                    (org-agenda-scheduled-leaders '("" ""))
                    (org-agenda-time-grid (quote ((daily today remove-match)
@@ -631,7 +634,7 @@ DEFS is a plist associating completion categories to commands."
 
 (use-package! denote
   :config
-  (setq org-agenda-files (list (concat (file-name-as-directory denote-directory) "20240219T111038--analysis-log-vaccine-response__work.org") (concat (file-name-as-directory denote-directory) "20240417T172124--analysis-log-spatial-pipeline__work.org")))
+  (setq org-agenda-files (list (concat (file-name-as-directory denote-directory) "20240219T111038--analysis-log-vaccine-response__work.org") (concat (file-name-as-directory denote-directory) "20240417T172124--analysis-log-spatial-pipeline__work.org")(concat (file-name-as-directory denote-directory) "20240219T105512--papers-to-read__work.org")))
   ;; Remember to check the doc strings of those variables.
   (setq! denote-directory (expand-file-name "~/Documents/notes")
          denote-excluded-directories-regexp "export.*"
@@ -1332,23 +1335,23 @@ the directory.  `REST' is passed to the `CONSULT-RIPGREP-FUNCTION'."
           (insert (format " tags=[\"%s\"]" tag))))))
 
   (map! :map code-cells-mode-map
-        :ni "C-c C-k" #'code-cells-backward-cell
-        :ni "C-c C-j" #'code-cells-forward-cell
-        :ni "C-c C-<up>" #'code-cells-move-cell-up
-        :ni "C-c C-<down>" #'code-cells-move-cell-down
-        :ni "C-c E" #'code-cells-eval-above
-        :ni "C-c C-c" #'code-cells-eval
-        :ni "C-<return>" #'code-cells-eval
-        :ni "S-<return>" #'my/eval-code-cell-and-next
-        :ni "C-c C-o" #'jupyter-eval-line-or-region
-        :ni "C-c i" #'my/insert-code-cell
-        :ni "C-c I" #'my/insert-markdown-cell
-        :ni "C-c k" #'jupyter-repl-pop-to-buffer
-        :ni "C-c m" #'my/code-cell-to-md
-        :ni "C-c M" #'my/md-cell-to-code
-        :ni "C-c d" #'my/delete-code-cell
-        :ni "C-c t" #'my/tag-cell
-        :ni "C-c C-v" #'code-cells-mark-cell)
+        :nvi "C-c C-k" #'code-cells-backward-cell
+        :nvi "C-c C-j" #'code-cells-forward-cell
+        :nvi "C-c C-<up>" #'code-cells-move-cell-up
+        :nvi "C-c C-<down>" #'code-cells-move-cell-down
+        :nvi "C-c E" #'code-cells-eval-above
+        :nvi "C-c C-c" #'code-cells-eval
+        :nvi "C-<return>" #'code-cells-eval
+        :nvi "S-<return>" #'my/eval-code-cell-and-next
+        :nvi "C-c C-o" #'jupyter-eval-line-or-region
+        :nvi "C-c i" #'my/insert-code-cell
+        :nvi "C-c I" #'my/insert-markdown-cell
+        :nvi "C-c k" #'jupyter-repl-pop-to-buffer
+        :nvi "C-c m" #'my/code-cell-to-md
+        :nvi "C-c M" #'my/md-cell-to-code
+        :nvi "C-c d" #'my/delete-code-cell
+        :nvi "C-c t" #'my/tag-cell
+        :nvi "C-c C-v" #'code-cells-mark-cell)
 
   ;; (setq code-cells-convert-ipynb-style '(
   ;;       ("pandoc" "--to" "ipynb" "--from" "org")
@@ -1396,12 +1399,14 @@ the directory.  `REST' is passed to the `CONSULT-RIPGREP-FUNCTION'."
 
 (defun jupyter-before-eval (&rest args)
   "Function to run before jupyter-eval-region."
+  (interactive)
   (setq jupyter-eval-indicator "[Kernel active]")
   (force-mode-line-update)
   )
 
 (defun jupyter-after-eval (&rest args)
   "Function to run after jupyter-eval-region."
+  (interactive)
   (setq jupyter-eval-indicator "")
   (force-mode-line-update)
   )
