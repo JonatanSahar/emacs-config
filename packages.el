@@ -61,6 +61,10 @@
 (package! org-super-agenda)
 (package! helm-org-rifle)
 (package! org-download)
+(package! org-pandoc-import
+  :recipe (:host github
+           :repo "tecosaur/org-pandoc-import"
+           :files ("*.el" "filters" "preprocessors")))
 
 (package! simple-httpd)
 (package! f)

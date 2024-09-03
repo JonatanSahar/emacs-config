@@ -491,3 +491,7 @@ The default tab-bar name uses the buffer name."
 ;;       (setq pub-dir (concat org-export-output-directory-prefix (substring extension 1)))
 ;;       (when (not (file-directory-p pub-dir))
 ;;        (make-directory pub-dir))))
+
+  (map! :map global-map
+        :i "C-/" #'evil-force-normal-state
+        :nv "C-/" #'doom/escape)

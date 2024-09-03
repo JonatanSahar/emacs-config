@@ -1442,3 +1442,9 @@ the directory.  `REST' is passed to the `CONSULT-RIPGREP-FUNCTION'."
 	  (ess-fl-keyword:delimiters)
 	  (ess-fl-keyword:=)
 	  (ess-R-fl-keyword:F&T . t))))
+
+(after! treemacs
+ (map! :map treemacs-mode-map :nvi "C-l" #'windmove-right)
+  )
+
+;; (use-package! org-pandoc-import :after org)
