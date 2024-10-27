@@ -75,6 +75,7 @@
 (setq-default line-spacing 0.1)
 
 (setq
+ text-scale-mode-step 1.05
  evil-respect-visual-line-mode 't
  scroll-bar-mode 1
  delete-by-moving-to-trash nil                      ; Delete files to trash
@@ -370,7 +371,22 @@ Return the errors parsed with the error patterns of CHECKER."
        (define-key evil-inner-text-objects-map ,key (quote ,inner-name))
        (define-key evil-outer-text-objects-map ,key (quote ,outer-name)))))
 
-(define-and-bind-text-object "l" "^" "\s*$") ; a line object without trailing whitespaces
+;; (define-and-bind-text-object "l" "^" "\s*$") ; a line object without trailing whitespaces
+
+(evil-define-text-object evil-select-inner-line-no-whitespace (count &optional beg end type)
+  "Select all text on the current line, excluding leading and trailing whitespace."
+  (let* ((begin (save-excursion
+                  (beginning-of-line)
+                  (skip-chars-forward " \t")
+                  (point)))
+         (end (save-excursion
+                (end-of-line)
+                (skip-chars-backward " \t")
+                (point))))
+    (evil-range begin end 'exclusive)))
+
+;; Bind the text object to "il" for inner line
+(define-key evil-inner-text-objects-map "l" 'evil-select-inner-line-no-whitespace)
 
 (yas-global-mode 0)
 
@@ -495,3 +511,38 @@ The default tab-bar name uses the buffer name."
   (map! :map global-map
         :i "C-/" #'evil-force-normal-state
         :nv "C-/" #'doom/escape)
+
+;; Define the 'laptop-mode' minor mode
+(define-minor-mode laptop-mode
+  "A mode for adjusting settings when working on a laptop."
+  :init-value nil
+  :lighter " Laptop"
+  :keymap nil
+  (if laptop-mode
+      (progn
+        ;; Enable settings for all existing buffers
+        (setq doom-font (font-spec :family "Iosevka Comfy" :weight 'regular :size 22))
+        (doom/reload-font)
+        (dolist (buf (buffer-list)) ;; Apply text scale to all open buffers
+          (with-current-buffer buf
+            (text-scale-increase 1)))
+        ;; Apply settings for all new files
+        (add-hook 'find-file-hook 'enable-laptop-mode-on-file-open))
+    ;; Disable settings for all existing buffers
+    (setq doom-font (font-spec :family "Iosevka Comfy" :weight 'regular :size 15))
+    (doom/reload-font)
+    (dolist (buf (buffer-list)) ;; Reset text scale for all open buffers
+      (with-current-buffer buf
+        (text-scale-set 0)))
+    ;; Remove the hook for new files
+    (remove-hook 'find-file-hook 'enable-laptop-mode-on-file-open)))
+
+;; Function to apply laptop-mode settings to a new buffer
+(defun enable-laptop-mode-on-file-open ()
+  "Apply laptop mode font and text scaling to a newly opened buffer."
+  (text-scale-increase 1))
+
+;; Bind laptop-mode to SPC t L in Doom Emacs
+(map! :leader
+      :desc "Toggle Laptop Mode"
+      "t L" #'laptop-mode)

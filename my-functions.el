@@ -890,3 +890,22 @@ The optional argument NEW-WINDOW is not used."
       (shell-command
        (format "scp %s %s" buffer-file-name remote-path))
       (message "File synced to remote location."))))
+
+(defun my/md-to-org-region (start end)
+  "Convert region from markdown to org, replacing selection"
+  (interactive "r")
+  (shell-command-on-region start end "pandoc -f markdown -t org" t t))
+
+ (defun my/dired-get-size ()
+  (interactive)
+  (let ((files (dired-get-marked-files)))
+    (with-temp-buffer
+      (apply 'call-process "/usr/bin/du" nil t nil "-sch" files)
+      (message "Size of all marked files: %s"
+               (progn
+                 (re-search-backward "\\(^[0-9.,]+[A-Za-z]+\\).*total$")
+                  (match-string 1))))))
+
+ (define-key dired-mode-map (kbd "?") 'my/dired-get-size)
+
+(map! :map dired-mode-map :localleader :nv "s" #'my/dwim-shell-commands-files-combined-size)

@@ -181,6 +181,8 @@
       )
 
 
+;; (map! :map minibuffer-mode-map
+;;  :niv "fg" #'abort-recursive-edit)
 (map!
  :n "gO" #'+evil/insert-newline-above
  :n "go" #'+evil/insert-newline-below
@@ -193,6 +195,7 @@
 
  :n "gh" #'avy-goto-char-timer
  :n "gf" #'execute-extended-command
+ ;; :niv "fg" #'evil-force-normal-state
 
  ;; :n "gh" #'windmove-left
  ;; :n "gj" #'windmove-down
@@ -282,6 +285,7 @@
       :desc "minimize window" "wmm" #'minimize-window
       :desc "minimize window" "wO" #'minimize-window
       :desc "maximize window" "wmM" #'doom/window-maximize-buffer
+      :desc "ace-window" "-" #'ace-window
       :desc "switch to buffer" "bb" #'consult-buffer
       :desc "buffer to new window" "bB" #'consult-buffer-other-window)
 
@@ -336,11 +340,12 @@
        :desc "avy line" "l" 'evil-avy-goto-line)
 
       (:prefix "t"
-       :nv "T" #'treemacs
-       :nv "t" #'popper-toggle
+       :nv "t" #'treemacs
+       :nv "T" #'popper-toggle
        :nv "<return>" #'popper-toggle
        :nv "s" #'shell
        :nv "i" #'my/toggle-org-timer
+       :nv "I" #'tmr
        )
 
       (:prefix "o"
@@ -390,10 +395,11 @@
        :desc "orgnv" "g" #'orgnv-browse
        :desc "orgnv + rebuild DB" "G" #'(lambda () (interactive) (my/orgnv-update-db) (orgnv-browse))
        :desc "kill all other windows" "o" 'delete-other-windows
-       :desc "resize window to small" "f" 'my/make-small-frame
+       :desc "resize window to small" "F" 'my/make-small-frame
        :desc "resize window to medium" "m" 'my/make-medium-frame
        :desc "resize window to large" "M" 'my/make-large-frame
-       :desc "make new frame" "F" 'make-frame-command
+       ;; :desc "make new frame" "F" 'make-frame-command
+       :desc "switch to other frame" "f" 'other-frame
        :desc "writeroom mode" "w" #'writeroom-mode
        :desc "kill buffer and window" "D" #'kill-buffer-and-window
        :desc "kill buffer" "d" 'kill-current-buffer
@@ -527,7 +533,7 @@
 
  :nvi "M-p" #'evil-paste-pop
  :nvi "M-n" #'evil-paste-pop-next
- :nvi "C-p" #'projectile-find-file
+ :nvi "C-S-p" #'projectile-find-file
 
  :nvi "C-c  h" #'org-toggle-heading
  :nvi "C-c  i" #'org-toggle-item
@@ -713,7 +719,10 @@
 (map! :map evil-org-mode-map :nvi "C-c k" #'evil-window-next
       :map global-map :nvi "C-c k" #'evil-window-next)
 
-(map! :map global-map :nv "'" #'evil-goto-mark)
+(map! :map global-map
+      :nvi "C-p" #'delete-other-windows
+      :nvi "C-S-p" #'projectile-find-file
+      :nv "'" #'evil-goto-mark)
 
 (fset 'copy-with-square-brackets
       (kmacro [?y ?a ?\]] 0 "%d"))
@@ -729,5 +738,16 @@
       :nv "gj" #'evil-next-visual-line
       :nv "V" #'evil-visual-screen-line)
 
- (map! :map treemacs-mode-map
-       :nvi "C-l" #'windmove-right)
+(map! :leader :prefix "w" :nv "w" #'ace-window)
+(map! :leader :prefix "b" :nv "F" #'consult-buffer-other-frame)
+
+;; Disable confirmation when closing a frame
+(setq frame-auto-delete nil) ;; Do not prompt when deleting frames
+
+(defun my/force-delete-frame ()
+  "Force close a frame without prompting."
+  (interactive)
+  (delete-frame nil t)) ;; The second argument (force) makes it close without confirmation.
+
+;; Bind the modified command to an easier key, or use the existing binding
+(map! :leader :prefix "q" :nv "f" #'my/force-delete-frame)

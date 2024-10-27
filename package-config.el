@@ -64,6 +64,8 @@
    org-agenda-breadcrumbs-separator " ❱ "
    org-odd-levels-only  nil
    org-startup-with-inline-images t
+   org-hide-block-startup t
+   org-startup-folded "fold"
    org-hide-emphasis-markers t
    org-list-indent-offset 2
    org-blank-before-new-entry '((heading . t) (plain-list-item . auto))
@@ -1310,6 +1312,14 @@ the directory.  `REST' is passed to the `CONSULT-RIPGREP-FUNCTION'."
     (call-interactively #'code-cells-forward-cell)
 )
 
+(defun my/code-cells-eval-line ()
+  (interactive)
+  ;; Get the beginning and end positions of the current line
+  (let ((beg (line-beginning-position))
+        (end (line-end-position)))
+    ;; Call the eval function with the positions
+    (code-cells-eval beg end)))
+
   (defun my/tag-cell ()
     (interactive)
       (beginning-of-line)
@@ -1334,6 +1344,12 @@ the directory.  `REST' is passed to the `CONSULT-RIPGREP-FUNCTION'."
               (insert (format "\"%s\"" tag)))
           (insert (format " tags=[\"%s\"]" tag))))))
 
+  (defalias 'my-code-cells-eval-line-normal
+   (kmacro "C-g V C-c C-c C-g"))
+  (defalias 'my-code-cells-eval-line-insert
+   (kmacro "C-g V C-c C-c C-g i"))
+
+
   (map! :map code-cells-mode-map
         :nvi "C-c C-k" #'code-cells-backward-cell
         :nvi "C-c C-j" #'code-cells-forward-cell
@@ -1341,7 +1357,11 @@ the directory.  `REST' is passed to the `CONSULT-RIPGREP-FUNCTION'."
         :nvi "C-c C-<down>" #'code-cells-move-cell-down
         :nvi "C-c E" #'code-cells-eval-above
         :nvi "C-c C-c" #'code-cells-eval
-        :nvi "C-<return>" #'code-cells-eval
+        :nvi "C-c C-\." #'code-cells-eval
+        :v "C-<return>" #'code-cells-eval
+        :ni "C-<return>" #'my/code-cells-eval-line
+        ;; :n "C-<return>" #'my-code-cells-eval-line-normal
+        ;; :i "C-<return>" #'my-code-cells-eval-line-insert
         :nvi "S-<return>" #'my/eval-code-cell-and-next
         :nvi "C-c C-o" #'jupyter-eval-line-or-region
         :nvi "C-c i" #'my/insert-code-cell
@@ -1415,6 +1435,14 @@ the directory.  `REST' is passed to the `CONSULT-RIPGREP-FUNCTION'."
 (advice-add 'jupyter-eval-region :after #'jupyter-after-eval)
 )
 
+;; Make jupyter buffers not pop up when they are already open
+(add-to-list 'display-buffer-alist
+             (cons "\\`\\*jupyter-.*\\'"
+                   (cons 'display-buffer-reuse-window
+                         '((reusable-frames . visible)
+                           (inhibit-switch-frame . nil)))))
+
+
 (use-package ess
   :init
   (setq ess-style 'RStudio)
@@ -1443,8 +1471,88 @@ the directory.  `REST' is passed to the `CONSULT-RIPGREP-FUNCTION'."
 	  (ess-fl-keyword:=)
 	  (ess-R-fl-keyword:F&T . t))))
 
-(after! treemacs
- (map! :map treemacs-mode-map :nvi "C-l" #'windmove-right)
+(with-eval-after-load 'treemacs
+  (define-key treemacs-mode-map (kbd "C-l") #'windmove-right))
+
+(use-package! key-chord
+  :config
+        (setq! key-chord-two-keys-delay 0.2)
+        (key-chord-define evil-insert-state-map "kj"  'evil-force-normal-state)
+        (key-chord-define evil-insert-state-map "jk"  'evil-force-normal-state)
+        (key-chord-define evil-visual-state-map "kj"  'evil-exit-visual-state)
+        (key-chord-define minibuffer-mode-map "kj"  'abort-recursive-edit)
+        ;; (key-chord-define evil-visual-state-map "jk"  'evil-exit-visual-state)
+        ;; (key-chord-define evil-insert-state-map "jd"  'evil-undo)
+        ;; (key-chord-define evil-insert-state-map "jf"  'evil-redo)
+
+        ;; (key-chord-define evil-insert-state-map "le"  'evil-end-of-line-or-visual-line)
+        ;; (key-chord-define evil-insert-state-map "la"  'evil-beginning-of-visual-line)
+        ;; (key-chord-define evil-normal-state-map "le"  'evil-end-of-line-or-visual-line)
+        ;; (key-chord-define evil-normal-state-map "la"  'evil-beginning-of-visual-line)
+
+        ;; (key-chord-define evil-normal-state-map "ls"  'save-buffer)
+        ;; (key-chord-define evil-visual-state-map "ls"  'save-buffer)
+        ;; (key-chord-define evil-insert-state-map "ls"  'save-buffer)
+
+        (key-chord-mode 1)
+        )
+
+(after! (:and treemacs ace-window)
+  (setq aw-ignored-buffers (delq 'treemacs-mode aw-ignored-buffers))
+  (setq aw-scope 'global)
+)
+
+(use-package! highlight-thing
+  :config
+  (global-highlight-thing-mode)
+
+  (setq!
+   highlight-thing-delay-seconds 0.5
+   highlight-thing-case-sensitive-p t
+   highlight-thing-exclude-thing-under-point t
+   highlight-thing-prefer-active-region t
+   highlight-thing-ignore-list '("False" "True")
+   highlight-thing-all-visible-buffers-p t
+   highlight-thing-limit-to-defun t
+   )
+
+  (setq
+   highlight-thing-limit-to-region-in-large-buffers-p nil
+   highlight-thing-narrow-region-lines 15
+   highlight-thing-large-buffer-limit 5000)
   )
 
-;; (use-package! org-pandoc-import :after org)
+
+(use-package! dwim-shell-command
+  :config
+  (defun my/dwim-shell-command-convert-image-to-jpg ()
+    "Convert all marked images to jpg(s)."
+    (interactive)
+    (dwim-shell-command-on-marked-files
+     "Convert to jpg"
+     "convert -verbose '<<f>>' '<<fne>>.jpg'"
+     :utils "convert"))
+
+  (defun my/dwim-shell-command-convert-audio-to-mp3 ()
+    "Convert all marked audio to mp3(s)."
+    (interactive)
+    (dwim-shell-command-on-marked-files
+     "Convert to mp3"
+     "ffmpeg -stats -n -i '<<f>>' -acodec libmp3lame '<<fne>>.mp3'"
+     :utils "ffmpeg"))
+
+  (defun my/dwim-shell-commands-files-combined-size ()
+  "Get files combined file size."
+  (interactive)
+  (dwim-shell-command-on-marked-files
+   "Get files combined file size"
+   "du -csh '<<*>>'"
+   :utils "du"
+   :on-completion (lambda (buffer _process)
+                    (with-current-buffer buffer
+                      (message "Total size: %s"
+                               (progn
+                                 (re-search-backward "\\(^[ 0-9.,]+[A-Za-z]+\\).*total$")
+                                 (match-string 1))))
+                    (kill-buffer buffer))))
+  )

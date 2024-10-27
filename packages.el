@@ -71,6 +71,11 @@
 
 (package! nov)
 
+(package! key-chord
+  :recipe (:host github
+           :repo "emacsorphanage/key-chord"
+           :files ("*.el")))
+
 ;;(package! org-remark)
 ;;(package! org-transclusion)
 
@@ -112,7 +117,8 @@
 (package! evil-better-visual-line)
 (package! tmr)
 (package! org-download)
-
+(package! highlight-thing)
+(package! dwim-shell-command)
 
 (package! consult)
 (package! consult-flycheck)
