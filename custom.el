@@ -15,7 +15,7 @@
  '(org-refile-use-outline-path 'file)
  '(org-safe-remote-resources
    '("\\`https://fniessen\\.github\\.io\\(?:/\\|\\'\\)" "\\`https://fniessen\\.github\\.io/org-html-themes/org/theme-readtheorg\\.setup\\'"))
- '(package-selected-packages '(zmq request))
+ '(package-selected-packages '(spacious-padding consult-denote zmq request))
  '(safe-local-variable-values
    '((elisp-lint-indent-specs
       (describe . 1)

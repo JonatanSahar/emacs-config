@@ -83,7 +83,11 @@
 (package! denote)
 (package! consult-notes)
 (package! citar-denote)
-
+;; (package! consult-denote)
+(package! spacious-padding)
+(package!  consult-denote
+  :recipe (:host github
+           :repo "protesilaos/consult-denote"))
 
 
 ;; writing experience

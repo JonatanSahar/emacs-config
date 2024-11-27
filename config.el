@@ -105,7 +105,7 @@
 (setq-default
  evil-shift-width 4 ; globally
  tab-width 4) ; globally
-(setq evil-shift-width 4
+(setq! evil-shift-width 4
       tab-width 4)
 
 (display-time-mode 1)                             ; Enable time in the mode-line
@@ -166,9 +166,16 @@
   (set-face-attribute 'fixed-pitch nil :height 1.0)
   (set-face-attribute 'variable-pitch nil :height 1.0))
 
-(add-hook! 'inferior-python-mode-hook
-  (+zen/toggle)
+(add-hook! ('jupyter-org-interaction-mode-hook 'inferior-python-mode-hook)
+  (writeroom-mode nil)
   (+word-wrap-mode 1)
+  (electric-pair-mode 1)
+  (map! :map jupyter-repl-mode-map
+        :i "C-k" #'jupyter-repl-history-previous
+        :nvi "C-e" #'evil-end-of-line-or-visual-line
+        :i "C-j" #'jupyter-repl-history-next
+        :i "<up>" #'jupyter-repl-history-previous
+        :i "<down>" #'jupyter-repl-history-next)
   (set-face-attribute 'fixed-pitch nil :height 1.0)
   (set-face-attribute 'variable-pitch nil :height 1.0))
 

@@ -1373,6 +1373,10 @@ the directory.  `REST' is passed to the `CONSULT-RIPGREP-FUNCTION'."
         :nvi "C-c t" #'my/tag-cell
         :nvi "C-c C-v" #'code-cells-mark-cell)
 
+  (map! :map python-mode-map
+        :nvi "C-c C-o" #'jupyter-eval-line-or-region
+        :nvi "C-c k" #'jupyter-repl-pop-to-buffer
+)
   ;; (setq code-cells-convert-ipynb-style '(
   ;;       ("pandoc" "--to" "ipynb" "--from" "org")
   ;;       ("pandoc" "--to" "org" "--from" "ipynb")
@@ -1433,7 +1437,6 @@ the directory.  `REST' is passed to the `CONSULT-RIPGREP-FUNCTION'."
 
 (advice-add 'jupyter-eval-region :before #'jupyter-before-eval)
 (advice-add 'jupyter-eval-region :after #'jupyter-after-eval)
-)
 
 ;; Make jupyter buffers not pop up when they are already open
 (add-to-list 'display-buffer-alist
@@ -1441,6 +1444,7 @@ the directory.  `REST' is passed to the `CONSULT-RIPGREP-FUNCTION'."
                    (cons 'display-buffer-reuse-window
                          '((reusable-frames . visible)
                            (inhibit-switch-frame . nil)))))
+)
 
 
 (use-package ess
@@ -1556,3 +1560,21 @@ the directory.  `REST' is passed to the `CONSULT-RIPGREP-FUNCTION'."
                                  (match-string 1))))
                     (kill-buffer buffer))))
   )
+
+
+(defun my/treemacs-copy-name-at-point ()
+  "Copy the filename or directory name at point in Treemacs."
+  (interactive)
+  (let ((name (treemacs-node-at-point)))
+    (if name
+        (progn
+          (kill-new (treemacs--get-label-of name))
+          (message "Copied: %s" (treemacs--get-label-of name)))
+      (message "No file or directory at point"))))
+(after! treemacs
+  (evil-define-key 'treemacs treemacs-mode-map (kbd "y n") #'my/treemacs-copy-name-at-point))
+
+;; (use-package! consult-denote)
+;; (use-package! spacious-padding)
+(after! spacious-padding
+  (spacious-padding-mode 1))
