@@ -103,10 +103,19 @@
       which-key-allow-multiple-replacements t)
 
 (setq-default
- evil-shift-width 4 ; globally
- tab-width 4) ; globally
-(setq! evil-shift-width 4
-      tab-width 4)
+    evil-shift-width 4 ; globally
+    tab-width 4) ; globally
+(setq!
+    evil-shift-width 4
+    tab-width 4)
+
+(defun my/set-indent ()
+  "Set indentation preferences."
+  (setq-local evil-shift-width 4)
+  (setq-local tab-width 4))
+
+(add-hook 'prog-mode-hook #'my/set-indent)
+(add-hook 'text-mode-hook #'my/set-indent)
 
 (display-time-mode 1)                             ; Enable time in the mode-line
 (display-battery-mode 1)                          ; On laptops it's nice to know how much power you have

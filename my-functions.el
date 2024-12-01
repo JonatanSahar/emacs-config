@@ -909,3 +909,31 @@ The optional argument NEW-WINDOW is not used."
  (define-key dired-mode-map (kbd "?") 'my/dired-get-size)
 
 (map! :map dired-mode-map :localleader :nv "s" #'my/dwim-shell-commands-files-combined-size)
+
+(defun evil-kill-to-prev-word-end ()
+  "Kill from point to the end of the prev word."
+  (interactive)
+  (evil-delete (point) (progn (evil-backward-word-end) (point))))
+
+(defun evil-kill-to-next-word-start ()
+  "Kill from point to the start of the next word."
+  (interactive)
+  (evil-delete (point) (progn (evil-forward-word-begin) (point))))
+
+(defun conditional-evil-kill-to-prev-word-end ()
+  "Kill to the end of the previous word only if the previous character is whitespace or at the beginning of a line."
+  (interactive)
+  (if (or (bolp) ; At beginning of line
+          (save-excursion (backward-char) (looking-at-p "\\s-"))) ; Previous char is whitespace
+      (evil-kill-to-prev-word-end)
+    (call-interactively 'backward-kill-word)))
+
+(defun conditional-evil-kill-to-next-word-start ()
+  "Kill to the start of the next word only if the next character is whitespace or at the end of a line."
+  (interactive)
+  (if (or (looking-at-p "\\s-") (eolp)) ; Check for whitespace or end of line
+      (evil-kill-to-next-word-start)
+    (call-interactively 'kill-word)))
+
+(map! :ni "C-<backspace>" #'conditional-evil-kill-to-prev-word-end
+      :ni "C-<delete>" #'conditional-evil-kill-to-next-word-start)
