@@ -87,7 +87,7 @@
                         )
 
    org-todo-keywords '(
-                       (sequence "TODO(t)" "NEXT(n)" "HOLD(h)" "SKIM(s)" "READ(r)" "NOTE(N)" "|" "DONE(d)")
+                       (sequence "TODO(t)" "NEXT(n)" "HOLD(h)" "SKIM(s)" "READ(r)" "NOTE(N)" "RESOURCE(R)" "|" "DONE(d)")
                        (sequence "[ ](T)" "[-](S)" "[?](W)" "|" "[X](D)"))
 
    org-agenda-block-separator " "
@@ -121,6 +121,11 @@
                           (org-agenda-prefix-format (concat "  %-2i  %t%s" ))
                           (org-agenda-todo-keyword-format "")))
 
+       (todo "RESOURCE" (
+                          (org-agenda-overriding-header "\n⚡ Resource list:\n")
+                          (org-agenda-remove-tags t)
+                          (org-agenda-prefix-format (concat "  %-2i  %t%s" ))
+                          (org-agenda-todo-keyword-format "")))
        (agenda "" (
                    (org-agenda-overriding-header "⚡ Schedule:\n")
                    (org-agenda-start-day "+0d")
@@ -343,7 +348,10 @@
   :bind (("C-x C-d" . consult-dir)
          :map minibuffer-local-completion-map
          ("C-x C-d" . consult-dir)
-         ("C-x C-j" . consult-dir-jump-file)))
+         ("C-x C-j" . consult-dir-jump-file))
+  :config
+  (setq! consult-dir-sources '(consult-dir--source-default consult-dir--source-bookmark consult-dir--source-project consult-dir--source-recentf consult-dir--source-tramp-local consult-dir--source-tramp-ssh))
+  )
 
 (after! citar
   (setq!
@@ -718,10 +726,6 @@ DEFS is a plist associating completion categories to commands."
 
 
 (add-to-list 'load-path (concat doom-emacs-dir (file-name-as-directory "gptel")))
-;; (require 'gptel)
-(setq gptel-api-key (getenv "OPENAI_API_KEY")
-      gptel-use-curl nil
-      gptel-default-mode 'org-mode)
 
 
 (after! consult
@@ -847,95 +851,95 @@ the directory.  `REST' is passed to the `CONSULT-RIPGREP-FUNCTION'."
 
 ;; (map! :after consult-notes :leader :prefix "n" :nv "f" #'consult-notes)
 
-(map!
- ;; :after denote
- (:map org-mode-map :leader
-       (:map org-mode-map :leader
-             (:prefix "n"
-              :nv "o" #'denote-open-or-create
-              ;; :nv "f" #'denote-open-or-create
-              :nv "f" #'consult-notes
-              :nv "j" #'my-denote-journal ; our custom command
-              :nv "n" #'denote
-              :nv "r" #'denote-rename-file
-              :nv "R" #'denote-rename-file-using-front-matter
-              :nv "k" #'denote-keywords-add
-              :nv "K" #'denote-keywords-remove
-              :nv "D" #'denote-date
-              :nv "z" #'denote-signature ; "zettelkasten" mnemonic
-              :nv "s" #'denote-subdirectory
-              :nv "t" #'denote-template
-              :nv "i" #'denote-link-or-create ; denote-link ; "insert" mnemonic
-              :nv "I" #'denote-link
-              :nv "L" #'denote-link-after-creating
-              :nv "a" #'denote-link-add-links
-              :nv "b" (lambda nil (interactive) (denote-link-backlinks) (windmove-down)) ;;(revert-buffer-with-coding-system 'utf-8))
-              :nv "F" #'denote-link-find-file
-              :nv "B" #'denote-link-find-backlink))
-       )
+(after! denote
+ (map!
+  ;; :after denote
+        (:map org-mode-map :leader
+              (:prefix "n"
+               :nv "o" #'denote-open-or-create
+               ;; :nv "f" #'denote-open-or-create
+               :nv "f" #'consult-notes
+               :nv "j" #'my-denote-journal ; our custom command
+               :nv "n" #'denote
+               :nv "r" #'denote-rename-file
+               :nv "R" #'denote-rename-file-using-front-matter
+               :nv "k" #'denote-keywords-add
+               :nv "K" #'denote-keywords-remove
+               :nv "D" #'denote-date
+               :nv "z" #'denote-signature ; "zettelkasten" mnemonic
+               :nv "s" #'denote-subdirectory
+               :nv "t" #'denote-template
+               :nv "i" #'denote-link-or-create ; denote-link ; "insert" mnemonic
+               :nv "I" #'denote-link
+               :nv "L" #'denote-link-after-creating
+               :nv "a" #'denote-link-add-links
+               :nv "b" #'denote-backlinks
+               :nv "F" #'denote-link-find-file
+               :nv "B" #'denote-link-find-backlink))
 
- (:map org-mode-map :nvi
-       "C-c n j" #'my-denote-journal ; our custom command
-       "C-c n o" #'denote-open-or-create
-       "C-c n n" #'denote
-       "C-c n N" #'denote-type
-       "C-c n d" #'denote-date
-       "C-c n z" #'denote-signature ; "zettelkasten" mnemonic
-       "C-c n s" #'denote-subdirectory
-       "C-c n t" #'denote-template
-       ;; If you intend to use Denote with a variety of file types, it is
-       ;; easier to bind the link-related commands to the `global-map', as
-       ;; shown here.  Otherwise follow the same pattern for `org-mode-map',
-       ;; `markdown-mode-map', and/or `text-mode-map'.
-       "C-c n I" #'denote-link; "insert" mnemonic
-       "C-c n L" #'denote-link-after-creating
-       "C-c n i" #'denote-link-or-create ; "insert" mnemonic
-       "[[" #'denote-link-or-create
-       "C-c n a" #'denote-link-add-links
-       "C-c n b" #'denote-link-backlinks
-       "C-c n f f" #'denote-link-find-file
-       "C-c n f b" #'denote-link-find-backlink
-       "C-c n k a" #'denote-keywords-add
-       "C-c n k r" #'denote-keywords-remove
-       ;; Note that `denote-rename-file' can work from any context, not just
-       ;; Dired bufffers.  That is why we bind it here to the `global-map'.
-       "C-c n r" #'denote-rename-file
-       "C-c n R" #'denote-rename-file-using-front-matter)
+  (:map org-mode-map :nvi
+        "C-c n j" #'my-denote-journal ; our custom command
+        "C-c n o" #'denote-open-or-create
+        "C-c n n" #'denote
+        "C-c n N" #'denote-type
+        "C-c n d" #'denote-date
+        "C-c n z" #'denote-signature ; "zettelkasten" mnemonic
+        "C-c n s" #'denote-subdirectory
+        "C-c n t" #'denote-template
+        ;; If you intend to use Denote with a variety of file types, it is
+        ;; easier to bind the link-related commands to the `global-map', as
+        ;; shown here.  Otherwise follow the same pattern for `org-mode-map',
+        ;; `markdown-mode-map', and/or `text-mode-map'.
+        "C-c n I" #'denote-link; "insert" mnemonic
+        "C-c n L" #'denote-link-after-creating
+        "C-c n i" #'denote-link-or-create ; "insert" mnemonic
+        "[[" #'denote-link-or-create
+        "C-c n a" #'denote-link-add-links
+        "C-c n b" #'denote-backlinks
+        "C-c n f f" #'denote-link-find-file
+        "C-c n f b" #'denote-link-find-backlink
+        "C-c n k a" #'denote-keywords-add
+        "C-c n k r" #'denote-keywords-remove
+        ;; Note that `denote-rename-file' can work from any context, not just
+        ;; Dired bufffers.  That is why we bind it here to the `global-map'.
+        "C-c n r" #'denote-rename-file
+        "C-c n R" #'denote-rename-file-using-front-matter)
 
- ;; Key bindings specifically for Dired.
- (:map dired-mode-map
-       "C-c C-d C-i" #'denote-link-dired-marked-notes
-       "C-c C-d C-r" #'denote-dired-rename-marked-files
-       "C-c C-d C-R" #'denote-dired-rename-marked-files-using-front-matter)
+  ;; Key bindings specifically for Dired.
+  (:map dired-mode-map
+        "C-c C-d C-i" #'denote-link-dired-marked-notes
+        "C-c C-d C-r" #'denote-dired-rename-marked-files
+        "C-c C-d C-R" #'denote-dired-rename-marked-files-using-front-matter)
 
- (:map evil-org-mode-map :prefix "C-n" :nvi
-       "j" #'my-denote-journal ; our custom command
+  (:map evil-org-mode-map :prefix "C-n" :nvi
+        "j" #'my-denote-journal ; our custom command
 
-       "o" #'denote-open-or-create
-       "n" #'denote
-       "N" #'denote-type
-       "d" #'denote-date
-       "z" #'denote-signature ; "zettelkasten" mnemonic
-       "s" #'denote-subdirectory
-       "t" #'denote-template
-       ;; If you intend to use Denote with a variety of file types, it is
-       ;; easier to bind the link-related commands to the `global-map', as
-       ;; shown here.  Otherwise follow the same pattern for `org-mode-map',
-       ;; `markdown-mode-map', and/or `text-mode-map'.
-       "I" #'denote-link; "insert" mnemonic
-       "i" #'denote-link-or-create ; "insert" mnemonic
-       "[[" #'denote-link-or-create
-       "]]" #'denote-link-or-create
-       "a" #'denote-link-add-links
-       "b" #'denote-link-backlinks
-       "f f" #'denote-link-find-file
-       "f b" #'denote-link-find-backlink
-       "k a" #'denote-keywords-add
-       "k r" #'denote-keywords-remove
-       ;; Note that `denote-rename-file' can work from any context, not just
-       ;; Dired bufffers.  That is why we bind it here to the `global-map'.
-       "r" #'denote-rename-file
-       "R" #'denote-rename-file-using-front-matter))
+        "o" #'denote-open-or-create
+        "n" #'denote
+        "N" #'denote-type
+        "d" #'denote-date
+        "z" #'denote-signature ; "zettelkasten" mnemonic
+        "s" #'denote-subdirectory
+        "t" #'denote-template
+        ;; If you intend to use Denote with a variety of file types, it is
+        ;; easier to bind the link-related commands to the `global-map', as
+        ;; shown here.  Otherwise follow the same pattern for `org-mode-map',
+        ;; `markdown-mode-map', and/or `text-mode-map'.
+        "I" #'denote-link; "insert" mnemonic
+        "i" #'denote-link-or-create ; "insert" mnemonic
+        "[[" #'denote-link-or-create
+        "]]" #'denote-link-or-create
+        "a" #'denote-link-add-links
+        "b" #'denote-backlinks
+        "f f" #'denote-link-find-file
+        "f b" #'denote-link-find-backlink
+        "k a" #'denote-keywords-add
+        "k r" #'denote-keywords-remove
+        ;; Note that `denote-rename-file' can work from any context, not just
+        ;; Dired bufffers.  That is why we bind it here to the `global-map'.
+        "r" #'denote-rename-file
+        "R" #'denote-rename-file-using-front-matter))
+ )
 
 (use-package! citar-denote
   :init
@@ -1097,83 +1101,25 @@ the directory.  `REST' is passed to the `CONSULT-RIPGREP-FUNCTION'."
 
 (use-package! gptel
   :init
-  (setq gptel-directives '((default . "You are an expert research assitant specializing in immunology You are helpful, positive, and careful about being factually correct") (programming . "Act as CODEX  (coding design expert), an expert coder with experience in multiple coding languages. Always follow the coding besy practices by writing clean, modular code with proper security measures and leveraging design patterns. Start messages with 'CODEX:' and 'Hi, what are we coding today?' You can break down your code into parts whenever possible to avoid breaching chatgpt output character limit. Write code part by part when I send 'continue'. If you reach the character limit, ll send 'continue' and then you should continue wihtout repeating any previous code. Do not assume anything on your side; please ask me for all the necessary information in bullet points before starting. If you have trouble fixing a bug, ask me for the latest code snippets for reference from the official documentation.") (writing . "I am writing a research paper on neuroscience. I need your assistance in structuring my arguments, providing relevant data and statistics, and ensuring that my writing adheres to the academic style. Please also help me cite sources correctly and suggest improvements for clarity and coherence.") (editing and proofreading . "have a draft of my manuscript that needs editing. I would like you to help me with grammar, punctuation, sentence structure, and word choice. Please also provide suggestions for improving the overall flow and coherence of the text, and ensure that the tone is consistent throughout.") (chat . "You are a large language model and a conversation partner. Respond concisely.")))
   :config
   (setq gptel-api-key (getenv "OPENAI_API_KEY")
         gptel-use-curl 'nil
         gptel-stream nil
         gptel-default-mode 'org-mode)
 
-  (gptel-make-openai "llama"          ;Any name
-  :stream t                             ;Stream responses
-  :protocol "http"
-  :host "192.114.18.118:8080/"                ;Llama.cpp server location
-  :models '("8b-instrucy-fp16"))                    ;Any names, doesn't matter for Llama
+  (setq
+   gptel-model 'qwen2.5-coder:32b
+   gptel-backend (gptel-make-ollama "Ollama"
+                   :host "localhost:11434"
+                   :stream t
+                   ;; :endpoint "/api/generate"
+                   :models '(qwen2.5-coder:32b)))
 
-  ;; gptel-default-mode 'markdown-mode)
-  )
-
-(defvar gptel-quick--history nil)
-
-(defvar gptel-quick--history nil)
-(defun gptel-quick (prompt)
-  (interactive
-   (let ((region-text (if (use-region-p)
-                          (buffer-substring-no-properties (region-beginning) (region-end))
-                        "")))
-     (list (cons (read-string "Ask ChatGPT: " nil gptel-quick--history) region-text))))
-  (let ((complete-prompt (concat (car prompt) (cdr prompt))))
-    (when (string= complete-prompt "")
-      (user-error "A prompt is required."))
-    (gptel-request
-        complete-prompt
-      :callback
-      (lambda (response info)
-        (if (not response)
-            (message "gptel-quick failed with message: %s" (plist-get info :status))
-          (with-current-buffer (get-buffer-create "*gptel-quick*")
-            (let ((inhibit-read-only t))
-              (erase-buffer)
-              (insert response))
-            (special-mode)
-            (display-buffer (current-buffer)
-                            `((display-buffer-in-side-window)
-                              (side . bottom)
-                              (window-height . ,#'fit-window-to-buffer)))))))))
-
-(defun gptel-rewrite-and-replace (bounds &optional directive)
-  (interactive
-   (list
-    (cond
-     ((use-region-p) (cons (region-beginning) (region-end)))
-     ((derived-mode-p 'text-mode)
-      (list (bounds-of-thing-at-point 'sentence)))
-     (t (cons (line-beginning-position) (line-end-position))))
-    (and current-prefix-arg
-         (read-string "ChatGPT Directive: "
-                      "You are a prose editor. Rewrite my prompt more professionally."))))
-  (gptel-request
-      (buffer-substring-no-properties (car bounds) (cdr bounds)) ;the prompt
-    :system (or directive "You are a prose editor. Rewrite my prompt more professionally.")
-    :buffer (current-buffer)
-    :context (cons (set-marker (make-marker) (car bounds))
-                   (set-marker (make-marker) (cdr bounds)))
-    :callback
-    (lambda (response info)
-      (if (not response)
-          (message "ChatGPT response failed with: %s" (plist-get info :status))
-        (let* ((bounds (plist-get info :context))
-               (beg (car bounds))
-               (end (cdr bounds))
-               (buf (plist-get info :buffer)))
-          (with-current-buffer buf
-            (save-excursion
-              (goto-char beg)
-              (kill-region beg end)
-              (insert response)
-              (set-marker beg nil)
-              (set-marker end nil)
-              (message "Rewrote line. Original line saved to kill-ring."))))))))
+  (gptel-make-ollama "Ollama"
+    :host "localhost:11434"
+    :stream t
+    ;; :endpoint "/api/generate"
+    :models '(deepseek-r1:32b)))
 
 ;; (use-package! shackle
 ;; :config
@@ -1205,38 +1151,21 @@ the directory.  `REST' is passed to the `CONSULT-RIPGREP-FUNCTION'."
 ;;ein
 (use-package! ein)
 
-;; jupyter
-;; (use-package jupyter
-;;   :demand t
-;;   :after (:all org python ob-jupyter ob-python)
-;;   :config
-
-;;   (org-babel-jupyter-override-src-block 'python)
-;;   (add-hook! jupyter-repl-mode #'electric-pair-mode)
-;;   (map! :map python-mode-map
-;;         :nvi "C-<return>" #'jupyter-eval-line-or-region
-;;         )
-
-;;   (map! :map jupyter-repl-mode-map
-;;         :i "C-k" #'jupyter-repl-history-previous
-;;         :nvi "C-e" #'evil-end-of-line-or-visual-line
-;;         :i "C-j" #'jupyter-repl-history-next
-;;         :i "<up>" #'jupyter-repl-history-previous
-;;         :i "<down>" #'jupyter-repl-history-next
-;;         )
-
-;;   (defun my/jupyter-refresh-kernelspecs ()
-;;     "Refresh Jupyter kernelspecs"
-;;     (interactive)
-;;     (jupyter-available-kernelspecs t)))
-
 (use-package jupyter
   :demand t
   :after (:all org python ob-jupyter ob-python)
+
   :config
+  (map! :map jupyter-repl-mode-map
+        :i "C-k" #'jupyter-repl-history-previous
+        :i "C-j" #'jupyter-repl-history-next
+        :nvi "C-e" #'evil-end-of-line-or-visual-line
+        :i "<up>" #'jupyter-repl-history-previous
+        :i "<down>" #'jupyter-repl-history-next)
 
   (org-babel-jupyter-override-src-block 'python)
-  (add-hook 'jupyter-repl-mode-hook #'electric-pair-mode)
+  (add-hook! 'jupyter-repl-mode-hook #'electric-pair-mode)
+  (add-hook! 'jupyter-repl-mode-hook (writeroom-mode -1))
 
   ;; Ensuring evil-mode is loaded before adding keybindings
   (with-eval-after-load 'evil
@@ -1395,56 +1324,40 @@ the directory.  `REST' is passed to the `CONSULT-RIPGREP-FUNCTION'."
         org-download-image-dir "images"
         org-download-heading-lvl nil
         org-download-timestamp "%Y%m%d-%H%M%S_"
-        org-image-actual-width 400
+        org-image-actual-width nil
         org-download-screenshot-method "xclip -selection clipboard -t image/png -o > '%s'")
   :bind
   ("C-M-p" . org-download-screenshot))
 
 
-(after! jupyter
-  (add-hook! jupyter-repl-mode #'electric-pair-mode)
-  (map! :map jupyter-repl-mode-map
-        :i "C-k" #'jupyter-repl-history-previous
-        :nvi "C-e" #'evil-end-of-line-or-visual-line
-        :i "C-j" #'jupyter-repl-history-next
-        :i "<up>" #'jupyter-repl-history-previous
-        :i "<down>" #'jupyter-repl-history-next
-        )
+  ;; ;; adding an indicator
+  ;; (defvar jupyter-eval-indicator ""
+  ;;   "Indicator for mode line to show when Jupyter is evaluating.")
 
-;; adding an indicator
-(defvar jupyter-eval-indicator ""
-  "Indicator for mode line to show when Jupyter is evaluating.")
+  ;; (put 'jupyter-eval-indicator 'risky-local-variable t)
 
-(put 'jupyter-eval-indicator 'risky-local-variable t)
+  ;; ;; Update your mode line format to include this indicator
+  ;; (setq mode-line-format
+  ;;       (cons '(:eval jupyter-eval-indicator) mode-line-format))
 
-;; Update your mode line format to include this indicator
-(setq mode-line-format
-      (cons '(:eval jupyter-eval-indicator) mode-line-format))
+  ;; (defun jupyter-before-eval (&rest args)
+  ;;   "Function to run before jupyter-eval-region."
+  ;;   (interactive)
+  ;;   (setq jupyter-eval-indicator "[Kernel active]")
+  ;;   (force-mode-line-update)
+  ;;   )
 
-(defun jupyter-before-eval (&rest args)
-  "Function to run before jupyter-eval-region."
-  (interactive)
-  (setq jupyter-eval-indicator "[Kernel active]")
-  (force-mode-line-update)
-  )
+  ;; (defun jupyter-after-eval (&rest args)
+  ;;   "Function to run after jupyter-eval-region."
+  ;;   (interactive)
+  ;;   (setq jupyter-eval-indicator "")
+  ;;   (force-mode-line-update)
+  ;;   )
 
-(defun jupyter-after-eval (&rest args)
-  "Function to run after jupyter-eval-region."
-  (interactive)
-  (setq jupyter-eval-indicator "")
-  (force-mode-line-update)
-  )
+  ;; (advice-add 'jupyter-eval-region :before #'jupyter-before-eval)
+  ;; (advice-add 'jupyter-eval-region :after #'jupyter-after-eval)
 
-(advice-add 'jupyter-eval-region :before #'jupyter-before-eval)
-(advice-add 'jupyter-eval-region :after #'jupyter-after-eval)
-
-;; Make jupyter buffers not pop up when they are already open
-(add-to-list 'display-buffer-alist
-             (cons "\\`\\*jupyter-.*\\'"
-                   (cons 'display-buffer-reuse-window
-                         '((reusable-frames . visible)
-                           (inhibit-switch-frame . nil)))))
-)
+  ;; Make jupyter buffers not pop up when they are already open
 
 
 (use-package ess
@@ -1571,8 +1484,11 @@ the directory.  `REST' is passed to the `CONSULT-RIPGREP-FUNCTION'."
           (kill-new (treemacs--get-label-of name))
           (message "Copied: %s" (treemacs--get-label-of name)))
       (message "No file or directory at point"))))
-(after! treemacs
-  (evil-define-key 'treemacs treemacs-mode-map (kbd "y n") #'my/treemacs-copy-name-at-point))
+
+(after! treemac
+  (setq! treemacs-sorting 'mod-time-desc)
+  (evil-define-key 'treemacs treemacs-mode-map (kbd "y n") #'my/treemacs-copy-name-at-point)
+  )
 
 ;; (use-package! consult-denote)
 ;; (use-package! spacious-padding)

@@ -97,6 +97,13 @@
 (load! "unbinding.el")
 (load! "keybindings.el")
 
+(after! tramp
+(add-to-list 'tramp-remote-path "/home/yonatan/.local/bin")
+;; (setq tramp-default-method "ssh")
+;; (setq tramp-remote-shell "/usr/bin/bash")  ;; Change to /bin/zsh if using Zsh
+;; (setq tramp-remote-shell-args '("-c" "-l"))
+)
+
 
 (setq which-key-idle-delay 0.2
       which-key-idle-secondary-delay 0.1
@@ -105,17 +112,26 @@
 (setq-default
     evil-shift-width 4 ; globally
     tab-width 4) ; globally
+
 (setq!
     evil-shift-width 4
     tab-width 4)
 
-(defun my/set-indent ()
+(defun my/set-indent-to-4 ()
   "Set indentation preferences."
+  (interactive)
   (setq-local evil-shift-width 4)
   (setq-local tab-width 4))
 
-(add-hook 'prog-mode-hook #'my/set-indent)
-(add-hook 'text-mode-hook #'my/set-indent)
+(add-hook 'prog-mode-hook #'my/set-indent-to-4)
+
+(defun my/set-indent-to-8 ()
+  "Set indentation preferences."
+  (setq-local evil-shift-width 8)
+  (setq-local tab-width 8))
+
+;; (add-hook 'text-mode-hook #'my/set-indent)
+
 
 (display-time-mode 1)                             ; Enable time in the mode-line
 (display-battery-mode 1)                          ; On laptops it's nice to know how much power you have
@@ -131,6 +147,9 @@
  evil-split-window-below t)
 
 (remove-hook 'text-mode-hook #'auto-fill-mode)
+
+(require 'evil-surround)
+(global-evil-surround-mode 1)
 
 (defun my/snipe_ivy ()
   (evilem-create (list 'evil-snipe-repeat
@@ -176,7 +195,7 @@
   (set-face-attribute 'variable-pitch nil :height 1.0))
 
 (add-hook! ('jupyter-org-interaction-mode-hook 'inferior-python-mode-hook)
-  (writeroom-mode nil)
+  (writeroom-mode -1)
   (+word-wrap-mode 1)
   (electric-pair-mode 1)
   (map! :map jupyter-repl-mode-map
@@ -269,8 +288,8 @@
 (defun my/make-large-frame () (interactive) (set-frame-size (selected-frame) 140 47))
 
 (setq default-frame-alist '(
-                            (height . 38)
-                            (width . 50)
+                            (height . 47)
+                            (width . 140)
                             (vertical-scroll-bars)
                             (tool-bar-lines . 0)
                             (menu-bar-lines . 0)
@@ -279,10 +298,10 @@
 
 
 (setq initial-frame-alist '(
-                            (top . 60)
-                            (left . 60)
-                            (height . 35)
-                            (width . 100)
+                            (top . 00)
+                            (left . 2000)
+                            (height . 50)
+                            (width . 140)
                             (vertical-scroll-bars)
                             (tool-bar-lines . 0)
                             (menu-bar-lines . 0)
@@ -404,7 +423,7 @@ Return the errors parsed with the error patterns of CHECKER."
 ;; Bind the text object to "il" for inner line
 (define-key evil-inner-text-objects-map "l" 'evil-select-inner-line-no-whitespace)
 
-(yas-global-mode 0)
+(yas-global-mode nil)
 
 (setq eshell-prompt-function
       (lambda()
@@ -432,8 +451,21 @@ Return the errors parsed with the error patterns of CHECKER."
 
 (setq company-backends '((company-capf company-files company-dabbrev-code company-dabbrev)))
 (setq writeroom-width 100)
-;; (diredp-toggle-find-file-reuse-dir 1)
+;; Make all system commands run as async
+(dired-async-mode 1)
+
 (setq dired-compress-file-alist '(("\\.gz\\'" . "gzip -9f %i") ("\\.bz2\\'" . "bzip2 -9f %i") ("\\.xz\\'" . "xz -9f %i") ("\\.zst\\'" . "zstd -qf -19 --rm -o %o %i") ("\\.zip\\'" . "zip %o -r --filesync %i")))
+
+(setq dired-guess-shell-alist-user
+      '(("\\.\\(png\\|jpe?g\\|gif\\|bmp\\|tiff?\\)$" "eog")))
+
+(defun my/dired-async-no-popup (orig-fun &rest args)
+  "Run `dired-do-async-shell-command' without popping up a buffer."
+  (let ((display-buffer-alist '(("Async Shell Command" display-buffer-no-window))))
+    (apply orig-fun args)))
+
+(advice-add 'dired-do-async-shell-command :around #'my/dired-async-no-popup)
+
 ;; tabs
 (defun my/name-tab-by-project-or-default ()
   "Return project name if in a project, or default tab-bar name if not.
@@ -443,7 +475,7 @@ The default tab-bar name uses the buffer name."
         (tab-bar-tab-name-current)
       (projectile-project-name))))
 
-(setq tab-bar-show 1)
+(setq! tab-bar-show nil)
 ;; (setq tab-bar-show nil)
 (setq tab-bar-format '(tab-bar-format-history tab-bar-format-tabs tab-bar-separator))
 (setq tab-bar-close-button-show nil)
@@ -562,3 +594,64 @@ The default tab-bar name uses the buffer name."
 (map! :leader
       :desc "Toggle Laptop Mode"
       "t L" #'laptop-mode)
+
+(pixel-scroll-precision-mode 1)
+
+;; Shouldn't be here but didn't work otherwise
+(add-hook! 'jupyter-repl-mode-hook #'electric-pair-mode (writeroom-mode -1))
+(map! :map jupyter-repl-mode-map
+      :i "C-k" #'jupyter-repl-history-previous
+      :nvi "C-e" #'evil-end-of-line-or-visual-line
+      :i "C-j" #'jupyter-repl-history-next
+      :i "<up>" #'jupyter-repl-history-previous
+      :i "<down>" #'jupyter-repl-history-next)
+(add-to-list 'display-buffer-alist
+               (cons "\\`\\*jupyter-.*\\'"
+                     (cons 'display-buffer-reuse-window
+                           '((reusable-frames . visible)
+                             (inhibit-switch-frame . nil)))))
+
+(setq epa-file-name-regexp "\\.gpg$")
+(setq epa-file-cache-passphrase-for-symmetric-encryption nil)
+
+(defun my-jupyter--debug-status (repl status &rest _)
+  "Log the kernel STATUS to *Messages* so we know it's being called."
+  (message "Kernel status changed => %s" status))
+
+(defvar my-jupyter-busy-overlay nil
+  "Overlay for 'Kernel Busy' message at top of REPL buffer.")
+
+(defun my-jupyter--overlay-busy (repl status &rest _)
+  "Show/hide an overlay at the top of the REPL buffer depending on STATUS."
+  (let ((buf (process-buffer (oref repl client))))
+    (when (buffer-live-p buf)
+      (with-current-buffer buf
+        (cond
+         ((string= status "busy")
+          (unless my-jupyter-busy-overlay
+            (setq my-jupyter-busy-overlay
+                  (make-overlay (point-min) (point-min)))
+            (overlay-put my-jupyter-busy-overlay 'after-string
+                         (propertize "★ Kernel Busy ★\n"
+                                     'face '(:foreground "yellow" :background "red" :weight bold)))
+            (overlay-put my-jupyter-busy-overlay 'priority 100)))
+         (t
+          (when my-jupyter-busy-overlay
+            (delete-overlay my-jupyter-busy-overlay)
+            (setq my-jupyter-busy-overlay nil))))))))
+
+(defun my-jupyter--mode-line-busy (repl status &rest _)
+  "Update `mode-line-process` in the REPL buffer according to STATUS."
+  (let ((buf (process-buffer (oref repl client))))
+    (when (buffer-live-p buf)
+      (with-current-buffer buf
+        (setq mode-line-process
+              (if (string= status "busy")
+                  " [Busy]"
+                ""))
+        (force-mode-line-update)))))
+
+;; Advise jupyter-repl--status-changed to run our code
+(advice-add 'jupyter-repl--status-changed :after #'my-jupyter--debug-status)
+(advice-add 'jupyter-repl--status-changed :after #'my-jupyter--overlay-busy)
+(advice-add 'jupyter-repl--status-changed :after #'my-jupyter--mode-line-busy)

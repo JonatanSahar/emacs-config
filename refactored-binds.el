@@ -291,7 +291,7 @@
                                       :desc "switch to previous buffer" "k" 'evil-switch-to-windows-last-buffer
                                       :desc "search and replace vim style" "s" #'my/search-replace
                                       :desc "search and replace vim style - in region" "S" #'my/search-replace-in-region
-                                      :desc "refile subtree" "R" 'org-refile
+                                      :desc "copy figures dir for spatial" "R" #'my/scp-copy-figures
                                       :desc "register dwi" "p" #'consult-register-load
                                       :desc "point to register" "p" #'point-to-register
                                       :desc "run macro" "e" #'kmacro-end-and-call-macro

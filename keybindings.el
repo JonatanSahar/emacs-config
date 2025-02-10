@@ -172,7 +172,6 @@
 (map! :leader
       :nv
       :desc "copy buffer name"  "fc" #'my/get-buffer-name
-      :desc "denote backlinks"  "nB" #'denote-link-backlinks
       ;; :desc "helm-bibtex"  "nB" #'helm-bibtex
       ;; :desc "citar references"  "nb" #'citar-open
       :desc "agenda for literature followup" "oal" #'(lambda () (interactive) (org-agenda nil "l"))
@@ -278,7 +277,8 @@
       :desc "searcj online" "sG" #'+lookup/online
       :desc "search org outline" "so" #'consult-outline
       :desc "search project/dir" "sp" #'consult-ripgrep
-      :desc "search project/dir" "sd" #'consult-ripgrep
+      :desc "ripgrep in project/dir" "sd" #'consult-ripgrep
+      :desc "grep in project/dir" "sD" #'consult-grep
       :desc "search buffer"  "ss" #'consult-line
       :desc "search for file in dir"  "sf" #'consult-fd
       :desc "equate window sizes" "we" #'balance-windows
@@ -286,15 +286,15 @@
       :desc "minimize window" "wO" #'minimize-window
       :desc "maximize window" "wmM" #'doom/window-maximize-buffer
       :desc "ace-window" "-" #'ace-window
+      :desc "ace-delete-window" "D" #'ace-delete-window
       :desc "switch to buffer" "bb" #'consult-buffer
       :desc "buffer to new window" "bB" #'consult-buffer-other-window)
 
 (map! :localleader
       :map (python-mode-map python-ts-mode-map)
-      :n :desc "eval buffer" "eb" #'python-shell-send-buffer
-      :n :desc "eval file" "ef" #'python-shell-send-file
-      :n :desc "eval function" "ed" #'python-shell-send-defun
-      :nv :desc "eval region" "er" #'python-shell-send-region
+      :n :desc "eval buffer" "eb" #'jupyter-eval-buffer
+      :n :desc "eval function" "ed" #'jupyter-eval-defun
+      :nv :desc "eval region" "er" #'jupyter-eval-region
       )
 (map! :map (python-mode-map python-ts-mode-map)
       :nv "C-<return>"  nil
@@ -317,11 +317,11 @@
       )
 (map! :after python
       :map (python-mode-map)
-      :nv "C-<return>" #'python-shell-send-statement
-      :nv "S-<return>" #'python-shell-send-statement
+      :nv "C-<return>" #'jupyter-eval-line-or-region
+      :nv "S-<return>" #'jupyter-eval-line-or-region
       :map (python-ts-mode-map)
-      :nv "S-<return>" #'python-shell-send-statement
-      :nv "C-<return>" #'python-shell-send-statement)
+      :nv "S-<return>" #'jupyter-eval-line-or-region
+      :nv "C-<return>" #'jupyter-eval-line-or-region)
 
 (map! :localleader
       :map matlab-mode-map
@@ -342,6 +342,7 @@
       (:prefix "t"
        :nv "t" #'treemacs
        :nv "T" #'popper-toggle
+       :nv "j" #'popper-toggle
        :nv "<return>" #'popper-toggle
        :nv "s" #'shell
        :nv "i" #'my/toggle-org-timer
@@ -406,7 +407,7 @@
        :desc "switch to previous buffer" "k" 'evil-switch-to-windows-last-buffer
        :desc "search and replace vim style" "s" #'my/search-replace
        :desc "search and replace vim style - in region" "S" #'my/search-replace-in-region
-       :desc "refile subtree" "R" 'org-refile
+       :desc "copy figures dir for spatial" "R" #'my/scp-copy-figures
        ;; :desc "paste from kill-ring" "p" #'consult-register
        :desc "register dwi" "p" #'consult-register-load
        :desc "point to register" "p" #'point-to-register
@@ -460,6 +461,7 @@
   ("q" nil "quit" :color blue))
 
 (map! :leader
+      :desc "ace delete window"  "d" #'ace-delete-window
       :desc "window resize hydra" "w." 'hydra-window-resize/body
       :desc "Open project buffer in other window" "pF" #'projectile-find-file-dwim-other-window
       :desc "open a buffer and switch to its tabspace" "bt" #'tabspaces-switch-buffer-and-tab

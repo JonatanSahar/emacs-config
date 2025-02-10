@@ -49,13 +49,6 @@
 ;; ...Or *all* packages (NOT RECOMMENDED; will likely break things)
                                         ;(unpin! t)
 
-;; (package! org-roam)
-;; (package! citar-org-roam)
-;; (package! org-roam-bibtex
-;; :recipe (:host github :repo "org-roam/org-roam-bibtex"))
-;; (package! org-roam-ui)
-
-;; (package! org :pin "73875939a8b5545")
 (package! org-pretty-tags)
 (package! org-superstar)
 (package! org-super-agenda)
@@ -68,6 +61,8 @@
 
 (package! simple-httpd)
 (package! f)
+
+(package! scratch)
 
 (package! nov)
 
@@ -148,14 +143,11 @@
 (package! matlab-mode)
 (package! lsp-pyright)
 (package! pyenv)
-(package! poetry)
 (package! virtualenvwrapper)
 (package! conda)
-(package! emacs-aio)
 (package! corfu)
 (package! cape)
 (package! shackle)
-(package! git-auto-commit-mode)
 
 
 ;; python
@@ -169,9 +161,8 @@
 (package! ef-themes)
 (package! org-modern)
 (package! logos)
-(package! mono-complete
-  :recipe (:host codeberg
-           :repo "ideasman42/emacs-mono-complete"
-           :branch "main"))
 (package! gptel)
 (package! all-the-icons)
+(package! git-commit
+  :recipe (:host github :repo "magit/magit" :files ("lisp/git-commit.el")))
+(package! listen)

@@ -881,16 +881,6 @@ The optional argument NEW-WINDOW is not used."
   (let ((org-download-screenshot-basename (read-string "Enter Filename: ")))
     (org-download-screenshot)))
 
-(defun sync-aux-file-to-chronos ()
-  "Sync the current buffer's file to a remote location using rsync."
-  (interactive)
-  (when (and buffer-file-name
-             (file-exists-p buffer-file-name))
-    (let ((remote-path "yonatan@192.114.18.118:/home/yonatan/UserSpace/spatial/code/aux.py"))
-      (shell-command
-       (format "scp %s %s" buffer-file-name remote-path))
-      (message "File synced to remote location."))))
-
 (defun my/md-to-org-region (start end)
   "Convert region from markdown to org, replacing selection"
   (interactive "r")
@@ -925,7 +915,10 @@ The optional argument NEW-WINDOW is not used."
   (interactive)
   (if (or (bolp) ; At beginning of line
           (save-excursion (backward-char) (looking-at-p "\\s-"))) ; Previous char is whitespace
-      (evil-kill-to-prev-word-end)
+      (evil-delete (point) (save-excursion
+                             (evil-backward-word-end)
+                             (forward-char) ; Move forward to avoid deleting the last char
+                             (point)))
     (call-interactively 'backward-kill-word)))
 
 (defun conditional-evil-kill-to-next-word-start ()
@@ -937,3 +930,34 @@ The optional argument NEW-WINDOW is not used."
 
 (map! :ni "C-<backspace>" #'conditional-evil-kill-to-prev-word-end
       :ni "C-<delete>" #'conditional-evil-kill-to-next-word-start)
+
+(eval `(defun my/ediff-buffers-wordwise (buffer-A buffer-B &optional startup-hooks job-name)
+     ,(concat (documentation 'ediff-buffers) "\nComparison is done word-wise.")
+     ,(interactive-form 'ediff-buffers)
+     (setq bufA (get-buffer buffer-A)
+           bufB (get-buffer buffer-B)
+           job-name (or job-name 'ediff-buffers-wordwise))
+     (cl-assert bufA nil
+            "Not a live buffer: %s" buffer-A)
+     (cl-assert bufB nil
+            "Not a live buffer: %s" buffer-B)
+     (ediff-regions-internal bufA
+                 (with-current-buffer bufA
+                   (point-min))
+                 (with-current-buffer bufA
+                   (point-max))
+                 bufB
+                 (with-current-buffer bufB
+                   (point-min))
+                 (with-current-buffer bufB
+                   (point-max))
+                 startup-hooks
+                 job-name
+                 'word-mode
+                 nil)))
+
+(defun my/scp-copy-figures ()
+  "Run the scp command to copy figures from the remote server."
+  (interactive)
+  (let ((default-directory "/home/yonatan/Projects/spatial/"))
+    (async-shell-command "scp -r yonatan@192.114.18.118:/home/yonatan/UserSpace/spatial/figures /home/yonatan/Projects/spatial/")))
