@@ -393,8 +393,9 @@
        :desc "embark act" "a" #'embark-act
        :desc "select header content" "y" #'my/visual-inside-org-header
        :desc "copy header content" "h" #'my/yank-org-headline
-       :desc "orgnv" "g" #'orgnv-browse
-       :desc "orgnv + rebuild DB" "G" #'(lambda () (interactive) (my/orgnv-update-db) (orgnv-browse))
+       :desc "gptel-send" "G" #'gptel
+       :desc "gptel-send" "g" #'gptel-send
+       :desc "gptel-rewrite" "r" #'gptel-rewrite
        :desc "kill all other windows" "o" 'delete-other-windows
        :desc "resize window to small" "F" 'my/make-small-frame
        :desc "resize window to medium" "m" 'my/make-medium-frame
@@ -416,17 +417,16 @@
        :desc "run macro" "e" #'kmacro-end-and-call-macro
        :desc "generate laTex previews" "L" #'org-latex-preview
 
-       (:prefix ("r" . "rectangle operations")
-        "r" #'replace-rectangle
-        :desc "paste rectangle" "p" #'yank-rectangle
-        :desc "copy rectangle" "y"  #'copy-rectangle-as-kill
-        :desc "cut rectangle" "x"  #'kill-rectangle
-        :desc "push rectangle right" "r"  #'open-rectangle
-        :desc "delete rectangle" "d"  #'clear-rectangle
-        )
+       ;; (:prefix ("r" . "rectangle operations")
+       ;;  "r" #'replace-rectangle
+       ;;  :desc "paste rectangle" "p" #'yank-rectangle
+       ;;  :desc "copy rectangle" "y"  #'copy-rectangle-as-kill
+       ;;  :desc "cut rectangle" "x"  #'kill-rectangle
+       ;;  :desc "push rectangle right" "r"  #'open-rectangle
+       ;;  :desc "delete rectangle" "d"  #'clear-rectangle
+       ;;  )
 
        (:prefix ("b" . "references")
-
         :desc "refresh bibliography" "r" #'citar-refresh
         :desc "open bibliography" "b" #'citar-open
         )
