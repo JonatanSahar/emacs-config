@@ -151,14 +151,12 @@
 (require 'evil-surround)
 (global-evil-surround-mode 1)
 
-(defun my/snipe_ivy ()
-  (evilem-create (list 'evil-snipe-repeat
-                       'evil-snipe-repeat-reverse)
+(define-key evil-snipe-parent-transient-map (kbd "C-;")
+  (evilem-create 'evil-snipe-repeat
                  :bind ((evil-snipe-scope 'buffer)
                         (evil-snipe-enable-highlight)
                         (evil-snipe-enable-incremental-highlight))))
 
-(map! :map evil-snipe-parent-transient-map "C-;" #'my/snipe_ivy )
 
 (custom-set-variables
  '(helm-ag-base-command "rg --no-heading")

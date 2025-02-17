@@ -162,6 +162,7 @@
 (package! org-modern)
 (package! logos)
 (package! gptel)
+(package! elysium)
 (package! all-the-icons)
 (package! git-commit
   :recipe (:host github :repo "magit/magit" :files ("lisp/git-commit.el")))

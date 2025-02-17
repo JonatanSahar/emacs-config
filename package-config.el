@@ -464,7 +464,6 @@ With prefix, rebuild the cache before offering candidates."
         "M-;" #'+company/complete)
   )
 
-(use-package! poetry)
 
 (defun define-minibuffer-key (key &rest defs)
   "Define KEY conditionally in the minibuffer.
@@ -645,6 +644,7 @@ DEFS is a plist associating completion categories to commands."
 (use-package! denote
   :config
   (setq org-agenda-files (list (concat (file-name-as-directory denote-directory) "20240219T111038--analysis-log-vaccine-response__work.org") (concat (file-name-as-directory denote-directory) "20240417T172124--analysis-log-spatial-pipeline__work.org")(concat (file-name-as-directory denote-directory) "20240219T105512--papers-to-read__work.org")))
+
   ;; Remember to check the doc strings of those variables.
   (setq! denote-directory (expand-file-name "~/Documents/notes")
          denote-excluded-directories-regexp "export.*"
@@ -655,55 +655,26 @@ DEFS is a plist associating completion categories to commands."
          denote-excluded-directories-regexp nil
          denote-excluded-keywords-regexp nil)
 
+  (denote-rename-buffer-mode 1)
+
   ;; Pick dates, where relevant, with Org's advanced interface:
   (setq denote-date-prompt-use-org-read-date t)
-
-
-  ;; Read this manual for how to specify `denote-templates'.  We do not
-  ;; include an example here to avoid potential confusion.
-
-  ;; We allow multi-word keywords by default.  The author's personal
-  ;; preference is for single-word keywords for a more rigid workflow.
-  (setq denote-allow-multi-word-keywords t)
-
-  (setq denote-date-format nil) ; read doc string
-
-  ;; By default, we do not show the context of links.  We just display
-  ;; file names.  This provides a more informative view.
+  (setq denote-allow-multi-word-keywords nil)
+  (setq denote-date-format nil)
   (setq denote-backlinks-show-context t)
 
-  ;; Also see `denote-link-backlinks-display-buffer-action' which is a bit
-  ;; advanced.
-
-  ;; If you use Markdown or plain text files (Org renders links as buttons
-  ;; right away)
   (add-hook 'find-file-hook #'denote-link-buttonize-buffer)
 
-  ;; We use different ways to specify a path for demo purposes.
   (setq denote-dired-directories
         (list denote-directory
               (thread-last denote-directory (expand-file-name "attachments"))
               (expand-file-name "~/Documents/books")))
 
   ;; Generic (great if you rename files Denote-style in lots of places):
-  ;; (add-hook 'dired-mode-hook #'denote-dired-mode)
+  (add-hook 'dired-mode-hook #'denote-dired-mode)
   ;;
   ;; OR if only want it in `denote-dired-directories':
-  (add-hook 'dired-mode-hook #'denote-dired-mode-in-directories)
-
-  ;; Here is a custom, user-level command from one of the examples we
-  ;; showed in this manual.  We define it here and add it to a key binding
-  ;; below.
-  (defun my-denote-journal ()
-    "Create an entry tagged 'journal', while prompting for a title."
-    (interactive)
-    (denote
-     (denote--title-prompt)
-     '("journal")))
-
-  ;; Denote DOES NOT define any key bindings.  This is for the user to
-  ;; decide.  For example:
-
+  ;; (add-hook 'dired-mode-hook #'denote-dired-mode-in-directories)
 
   (with-eval-after-load 'org-capture
     (setq denote-org-capture-specifiers "%l\n%i\n%?")
@@ -811,9 +782,6 @@ the directory.  `REST' is passed to the `CONSULT-RIPGREP-FUNCTION'."
   ;; Probably not needed if you are using which-key.
   ;; (define-key consult-narrow-map (vconcat consult-narrow-key "?") #'consult-narrow-help)
 
-  (autoload 'projectile-project-root "projectile")
-  (setq consult-project-root-function #'projectile-project-root)
-
   ;; Optionally add the `consult-flycheck' command.
   (use-package! consult-flycheck
     :bind (:map flycheck-command-map
@@ -821,13 +789,8 @@ the directory.  `REST' is passed to the `CONSULT-RIPGREP-FUNCTION'."
 
 
   :config
-
   (autoload 'projectile-project-root "projectile")
   (setq consult-project-function (lambda (_) (projectile-project-root)))
-  (map! :map evil-normal-state-map
-        "M-e" #'consult-isearch-forward
-        )
-  )
 
 (use-package! consult-company
   :config
@@ -1107,13 +1070,33 @@ the directory.  `REST' is passed to the `CONSULT-RIPGREP-FUNCTION'."
         gptel-stream nil
         gptel-default-mode 'org-mode)
 
+(setq! gptel-directives
+  '(
+    (default   . "You are a large language model and a helpful assistant. Answer the user’s questions accurately and concisely.")
+    (programming . "You are a language model with expert programming knowledge. Provide clean, correct code solutions with minimal commentary")
+    (writing   . "You are a skilled writing assistant. Help improve text for clarity, style, and correctness. Respond succinctly and to the point.")
+    (chat      . "You are a friendly conversational partner and knowledgeable assistant. Engage naturally and helpfully in conversation, keeping your responses concise.")
+    (refactor  . "You are a language model with expert programming knowledge. Provide clean, correct code solutions with minimal commentary; output code and only code, DO NOT add code fences e.g. Python ''' ''' around the code.")
+  (rewrite   . "You are a language model skilled in rephrasing. Rewrite the provided text to improve clarity and conciseness while preserving its original meaning.")
+  ))
   (setq
-   gptel-model 'qwen2.5-coder:32b
+   gptel-model 'phi4:latest
    gptel-backend (gptel-make-ollama "Ollama"
                    :host "localhost:11434"
                    :stream t
+                   :models '(phi4:latest)))
+
+(gptel-make-ollama "Ollama"
+                   :host "localhost:11434"
+                   :stream t
                    ;; :endpoint "/api/generate"
-                   :models '(qwen2.5-coder:32b)))
+                   :models '(qwen2.5-coder:32b))
+
+(gptel-make-ollama "Ollama"
+                   :host "localhost:11434"
+                   :stream t
+                   ;; :endpoint "/api/generate"
+                   :models '(phi4:latest))
 
   (gptel-make-ollama "Ollama"
     :host "localhost:11434"
@@ -1494,3 +1477,13 @@ the directory.  `REST' is passed to the `CONSULT-RIPGREP-FUNCTION'."
 ;; (use-package! spacious-padding)
 (after! spacious-padding
   (spacious-padding-mode 1))
+
+(use-package elysium
+  :custom
+  ;; Below are the default values
+  (elysium-window-size 0.33) ; The elysium buffer will be 1/3 your screen
+  (elysium-window-style 'vertical)) ; Can be customized to horizontal
+(use-package smerge-mode
+  :ensure nil
+  :hook
+  (prog-mode . smerge-mode))
