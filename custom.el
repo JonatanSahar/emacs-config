@@ -5,7 +5,7 @@
  ;; If there is more than one, they won't work right.
  '(linum-format 'dynamic)
  '(magit-todos-insert-after '(bottom) nil nil "Changed by setter of obsolete option `magit-todos-insert-at'")
- '(package-selected-packages '(spacious-padding consult-denote)))
+ '(package-selected-packages '(copilot-chat spacious-padding consult-denote)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.

@@ -162,13 +162,17 @@
 (package! org-modern)
 (package! logos)
 (package! gptel)
-(package! elysium)
+(package! elysium
+  :recipe (:host github :repo "lanceberge/elysium" :files ("*.el"))
+  )
 (package! all-the-icons)
 (package! git-commit
   :recipe (:host github :repo "magit/magit" :files ("lisp/git-commit.el")))
 (package! listen)
 
 
-(unpin! projectile)
+(package! projectile)
 (package! copilot
   :recipe (:host github :repo "copilot-emacs/copilot.el" :files ("*.el")))
+(package! copilot-chat
+  :recipe (:host github :repo "chep/copilot-chat.el" :files ("*.el")))

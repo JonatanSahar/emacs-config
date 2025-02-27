@@ -327,7 +327,7 @@ The default tab-bar name uses the buffer name."
                            '((reusable-frames . visible)
                              (inhibit-switch-frame . nil)))))
 
-(load! "keybindings.el")
+
 
 (use-package! denote
   :config
@@ -415,93 +415,6 @@ The default tab-bar name uses the buffer name."
   (setq consult-notes-denote-display-id nil)
   )
 
-(after! denote
-  (map!
-   (:map org-mode-map :leader
-         (:prefix "n"
-          :nv "o" #'denote-open-or-create
-          ;; :nv "f" #'denote-open-or-create
-          :nv "f" #'consult-notes
-          :nv "n" #'denote
-          :nv "r" #'denote-rename-file
-          :nv "R" #'denote-rename-file-using-front-matter
-          :nv "k" #'denote-keywords-add
-          :nv "K" #'denote-keywords-remove
-          :nv "D" #'denote-date
-          :nv "z" #'denote-signature ; "zettelkasten" mnemonic
-          :nv "s" #'denote-subdirectory
-          :nv "t" #'denote-template
-          :nv "i" #'denote-link-or-create ; denote-link ; "insert" mnemonic
-          :nv "I" #'denote-link
-          :nv "L" #'denote-link-after-creating
-          :nv "a" #'denote-link-add-links
-          :nv "b" #'denote-backlinks
-          :nv "F" #'denote-link-find-file
-          :nv "B" #'denote-link-find-backlink))
-
-   (:map org-mode-map :nvi
-         "C-c n j" #'my-denote-journal ; our custom command
-         "C-c n o" #'denote-open-or-create
-         "C-c n n" #'denote
-         "C-c n N" #'denote-type
-         "C-c n d" #'denote-date
-         "C-c n z" #'denote-signature ; "zettelkasten" mnemonic
-         "C-c n s" #'denote-subdirectory
-         "C-c n t" #'denote-template
-         ;; If you intend to use Denote with a variety of file types, it is
-         ;; easier to bind the link-related commands to the `global-map', as
-         ;; shown here.  Otherwise follow the same pattern for `org-mode-map',
-         ;; `markdown-mode-map', and/or `text-mode-map'.
-         "C-c n I" #'denote-link; "insert" mnemonic
-         "C-c n L" #'denote-link-after-creating
-         "C-c n i" #'denote-link-or-create ; "insert" mnemonic
-         "[[" #'denote-link-or-create
-         "C-c n a" #'denote-link-add-links
-         "C-c n b" #'denote-backlinks
-         "C-c n f f" #'denote-link-find-file
-         "C-c n f b" #'denote-link-find-backlink
-         "C-c n k a" #'denote-keywords-add
-         "C-c n k r" #'denote-keywords-remove
-         ;; Note that `denote-rename-file' can work from any context, not just
-         ;; Dired bufffers.  That is why we bind it here to the `global-map'.
-         "C-c n r" #'denote-rename-file
-         "C-c n R" #'denote-rename-file-using-front-matter)
-
-   ;; Key bindings specifically for Dired.
-   (:map dired-mode-map
-         "C-c C-d C-i" #'denote-link-dired-marked-notes
-         "C-c C-d C-r" #'denote-dired-rename-marked-files
-         "C-c C-d C-R" #'denote-dired-rename-marked-files-using-front-matter)
-
-   (:map evil-org-mode-map :prefix "C-n" :nvi
-         "j" #'my-denote-journal ; our custom command
-
-         "o" #'denote-open-or-create
-         "n" #'denote
-         "N" #'denote-type
-         "d" #'denote-date
-         "z" #'denote-signature ; "zettelkasten" mnemonic
-         "s" #'denote-subdirectory
-         "t" #'denote-template
-         ;; If you intend to use Denote with a variety of file types, it is
-         ;; easier to bind the link-related commands to the `global-map', as
-         ;; shown here.  Otherwise follow the same pattern for `org-mode-map',
-         ;; `markdown-mode-map', and/or `text-mode-map'.
-         "I" #'denote-link; "insert" mnemonic
-         "i" #'denote-link-or-create ; "insert" mnemonic
-         "[[" #'denote-link-or-create
-         "]]" #'denote-link-or-create
-         "a" #'denote-link-add-links
-         "b" #'denote-backlinks
-         "f f" #'denote-link-find-file
-         "f b" #'denote-link-find-backlink
-         "k a" #'denote-keywords-add
-         "k r" #'denote-keywords-remove
-         ;; Note that `denote-rename-file' can work from any context, not just
-         ;; Dired bufffers.  That is why we bind it here to the `global-map'.
-         "r" #'denote-rename-file
-         "R" #'denote-rename-file-using-front-matter))
-  )
 
 (use-package jupyter
   :demand t
@@ -1160,6 +1073,29 @@ The default tab-bar name uses the buffer name."
   (setq tmr-sound-file "~/Documents/sounds/tibetian-bowl-1.wav")
   )
 
+(defun extract-code-fences (text)
+  "Extract text between code fences denoted by triple single quotes ''' in TEXT."
+  (let ((start nil) (results '()) (in-fence nil))
+    ;; Loop through each line of text
+    (dolist (line (split-string text "\n"))
+      (cond
+       ;; Check for the start or end of a code fence
+       ((string-match-p "^'''$\\|^'''.*" line)
+        (setq in-fence (not in-fence))
+        ;; If exiting a code fence, save collected lines and reset start
+        (when (and in-fence (not start))
+          (setq start (point)))
+        (unless in-fence
+          (push (reverse results) start)
+          (setq results '())))
+       ;; Collect lines if within a code fence
+       (in-fence
+        (push line results))))
+    ;; Return the collected content between fences as a single string
+    (mapconcat (lambda (lines)
+                 (string-join lines "\n"))
+               (nreverse start) "\n")))
+
 (use-package! gptel
   :init
   :config
@@ -1174,8 +1110,10 @@ The default tab-bar name uses the buffer name."
            (programming . "You are a language model with expert programming knowledge. Provide clean, correct code solutions with minimal commentary")
            (writing   . "You are a skilled writing assistant. Help improve text for clarity, style, and correctness. Respond succinctly and to the point.")
            (chat      . "You are a friendly conversational partner and knowledgeable assistant. Engage naturally and helpfully in conversation, keeping your responses concise.")
-           (refactor  . "You are a language model with expert programming knowledge. Provide clean, correct code solutions with minimal commentary; output code and only code, DO NOT add code fences e.g. Python ''' ''' around the code.")
-           (rewrite   . "You are a language model skilled in rephrasing. Rewrite the provided text to improve clarity and conciseness while preserving its original meaning.")
+
+           (refactor  . "your primary task is to produce code for in-place refactoring with modifications based on the included request. You are to do this with precise line number ranges. Follow these instructions meticulously:\n1. Carefully analyze the original code, paying close attention to its structure and line numbers. Line numbers start from 1 and include ALL lines, even empty ones.\n2. When suggesting modifications include all of the code supplied, with the relevant changes applied.\nb. Provide the exact code snippet to be replaced WITHOUT enclosing it in a code block\n3. Crucial guidelines for suggested code snippets:\n- Only apply the change(s) suggested by the most recent assistant message (before your generation).\n- Do not make any unrelated changes to the code.\n- Produce a valid full rewrite of the entire original code without skipping any lines. Do not be lazy!\n- Do not arbitrarily delete pre-existing comments/empty Lines.\n- Do not omit large parts of the original file for no reason.\n- Do not omit any needed changes from the requisite messages/code blocks.\n- If there is a clicked code block, bias towards just applying that (and applying other changes implied).\n- Please keep your suggested code changes minimal, and do not include irrelevant lines in the code snippet.\n- Maintain the SAME indentation in the returned code as in the source code\n4. Final check:\n- Review all suggestions, ensuring each line number is correct, especially the start_line and end_line.\n- Confirm that no unrelated code is accidentally modified or deleted.\n- Verify that the start_line and end_line correctly include all intended lines for replacement.\n- Perform a final alignment check to ensure your line numbers haven't shifted, especially the start_line.\n- Double-check that your line numbers align perfectly with the original code structure.\n- Do not show the full content after these modifications.\nRemember: Accurate line numbers are CRITICAL. The range start_line to end_line must include ALL lines to be replaced, from the very first to the very last. Double-check every range before finalizing your response, paying special attention to the start_line to ensure it hasn't shifted down. Ensure that your line numbers perfectly match the original code structure without any overall shift.\nFinally, make sure to output ONLY code, as text, without code block fences or anything, perfectly prepared for insertion into the original code.")
+
+           (rewrite   . "You are a language model with expert programming knowledge. Provide clean, correct code solutions with minimal commentary; output code and only code, DO NOT add code fences e.g. Python ''' ''' around the code.")
            ))
   (setq
    gptel-model 'phi4:latest
@@ -1189,6 +1127,14 @@ The default tab-bar name uses the buffer name."
 (gptel-make-anthropic "Claude"          ;Any name you want
   :stream t                             ;Streaming responses
   :key(getenv "ANTHROPIC_API_KEY"))
+
+;; Github Models offers an OpenAI compatible API
+(gptel-make-openai "Github Models" ;Any name you want
+  :host "models.inference.ai.azure.com"
+  :endpoint "/chat/completions?api-version=2024-05-01-preview"
+  :stream t
+  :key(getenv "GITHUB_API_KEY")
+  :models '(gpt-4o-mini))
 
   (gptel-make-ollama "Ollama"
     :host "localhost:11434"
@@ -1292,11 +1238,6 @@ The default tab-bar name uses the buffer name."
 (after! spacious-padding
   (spacious-padding-mode 1))
 
-;; (use-package elysium
-;;   :custom
-;;   ;; Below are the default values
-;;   (elysium-window-size 0.33) ; The elysium buffer will be 1/3 your screen
-;;   (elysium-window-style 'vertical)) ; Can be customized to horizontal
 
 (use-package smerge-mode
   :hook
@@ -1307,6 +1248,16 @@ The default tab-bar name uses the buffer name."
   (if (use-region-p) (my/search-replace-in-region) (evil-ex "%s/"))
   )
 
+(use-package! copilot
+  :hook (prog-mode . copilot-mode)
+  :bind (:map copilot-completion-map
+              ("<tab>" . 'copilot-accept-completion)
+              ("TAB" . 'copilot-accept-completion)
+              ("C-TAB" . 'copilot-accept-completion-by-word)
+              ("C-<tab>" . 'copilot-accept-completion-by-word)))
+
+
+;; My functions
 (defun my/search-replace-in-region ()
   (interactive)
   ;; (if (eq last-command 'evil-yank)
@@ -1384,10 +1335,20 @@ The default tab-bar name uses the buffer name."
   (interactive)
   (revert-buffer :ignore-auto :noconfirm))
 
-(use-package! copilot
-  :hook (prog-mode . copilot-mode)
-  :bind (:map copilot-completion-map
-              ("<tab>" . 'copilot-accept-completion)
-              ("TAB" . 'copilot-accept-completion)
-              ("C-TAB" . 'copilot-accept-completion-by-word)
-              ("C-<tab>" . 'copilot-accept-completion-by-word)))
+
+(after! org
+  (load! "keybindings.el")
+  ;; (use-package elysium
+  ;;   :custom
+  ;;   ;; Below are the default values
+  ;;   (elysium-window-size 0.33) ; The elysium buffer will be 1/3 your screen
+  ;;   (elysium-window-style 'vertical)) ; Can be customized to horizontal
+  ;; (use-package copilot-chat
+  ;;   :bind (:map global-map
+  ;;               ("C-c C-p" . copilot-chat-yank)
+  ;;               ("C-c C-p" . copilot-chat-yank-pop)
+  ;;               ("C-c C-Y" . (lambda () (interactive) (copilot-chat-yank-pop -1))))
+  ;;   )
+
+  )
+

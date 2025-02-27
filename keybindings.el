@@ -1,5 +1,10 @@
 ;;; ~/.doom.d/keybindings.el -*- lexical-binding: t; -*-
 
+(defun my-evil-end-of-visual-line ()
+  "Wrapper for evil-end-of-visual-line that preserves visual selection."
+  (interactive)
+  (evil-end-of-visual-line))
+
 (map! :map (evil-org-mode-map emacs-lisp-mode-map prog-mode-map text-mode-map org-mode-map)
       :i "C-z" #'evil-undo
       :i "C-Z" #'evil-emacs-state
@@ -11,6 +16,16 @@
       :i "C-S-k" (lambda nil (interactive) (scroll-down-command 1))
       :n "k" #'evil-previous-visual-line
       :n "j" #'evil-next-visual-line
+      :n "gl" #'(lambda ()
+                      (interactive)
+                      (call-interactively #'evil-next-flyspell-error)
+                      (call-interactively #'flyspell-correct-at-point)
+                      )
+      :n "gh" #'(lambda ()
+                      (interactive)
+                      (call-interactively #'evil-prev-flyspell-error)
+                      (call-interactively #'flyspell-correct-at-point)
+                      )
       :ni "C-c +" #'(lambda ()
                       (interactive)
                       (call-interactively #'evil-next-flyspell-error)
@@ -21,7 +36,7 @@
                       (call-interactively #'evil-prev-flyspell-error)
                       (call-interactively #'flyspell-correct-at-point)
                       )
-      :nv "C-e" #'evil-end-of-visual-line
+      :nv "C-e" #'my-evil-end-of-visual-line
       :i "M-h" #'org-beginning-of-line
       :i "M-l" #'org-end-of-line
       :i "C-S-j" #'next-line
@@ -471,6 +486,43 @@
       :desc "consult buffer to new window" "S-SPC" #'consult-buffer-other-window
       )
 
+(defhydra hydra-smerge (:color pink
+                            :hint nil
+                            :pre (smerge-mode 1)
+                            ;; Disable `smerge-mode' when quitting hydra if
+                            ;; no merge conflicts remain.
+                            :post (smerge-auto-leave))
+      "
+^Move^       ^Keep^               ^Diff^                 ^Other^
+^^-----------^^-------------------^^---------------------^^-------
+_n_ext       _b_ase               _<_: upper/base        _C_ombine
+_p_rev       _u_pper              _=_: upper/lower       _R_esolve
+^^           _l_ower              _>_: base/lower        _k_ill current
+^^           _a_ll                _r_efine
+^^           _RET_: current       _e_diff
+"
+      ("n" smerge-next)
+      ("p" smerge-prev)
+      ("b" (lambda () (interactive) (smerge-keep-base) (quit-hydra)))
+      ("u" (lambda () (interactive) (smerge-keep-upper) (quit-hydra)))
+      ("l" (lambda () (interactive) (smerge-keep-lower) (quit-hydra)))
+      ("a" smerge-keep-all)
+      ("RET" smerge-keep-current)
+      ("\C-m" smerge-keep-current)
+      ("<" smerge-diff-base-upper)
+      ("=" smerge-diff-upper-lower)
+      (">" smerge-diff-base-lower)
+      ("r" smerge-refine)
+      ("e" smerge-ediff)
+      ("C" smerge-combine-with-next)
+      ("R" smerge-resolve)
+      ("K" smerge-kill-current)
+      ("q" nil "cancel" :color blue)
+      )
+
+(map!
+ :n "C-c s" #'hydra-smerge/body
+ :n "C-c m" #'hydra-smerge/body)
 
 
 (define-key evil-normal-state-map (kbd "J") 'evil-join)
@@ -753,3 +805,117 @@
 
 ;; Bind the modified command to an easier key, or use the existing binding
 (map! :leader :prefix "q" :nv "f" #'my/force-delete-frame)
+
+(defun my/org-move-line (direction)
+  "Move line up or down with DIRECTION."
+  (interactive)
+  (if (org-at-heading-or-item-p)
+      (if (eq direction 'forward)
+          (call-interactively #'org-metadown)
+        (call-interactively #'org-metaup))
+    (if (eq direction 'forward)
+        (call-interactively #'org-drag-line-forward)
+      (call-interactively #'org-drag-line-backward))))
+
+(defun my/org-meta-down ()
+  "Move line down, but only if not in a heading or table."
+  (interactive)
+  (my/org-move-line 'forward))
+
+(defun my/org-meta-up ()
+  "Move line up, but only if not in a heading or table."
+  (interactive)
+  (my/org-move-line 'backward))
+
+(map! :map evil-org-mode-map
+  :ni "M-j" #'my/org-meta-down
+  :ni "M-k" #'my/org-meta-up)
+
+
+(after! denote
+  (map!
+   (:map org-mode-map :leader
+         (:prefix "n"
+          :nv "o" #'denote-open-or-create
+          ;; :nv "f" #'denote-open-or-create
+          :nv "f" #'consult-notes
+          :nv "n" #'denote
+          :nv "r" #'denote-rename-file
+          :nv "R" #'denote-rename-file-using-front-matter
+          :nv "k" #'denote-keywords-add
+          :nv "K" #'denote-keywords-remove
+          :nv "D" #'denote-date
+          :nv "z" #'denote-signature ; "zettelkasten" mnemonic
+          :nv "s" #'denote-subdirectory
+          :nv "t" #'denote-template
+          :nv "i" #'denote-link-or-create ; denote-link ; "insert" mnemonic
+          :nv "I" #'denote-link
+          :nv "L" #'denote-link-after-creating
+          :nv "a" #'denote-link-add-links
+          :nv "b" #'denote-backlinks
+          :nv "F" #'denote-link-find-file
+          :nv "B" #'denote-link-find-backlink))
+
+   (:map org-mode-map :nvi
+         "C-c n j" #'my-denote-journal ; our custom command
+         "C-c n o" #'denote-open-or-create
+         "C-c n n" #'denote
+         "C-c n N" #'denote-type
+         "C-c n d" #'denote-date
+         "C-c n z" #'denote-signature ; "zettelkasten" mnemonic
+         "C-c n s" #'denote-subdirectory
+         "C-c n t" #'denote-template
+         ;; If you intend to use Denote with a variety of file types, it is
+         ;; easier to bind the link-related commands to the `global-map', as
+         ;; shown here.  Otherwise follow the same pattern for `org-mode-map',
+         ;; `markdown-mode-map', and/or `text-mode-map'.
+         "C-c n I" #'denote-link; "insert" mnemonic
+         "C-c n L" #'denote-link-after-creating
+         "C-c n i" #'denote-link-or-create ; "insert" mnemonic
+         "[[" #'denote-link-or-create
+         "C-c n a" #'denote-link-add-links
+         "C-c n b" #'denote-backlinks
+         "C-c n f f" #'denote-link-find-file
+         "C-c n f b" #'denote-link-find-backlink
+         "C-c n k a" #'denote-keywords-add
+         "C-c n k r" #'denote-keywords-remove
+         ;; Note that `denote-rename-file' can work from any context, not just
+         ;; Dired bufffers.  That is why we bind it here to the `global-map'.
+         "C-c n r" #'denote-rename-file
+         "C-c n R" #'denote-rename-file-using-front-matter)
+
+   ;; Key bindings specifically for Dired.
+   (:map dired-mode-map
+         "C-c C-d C-i" #'denote-link-dired-marked-notes
+         "C-c C-d C-r" #'denote-dired-rename-marked-files
+         "C-c C-d C-R" #'denote-dired-rename-marked-files-using-front-matter)
+
+   (:map evil-org-mode-map :prefix "C-n" :nvi
+         "j" #'my-denote-journal ; our custom command
+
+         "o" #'denote-open-or-create
+         "n" #'denote
+         "N" #'denote-type
+         "d" #'denote-date
+         "z" #'denote-signature ; "zettelkasten" mnemonic
+         "s" #'denote-subdirectory
+         "t" #'denote-template
+         ;; If you intend to use Denote with a variety of file types, it is
+         ;; easier to bind the link-related commands to the `global-map', as
+         ;; shown here.  Otherwise follow the same pattern for `org-mode-map',
+         ;; `markdown-mode-map', and/or `text-mode-map'.
+         "I" #'denote-link; "insert" mnemonic
+         "i" #'denote-link-or-create ; "insert" mnemonic
+         "[[" #'denote-link-or-create
+         "]]" #'denote-link-or-create
+         "a" #'denote-link-add-links
+         "b" #'denote-backlinks
+         "f f" #'denote-link-find-file
+         "f b" #'denote-link-find-backlink
+         "k a" #'denote-keywords-add
+         "k r" #'denote-keywords-remove
+         ;; Note that `denote-rename-file' can work from any context, not just
+         ;; Dired bufffers.  That is why we bind it here to the `global-map'.
+         "r" #'denote-rename-file
+         "R" #'denote-rename-file-using-front-matter))
+  )
