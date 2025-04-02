@@ -305,6 +305,18 @@
       :desc "switch to buffer" "bb" #'consult-buffer
       :desc "buffer to new window" "bB" #'consult-buffer-other-window)
 
+(defun my/python-eval-line-or-defun ()
+  (interactive)
+  (if (and (or (eq major-mode 'python-mode)
+               (eq major-mode 'python-ts-mode))
+           (or (eq evil-state 'normal)
+               (eq evil-state 'insert))
+           (save-excursion
+             (beginning-of-line)
+             (looking-at "^[ \t]*def ")))
+      (jupyter-eval-defun)
+      (jupyter-eval-line-or-region)))
+
 (map! :localleader
       :map (python-mode-map python-ts-mode-map)
       :n :desc "eval buffer" "eb" #'jupyter-eval-buffer
@@ -331,12 +343,10 @@
       :nv "C-h" #'windmove-left
       )
 (map! :after python
-      :map (python-mode-map)
+      :map (python-mode-map python-ts-mode-map)
       :nv "C-<return>" #'jupyter-eval-line-or-region
       :nv "S-<return>" #'jupyter-eval-line-or-region
-      :map (python-ts-mode-map)
-      :nv "S-<return>" #'jupyter-eval-line-or-region
-      :nv "C-<return>" #'jupyter-eval-line-or-region)
+)
 
 (map! :localleader
       :map matlab-mode-map
@@ -402,10 +412,12 @@
         :desc "surround object with single quotes"  "\'" (kbd "ysio\'")
         :desc "surround object with parens" "\)" (kbd "ysio\)")
         :desc "surround object with brackets" "\]" (kbd "ysio\]")
+        :desc "surround object with curlies"  "}" (kbd "ysio}")
+        :desc "surround object with spaces"  "SPC" (kbd "ysio SPC")
         ))
 
       (:prefix ("k" . "my commands")
-       :desc "embark act" "a" #'embark-act
+       :desc "aidermacs transient" "a" #'aidermacs-transient-menu
        :desc "select header content" "y" #'my/visual-inside-org-header
        :desc "copy header content" "h" #'my/yank-org-headline
        :desc "gptel-send" "G" #'gptel
@@ -497,7 +509,7 @@
 ^^-----------^^-------------------^^---------------------^^-------
 _n_ext       _b_ase               _<_: upper/base        _C_ombine
 _p_rev       _u_pper              _=_: upper/lower       _R_esolve
-^^           _l_ower              _>_: base/lower        _k_ill current
+^^           _l_ower              _>_: base/lower        _K_ill current
 ^^           _a_ll                _r_efine
 ^^           _RET_: current       _e_diff
 "
@@ -527,11 +539,6 @@ _p_rev       _u_pper              _=_: upper/lower       _R_esolve
 
 (define-key evil-normal-state-map (kbd "J") 'evil-join)
 (define-key evil-normal-state-map (kbd "K") 'join-line)
-
-;; (setq key-chord-two-keys-delay 0.5)
-;; (key-chord-define evil-insert-state-map "[[" #'org-roam-insert)
-;; (key-chord-define term-mode-map "jk" #'evil-force-normal-state)
-;; (key-chord-define evil-visual-state-map "jk" #'evil-force-normal-state)
 
 (global-set-key [f11] 'flyspell-correct-at-point)
 

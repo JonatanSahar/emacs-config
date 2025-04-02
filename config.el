@@ -314,20 +314,20 @@ The default tab-bar name uses the buffer name."
 (pixel-scroll-precision-mode 1)
 
 ;; ;; Shouldn't be here but didn't work otherwise
-;; (add-hook! 'jupyter-repl-mode-hook #'electric-pair-mode (writeroom-mode -1))
-;; (map! :map jupyter-repl-mode-map
-;;       :i "C-k" #'jupyter-repl-history-previous
-;;       :nvi "C-e" #'evil-end-of-line-or-visual-line
-;;       :i "C-j" #'jupyter-repl-history-next
-;;       :i "<up>" #'jupyter-repl-history-previous
-;;       :i "<down>" #'jupyter-repl-history-next)
-(add-to-list 'display-buffer-alist
+(defun my/setup-jupyter-display-rules ()
+  "Configure display rules for Jupyter buffers."
+  (interactive)
+  (add-to-list 'display-buffer-alist
                (cons "\\`\\*jupyter-.*\\'"
                      (cons 'display-buffer-reuse-window
                            '((reusable-frames . visible)
                              (inhibit-switch-frame . nil)))))
 
-
+  (add-to-list 'display-buffer-alist
+               (cons "\\`\\*copilot-.*\\'"
+                     (cons 'display-buffer-reuse-window
+                           '((reusable-frames . visible)
+                             (inhibit-switch-frame . nil))))))
 
 (use-package! denote
   :config
@@ -1124,6 +1124,8 @@ The default tab-bar name uses the buffer name."
     :models '(phi4:latest qwen2.5-coder:32b deepseek-r1:32b)
 ))
 
+(gptel-make-gemini "Gemini" :key (getenv "GEMINI_API_KEY"):stream t)
+
 (gptel-make-anthropic "Claude"          ;Any name you want
   :stream t                             ;Streaming responses
   :key(getenv "ANTHROPIC_API_KEY"))
@@ -1134,7 +1136,7 @@ The default tab-bar name uses the buffer name."
   :endpoint "/chat/completions?api-version=2024-05-01-preview"
   :stream t
   :key(getenv "GITHUB_API_KEY")
-  :models '(gpt-4o-mini))
+  :models '(DeepSeek-V3 Codestral-2501 Cohere-command-r-08-2024))
 
   (gptel-make-ollama "Ollama"
     :host "localhost:11434"
@@ -1239,9 +1241,7 @@ The default tab-bar name uses the buffer name."
   (spacious-padding-mode 1))
 
 
-(use-package smerge-mode
-  :hook
-  (prog-mode . smerge-mode))
+(use-package smerge-mode)
 
 (defun my/search-replace ()
   (interactive)
@@ -1255,6 +1255,26 @@ The default tab-bar name uses the buffer name."
               ("TAB" . 'copilot-accept-completion)
               ("C-TAB" . 'copilot-accept-completion-by-word)
               ("C-<tab>" . 'copilot-accept-completion-by-word)))
+
+
+(use-package aidermacs
+  :bind (("C-c a" . aidermacs-transient-menu))
+  :config
+  ; Set API_KEY in .bashrc, that will automatically picked up by aider or in elisp
+  ;; (setenv "ANTHROPIC_API_KEY" "sk-...")
+  ; defun my-get-openrouter-api-key yourself elsewhere for security reasons
+  ;; (setenv "OPENROUTER_API_KEY" (my-get-openrouter-api-key))
+  :custom
+  ; See the Configuration section below
+  (aidermacs-use-architect-mode t)
+  ;; (aidermacs-default-model "sonnet")
+  (setq
+   ;; aidermacs-editor-model "anthropic/claude-3-7-sonnet-20250219"
+   aidermacs-editor-model "gemini/gemini-2.0-flash-thinking-exp"
+   aidermacs-architect-model "gemini/gemini-2.0-flash-thinking-exp"
+   aidermacs-watch-files t
+   aidermacs-backend 'vterm)
+  )
 
 
 ;; My functions
@@ -1336,19 +1356,28 @@ The default tab-bar name uses the buffer name."
   (revert-buffer :ignore-auto :noconfirm))
 
 
+(use-package projectile)
+
 (after! org
   (load! "keybindings.el")
-  ;; (use-package elysium
-  ;;   :custom
-  ;;   ;; Below are the default values
-  ;;   (elysium-window-size 0.33) ; The elysium buffer will be 1/3 your screen
-  ;;   (elysium-window-style 'vertical)) ; Can be customized to horizontal
-  ;; (use-package copilot-chat
-  ;;   :bind (:map global-map
-  ;;               ("C-c C-p" . copilot-chat-yank)
-  ;;               ("C-c C-p" . copilot-chat-yank-pop)
-  ;;               ("C-c C-Y" . (lambda () (interactive) (copilot-chat-yank-pop -1))))
-  ;;   )
+  (use-package elysium
+    :custom
+    ;; Below are the default values
+    (elysium-window-size 0.33) ; The elysium buffer will be 1/3 your screen
+    (elysium-window-style 'vertical)) ; Can be customized to horizontal
+  (use-package copilot-chat
+    :bind (:map global-map
+                ("C-c C-p" . copilot-chat-yank)
+                )
+    )
 
   )
 
+(unless (fboundp 'incf)
+  (defalias 'incf 'cl-incf))
+
+;; disable company mode everywhere
+(setq company-global-modes nil)
+
+;; activate which-function-mode in all programming modes
+(add-hook 'prog-mode-hook 'which-function-mode)
