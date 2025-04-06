@@ -1,9 +1,65 @@
 ;;; ~/.doom.d/keybindings.el -*- lexical-binding: t; -*-
 
+;; Custom Functions & Macros
+;; =========================
+
 (defun my-evil-end-of-visual-line ()
   "Wrapper for evil-end-of-visual-line that preserves visual selection."
   (interactive)
   (evil-end-of-visual-line))
+
+(defun my/save-and-change-to-normal ()
+  (interactive)
+  (evil-normal-state)
+  (save-buffer))
+
+(defun my/python-eval-line-or-defun ()
+  (interactive)
+  (if (and (or (eq major-mode 'python-mode)
+               (eq major-mode 'python-ts-mode))
+           (or (eq evil-state 'normal)
+               (eq evil-state 'insert))
+           (save-excursion
+             (beginning-of-line)
+             (looking-at "^[ \t]*def ")))
+      (jupyter-eval-defun)
+    (jupyter-eval-line-or-region)))
+
+(defun my-shell nil (interactive) (shell) (popper-toggle-type) (evil-normal-state))
+
+(defun make-bold()
+  (interactive)
+  (if (use-region-p) (evil-surround-region (region-beginning) (region-end) t *)))
+
+(defun my/force-delete-frame ()
+  "Force close a frame without prompting."
+  (interactive)
+  (delete-frame nil t)) ;; The second argument (force) makes it close without confirmation.
+
+(defun my/org-move-line (direction)
+  "Move line up or down with DIRECTION."
+  (interactive)
+  (if (org-at-heading-or-item-p)
+      (if (eq direction 'forward)
+          (call-interactively #'org-metadown)
+        (call-interactively #'org-metaup))
+    (if (eq direction 'forward)
+        (call-interactively #'org-drag-line-forward)
+      (call-interactively #'org-drag-line-backward))))
+
+(defun my/org-meta-down ()
+  "Move line down, but only if not in a heading or table."
+  (interactive)
+  (my/org-move-line 'forward))
+
+(defun my/org-meta-up ()
+  "Move line up, but only if not in a heading or table."
+  (interactive)
+  (my/org-move-line 'backward))
+
+(fset 'copy-with-square-brackets
+      (kmacro [?y ?a ?\]] 0 "%d"))
+
 
 (map! :map (evil-org-mode-map emacs-lisp-mode-map prog-mode-map text-mode-map org-mode-map)
       :i "C-z" #'evil-undo
@@ -462,11 +518,6 @@
        ;;          :desc "right double arrow"  "R" (kbd "$\\Rightarrow$")))
        ))
 
-(setq
- avy-style 'at-full
- avy-all-windows 't
- avy-single-candidate-jump 't)
-
 (defhydra hydra-window (:color red
                         :columns 3)
   ("h" windmove-left "window-left")
@@ -638,12 +689,6 @@ _p_rev       _u_pper              _=_: upper/lower       _R_esolve
 ;; (map! :map (evil-org-mode-map emacs-lisp-mode-map) :n "<up>" #'evil-scroll-line-up)
 ;; (map! :map (evil-org-mode-map emacs-lisp-mode-map) :n "<down>" #'evil-scroll-line-down)
 
-(setq scroll-preserve-screen-position 1)
-
-(defun make-bold()
-  (interactive)
-  (if (use-region-p) (evil-surround-region (region-beginning) (region-end) t *)))
-
 (map!
  (:when (modulep! :editor multiple-cursors)
    :prefix "g"
@@ -750,8 +795,6 @@ _p_rev       _u_pper              _=_: upper/lower       _R_esolve
       :n [left] 'left-char
       :n [right] 'right-char)
 
-(setq visual-order-cursor-movement t)
-
 (map! :map evil-org-mode-map
       "<f9>" #'+eval/region
       "C-c  k" #'org-capture
@@ -785,9 +828,6 @@ _p_rev       _u_pper              _=_: upper/lower       _R_esolve
       :nvi "C-S-p" #'projectile-find-file
       :nv "'" #'evil-goto-mark)
 
-(fset 'copy-with-square-brackets
-      (kmacro [?y ?a ?\]] 0 "%d"))
-
 (map! :map citar-citation-map
       :desc "copy cite link"  "c" #'copy-with-square-brackets
       "d" #'citar-org-delete-citation)
@@ -812,27 +852,6 @@ _p_rev       _u_pper              _=_: upper/lower       _R_esolve
 
 ;; Bind the modified command to an easier key, or use the existing binding
 (map! :leader :prefix "q" :nv "f" #'my/force-delete-frame)
-
-(defun my/org-move-line (direction)
-  "Move line up or down with DIRECTION."
-  (interactive)
-  (if (org-at-heading-or-item-p)
-      (if (eq direction 'forward)
-          (call-interactively #'org-metadown)
-        (call-interactively #'org-metaup))
-    (if (eq direction 'forward)
-        (call-interactively #'org-drag-line-forward)
-      (call-interactively #'org-drag-line-backward))))
-
-(defun my/org-meta-down ()
-  "Move line down, but only if not in a heading or table."
-  (interactive)
-  (my/org-move-line 'forward))
-
-(defun my/org-meta-up ()
-  "Move line up, but only if not in a heading or table."
-  (interactive)
-  (my/org-move-line 'backward))
 
 (map! :map evil-org-mode-map
   :ni "M-j" #'my/org-meta-down
