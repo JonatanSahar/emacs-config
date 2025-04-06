@@ -1143,43 +1143,6 @@ _p_rev       _u_pper              _=_: upper/lower       _R_esolve
 
 
 (map! :map minibuffer-mode-map :nvi ";" #'embark-act)
-(map!
- :nvi "C-;" #'embark-act
- :nvi "C-c  c" #'evil-yank
- :nvi "C-c  v" #'consult-yank-from-kill-ring
- ;; :nv "C-v" #'evil-paste-after
- :i "C-v" #'(lambda () (interactive) (backward-char) (evil-paste-after 1))
- :i "C-c p" #'(lambda () (interactive) (backward-char) (evil-paste-after 1))
- :i "C-c P" #'(lambda () (interactive) (backward-char 2) (evil-paste-after 1))
- :nvi "C-c  y" #'evil-yank
- :nv "C-c  p" #'evil-paste-after
- :nv "C-c  P" #'evil-paste-before
- :nvi "C-c  C-r" #'evil-redo
- :nvi "C-c  d" #'evil-delete
- :nvi "C-c  x" #'evil-delete
-
- :nvi "M-p" #'evil-paste-pop
- :nvi "M-n" #'evil-paste-pop-next
- :nvi "C-S-p" #'projectile-find-file
-
- :nvi "C-c  h" #'org-toggle-heading
- :nvi "C-c  i" #'org-toggle-item
- ;; :nvi "C-c  i" #'(lambda () (interactive) ((org-toggle-item) (org-end-of-line)))
- :nvi "C-c  a" #'(lambda () (interactive) (org-capture nil "a"))
-
- :nvi "C-c  o" #'(lambda () (interactive) (org-agenda nil "o"))
- ;; :i "C-c p" #'consult-yank-from-kill-ring
- ;; :i "C-c y" #'evil-yank
- :ni "C-c I" #'org-cite-insert
- ;; :ni "C-c I" #'org-ref-insert-cite-link
- :ni "C-c [" #'denote-link-or-create
- ;; :ni "C-c I" #'org-cite-insert
-
- :ni "C-S-j" #'evil-mc-make-cursor-move-next-line
- :ni "C-S-k" #'evil-mc-make-cursor-move-prev-line
- :nvi "M-j" #'drag-stuff-down
- :nvi "M-k" #'drag-stuff-up
- )
 
 (evil-define-key 'insert jupyter-repl-mode-map (kbd "C-j") nil)
 (evil-define-key 'insert jupyter-repl-mode-map (kbd "C-k") nil)
