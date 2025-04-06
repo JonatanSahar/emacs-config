@@ -867,14 +867,6 @@ _p_rev       _u_pper              _=_: upper/lower       _R_esolve
  :nvi "C-k" #'windmove-up
  )
 
-;; (map!
-;; (:prefix "g"
-;;          (:prefix "f"
-;;           :vn "j" #'evil-mc-make-and-goto-next-match
-;;           :vn "J" #'evil-mc-skip-and-goto-next-match
-;;           :vn "k" #'evil-mc-make-and-goto-prev-match
-;;           :vn "K" #'evil-mc-skip-and-goto-prev-match)))
-
 (map! :prefix "z"
       :nv "z" (lambda ()
                 (interactive)
@@ -1151,10 +1143,6 @@ _p_rev       _u_pper              _=_: upper/lower       _R_esolve
 
 
 (map! :map minibuffer-mode-map :nvi ";" #'embark-act)
-(map!
- :i "C-S-j" nil
- :i "C-S-k" nil
- )
 (map!
  :nvi "C-;" #'embark-act
  :nvi "C-c  c" #'evil-yank
