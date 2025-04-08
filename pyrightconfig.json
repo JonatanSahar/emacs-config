@@ -1,0 +1,19 @@
+{
+    "reportGeneralTypeIssues": "none",
+    "reportOptionalMemberAccess": "none",
+    "reportOptionalCall": "none",
+    "reportOptionalIterable": "none",
+    "reportOptionalContextManager": "none",
+    "reportOptionalOperand": "none",
+    "reportUntypedFunctionDecorator": "none",
+    "reportUntypedClassDecorator": "none",
+    "reportUntypedBaseClass": "none",
+    "reportUnknownParameterType": "none",
+    "reportUnknownArgumentType": "none",
+    "reportUnknownLambdaType": "none",
+    "reportUnknownVariableType": "none",
+    "reportUnknownMemberType": "none",
+    "reportMissingTypeStubs": "none",
+    "reportPrivateUsage": "none",
+    "reportUnboundVariable": "warning"
+}
