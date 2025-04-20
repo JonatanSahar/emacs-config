@@ -64,7 +64,7 @@
 ;; they are implemented.
 ;; various settings
 
-(setq package-gnupghome-dir ".local/elpa/gnupg")
+(setq package-gnupghome-dir ".doom.d/elpa/gnupg")
 (setq-default line-spacing 0.1)
 
 (setq
@@ -130,7 +130,7 @@
   (hl-todo-mode 1)
   (flyspell-lazy-mode -1)
   (+word-wrap-mode 1)
-  ;; (+zen/toggle)
+  (+zen/toggle)
   )
 
 (after! tramp
@@ -207,6 +207,7 @@
 (setq ibuffer-old-time 48)
 (add-hook 'ibuffer-mode-hook #'hl-line-mode)
 
+
 (setq citar--multiple-setup (cons "<tab>"  "RET"))
 (setq writeroom-mode-line 't)
 (evil-define-text-object evil-select-inner-line-no-whitespace (count &optional beg end type)
@@ -251,8 +252,7 @@
 
 ;; (add-hook 'denote-backlinks-mode-hook #'+zen/toggle)
 
-(setq doom-projectile-fd-binary "fdfind")
-;;
+(setq doom-projectile-fd-binary "fd")
 
 (pixel-scroll-precision-mode 1)
 
@@ -260,3 +260,22 @@
 
 (load! "package-config.el")
 (load! "functions.el")
+(load! "keybindings.el")
+
+;; (connection-local-set-profiles '(:protocol "ssh") 'use-own-path)
+(setq treesit-language-source-alist
+  '((bash "https://github.com/tree-sitter/tree-sitter-bash")
+    (cmake "https://github.com/uyha/tree-sitter-cmake")
+    (css "https://github.com/tree-sitter/tree-sitter-css")
+    (elisp "https://github.com/Wilfred/tree-sitter-elisp")
+    (go "https://github.com/tree-sitter/tree-sitter-go")
+    (html "https://github.com/tree-sitter/tree-sitter-html")
+    (javascript "https://github.com/tree-sitter/tree-sitter-javascript" "master" "src")
+    (json "https://github.com/tree-sitter/tree-sitter-json")
+    (make "https://github.com/alemuller/tree-sitter-make")
+    (markdown "https://github.com/ikatyang/tree-sitter-markdown")
+    (python "https://github.com/tree-sitter/tree-sitter-python")
+    (toml "https://github.com/tree-sitter/tree-sitter-toml")
+    (tsx "https://github.com/tree-sitter/tree-sitter-typescript" "master" "tsx/src")
+    (typescript "https://github.com/tree-sitter/tree-sitter-typescript" "master" "typescript/src")
+    (yaml "https://github.com/ikatyang/tree-sitter-yaml")))

@@ -82,6 +82,11 @@
   :recipe (:host github :repo "chep/copilot-chat.el" :files ("*.el")))
 (package! aidermacs
 :recipe (:host github :repo "MatthewZMD/aidermacs" :files ("*.el")))
+(package! emigo
+  :recipe (:host github :repo "MatthewZMD/emigo" :files ("*.el"))
+  )
 
 (package! highlight-thing)
 (package! dwim-shell-command)
+(package! drag-stuff)
+(package! python-black)

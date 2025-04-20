@@ -191,4 +191,81 @@
 (map! :leader
       :desc "Toggle Laptop Mode"
       "t L" #'laptop-mode)
-;;; functions.el ends here
+
+
+;; Custom Functions & Macros
+;; =========================
+(defun my-evil-end-of-visual-line ()
+  "Wrapper for evil-end-of-visual-line that preserves visual selection."
+  (interactive)
+  (evil-end-of-visual-line))
+
+(defun my/save-and-change-to-normal ()
+  (interactive)
+  (evil-normal-state)
+  (save-buffer))
+
+(defun my/python-eval-line-or-defun ()
+  (interactive)
+  (if (and (or (eq major-mode 'python-mode)
+               (eq major-mode 'python-ts-mode))
+           (or (eq evil-state 'normal)
+               (eq evil-state 'insert))
+           (save-excursion
+             (beginning-of-line)
+             (looking-at "^[ \t]*def ")))
+      (jupyter-eval-defun)
+    (jupyter-eval-line-or-region)))
+
+(defun my-shell nil (interactive) (shell) (popper-toggle-type) (evil-normal-state))
+
+(defun make-bold()
+  (interactive)
+  (if (use-region-p) (evil-surround-region (region-beginning) (region-end) t *)))
+
+(defun my/force-delete-frame ()
+  "Force close a frame without prompting."
+  (interactive)
+  (delete-frame nil t)) ;; The second argument (force) makes it close without confirmation.
+
+(defun my/org-move-line (direction)
+  "Move line up or down with DIRECTION."
+  (interactive)
+  (if (org-at-heading-or-item-p)
+      (if (eq direction 'forward)
+          (call-interactively #'org-metadown)
+        (call-interactively #'org-metaup))
+    (if (eq direction 'forward)
+        (call-interactively #'org-drag-line-forward)
+      (call-interactively #'org-drag-line-backward))))
+
+(defun my/org-meta-down ()
+  "Move line down, but only if not in a heading or table."
+  (interactive)
+  (my/org-move-line 'forward))
+
+(defun my/org-meta-up ()
+  "Move line up, but only if not in a heading or table."
+  (interactive)
+  (my/org-move-line 'backward))
+
+(fset 'copy-with-square-brackets
+      (kmacro [?y ?a ?\]] 0 "%d"))
+
+;; from https://github.com/renzmann/.emacs.d
+(defun pyrightconfig-write (virtualenv)
+  "Write a `pyrightconfig.json' file at the Git root of a project
+with `venvPath' and `venv' set to the absolute path of
+`virtualenv'.  When run interactively, prompts for a directory to
+select."
+  (interactive "DEnv: ")
+  ;; Naming convention for venvPath matches the field for pyrightconfig.json
+  (let* ((venv-dir (tramp-file-local-name (file-truename virtualenv)))
+         (venv-file-name (directory-file-name venv-dir))
+         (venvPath (file-name-directory venv-file-name))
+         (venv (file-name-base venv-file-name))
+         (base-dir (vc-git-root default-directory))
+         (out-file (expand-file-name "pyrightconfig.json" base-dir))
+         (out-contents (json-encode (list :venvPath venvPath :venv venv))))
+    (with-temp-file out-file (insert out-contents))
+    (message (concat "Configured `" out-file "` to use environment `" venv-dir))))

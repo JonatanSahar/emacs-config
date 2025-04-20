@@ -96,9 +96,6 @@
 
   (add-hook! 'jupyter-repl-mode-hook #'electric-pair-mode))
 
-
-
-
 ;; code cells
 (use-package! code-cells
   :load-path "~/.config/doom/external-lisp/code-cells.el/"
@@ -204,6 +201,8 @@
         :nvi "S-<return>" #'my/eval-code-cell-and-next
         :nvi "C-c C-o" #'jupyter-eval-line-or-region
         :nvi "C-c i" #'my/insert-code-cell
+        :i "C-c i" #'my/insert-code-cell
+
         :nvi "C-c I" #'my/insert-markdown-cell
         :nvi "C-c k" #'jupyter-repl-pop-to-buffer
         :nvi "C-c m" #'my/code-cell-to-md
@@ -516,6 +515,7 @@ the directory.  `REST' is passed to the `CONSULT-RIPGREP-FUNCTION'."
 (after! lsp-pyright
   ;; Configuration specific to lsp-pyright can go here if needed in the future
   ;; e.g., (setq lsp-pyright-some-option t)
+  (setq lsp-pyright-use-library-code-for-types t)
   )
 
 ;; Ensure eglot (or lsp) is started for python buffers
@@ -523,7 +523,6 @@ the directory.  `REST' is passed to the `CONSULT-RIPGREP-FUNCTION'."
 (add-hook 'python-mode-hook #'eglot-ensure)
 
 ;; If you still want the specific lsp-pyright variable setting:
-(setq lsp-pyright-use-library-code-for-types t)
 
 (setq ispell-personal-dictionary-en   "~/Documents/dictionaries/personal.en")
 (setq ispell-personal-dictionary-heb  "~/Documents/dictionaries/personal.heb")
@@ -729,18 +728,18 @@ the default tab-bar name uses the buffer name."
     :models '(phi4:latest qwen2.5-coder:32b deepseek-r1:32b)
 ))
 
-(gptel-make-gemini "gemini" :key (getenv "gemini_api_key"):stream t)
+(gptel-make-gemini "gemini" :key (getenv "GEMINI_API_KEY"):stream t)
 
 (gptel-make-anthropic "claude"          ;any name you want
   :stream t                             ;streaming responses
-  :key(getenv "anthropic_api_key"))
+  :key(getenv "ANTHROPIC_API_KEY"))
 
 ;; github models offers an openai compatible api
 (gptel-make-openai "github models" ;any name you want
   :host "models.inference.ai.azure.com"
   :endpoint "/chat/completions?api-version=2024-05-01-preview"
   :stream t
-  :key(getenv "github_api_key")
+  :key(getenv "GITHUB_API_KEY")
   :models '(deepseek-v3 codestral-2501 cohere-command-r-08-2024))
 
   (gptel-make-ollama "ollama"
@@ -867,25 +866,38 @@ the default tab-bar name uses the buffer name."
               ("C-TAB" . 'copilot-accept-completion-by-word)
               ("C-<TAB>" . 'copilot-accept-completion-by-word)))
 
+(after! (evil copilot)
+  ;; Define the custom function that either accepts the completion or does the default behavior
+  (defun my/copilot-tab-or-default ()
+    (interactive)
+    (if (and (bound-and-true-p copilot-mode)
+             ;; Add any other conditions to check for active copilot suggestions if necessary
+             )
+        (copilot-accept-completion)
+      (evil-insert 1))) ; Default action to insert a tab. Adjust as needed.
+
+  (defun my/copilot-word-or-default ()
+    (interactive)
+    (if (and (bound-and-true-p copilot-mode)
+             ;; Add any other conditions to check for active copilot suggestions if necessary
+             )
+        (copilot-accept-completion-by-word)
+      (evil-insert 1))) ; Default action to insert a tab. Adjust as needed.
+
+  ;; Bind the custom function to <tab> in Evil's insert state
+  (evil-define-key 'insert 'global (kbd "<tab>") 'my/copilot-tab-or-default)
+  (evil-define-key 'insert 'global (kbd "C-l") 'my/copilot-word-or-default))
 
 (use-package! aidermacs
   :bind (("C-c a" . aidermacs-transient-menu))
   :config
-  ; set api_key in .bashrc, that will automatically picked up by aider or in elisp
-  ;; (setenv "anthropic_api_key" "sk-...")
-  ; defun my-get-openrouter-api-key yourself elsewhere for security reasons
-  ;; (setenv "openrouter_api_key" (my-get-openrouter-api-key))
-  :custom
-  ; see the configuration section below
-  (aidermacs-use-architect-mode t)
-  ;; (aidermacs-default-model "sonnet")
-  (setq
-   ;; aidermacs-editor-model "anthropic/claude-3-7-sonnet-20250219"
-   aidermacs-editor-model "gemini/gemini-2.0-flash-thinking-exp"
-   aidermacs-architect-model "gemini/gemini-2.0-flash-thinking-exp"
+   (setq
+   aidermacs-editor-model "anthropic/claude-3-5-sonnet-20241022"
+   aidermacs-architect-model "anthropic/claude-3-7-sonnet-20250219"
    aidermacs-watch-files t
-   aidermacs-backend 'vterm)
-  )
+   aidermacs-backend 'vterm
+   aidermacs-auto-commits t
+   ))
 
 (use-package! elysium
   :custom
@@ -899,4 +911,44 @@ the default tab-bar name uses the buffer name."
               )
   )
 
-;;; package-config.el ends here
+(use-package! emigo
+  :config
+  (emigo-enable) ;; Starts the background process automatically
+  :custom
+  ;; Encourage using OpenRouter with Deepseek
+  (emigo-model "openrouter/deepseek/deepseek-chat-v3-0324")
+  (emigo-base-url "https://openrouter.ai/api/v1")
+  (emigo-api-key (getenv "OPENROUTER_API_KEY")))
+
+(after! python
+  :config
+  (require 'eglot)
+  (setq python-check-command "ruff check"))
+
+(use-package! drag-stuff
+  :defer t
+  :init
+  (map!
+   "<M-up>"    #'drag-stuff-up
+   "<M-down>"  #'drag-stuff-down
+   "<M-k>"    #'drag-stuff-up
+   "<M-j>"  #'drag-stuff-down))
+
+(with-eval-after-load 'eglot
+  (setq eglot-workspace-configuration
+        '((:pylsp .
+           (:plugins
+            (:pycodestyle (:enabled :json-false)
+             :flake8      (:enabled :json-false)
+             :pylint      (:enabled :json-false)
+             :pyflakes    (:enabled :json-false)
+             :jedi_completion (:enabled t))))
+
+          (:pyright .
+           (:typeCheckingMode "off"
+            :disableLanguageServices :json-true
+            :disableOrganizeImports :json-false)))))
+
+(use-package! python-black
+  :after python
+  :hook (python-mode . python-black-on-save-mode-enable-dwim))

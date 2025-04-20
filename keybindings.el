@@ -1,71 +1,39 @@
 ;;; ~/.doom.d/keybindings.el -*- lexical-binding: t; -*-
 
-;; Custom Functions & Macros
-;; =========================
-
-(defun my-evil-end-of-visual-line ()
-  "Wrapper for evil-end-of-visual-line that preserves visual selection."
-  (interactive)
-  (evil-end-of-visual-line))
-
-(defun my/save-and-change-to-normal ()
-  (interactive)
-  (evil-normal-state)
-  (save-buffer))
-
-(defun my/python-eval-line-or-defun ()
-  (interactive)
-  (if (and (or (eq major-mode 'python-mode)
-               (eq major-mode 'python-ts-mode))
-           (or (eq evil-state 'normal)
-               (eq evil-state 'insert))
-           (save-excursion
-             (beginning-of-line)
-             (looking-at "^[ \t]*def ")))
-      (jupyter-eval-defun)
-    (jupyter-eval-line-or-region)))
-
-(defun my-shell nil (interactive) (shell) (popper-toggle-type) (evil-normal-state))
-
-(defun make-bold()
-  (interactive)
-  (if (use-region-p) (evil-surround-region (region-beginning) (region-end) t *)))
-
-(defun my/force-delete-frame ()
-  "Force close a frame without prompting."
-  (interactive)
-  (delete-frame nil t)) ;; The second argument (force) makes it close without confirmation.
-
-(defun my/org-move-line (direction)
-  "Move line up or down with DIRECTION."
-  (interactive)
-  (if (org-at-heading-or-item-p)
-      (if (eq direction 'forward)
-          (call-interactively #'org-metadown)
-        (call-interactively #'org-metaup))
-    (if (eq direction 'forward)
-        (call-interactively #'org-drag-line-forward)
-      (call-interactively #'org-drag-line-backward))))
-
-(defun my/org-meta-down ()
-  "Move line down, but only if not in a heading or table."
-  (interactive)
-  (my/org-move-line 'forward))
-
-(defun my/org-meta-up ()
-  "Move line up, but only if not in a heading or table."
-  (interactive)
-  (my/org-move-line 'backward))
-
-(fset 'copy-with-square-brackets
-      (kmacro [?y ?a ?\]] 0 "%d"))
 
 
 ;; Keybindings
 ;; ===========
 
+(map!
+      "M-k"  nil
+      "M-j"   nil)
+
+;; Python
+;; ------
+(map! :map (python-mode-map python-ts-mode-map)
+      ;; Jupyter Integration
+      :nv "C-<return>" #'jupyter-eval-line-or-region
+      :nv "S-<return>" #'jupyter-eval-line-or-region ; Alternative
+      :v "C-c <return>" #'python-shell-send-region ; Send region to shell (standard python.el)
+      :localleader
+      :n :desc "eval buffer" "eb" #'jupyter-eval-buffer
+      :n :desc "eval function" "ed" #'jupyter-eval-defun
+      :nv :desc "eval region" "er" #'jupyter-eval-region)
+
+(map! :map inferior-python-mode ; Bindings for the Python REPL buffer
+      :nvi "C-k" #'windmove-up ; Allow windmove in REPL
+      :nvi "C-j" #'windmove-down
+      :nv "C-h" #'windmove-left)
+(evil-define-key 'insert jupyter-repl-mode-map (kbd "C-j") nil) ; Unbind C-j in Jupyter REPL insert
+(evil-define-key 'insert jupyter-repl-mode-map (kbd "C-k") nil) ; Unbind C-k in Jupyter REPL insert
+(evil-define-key 'insert jupyter-repl-mode-map (kbd "C-S-j") #'evil-mc-make-cursor-move-next-line) ; MC in Jupyter REPL
+(evil-define-key 'insert jupyter-repl-mode-map (kbd "C-S-k") #'evil-mc-make-cursor-move-prev-line) ; MC in Jupyter REPL
+
 ;; Global Bindings (Apply Everywhere)
 ;; ----------------------------------
+(map! :nvi "C-p" #'delete-other-windows )
+
 (map! :nvi ; These apply in normal, visual, insert states
       ;; Basic Editing & Navigation
       "C-z" #'evil-undo
@@ -74,7 +42,6 @@
       [C-o] #'better-jumper-jump-backward
       [C-i] #'better-jumper-jump-forward
       ;; Window Management
-      "M-q" #'+workspace/other ; Switch workspace/window
       "C-p" #'delete-other-windows ; Close other windows
       ;; Input & System
       "C-\\" #'toggle-input-method
@@ -91,9 +58,6 @@
       ;; Paste Ring
       "M-p" #'evil-paste-pop
       "M-n" #'evil-paste-pop-next
-      ;; Drag Stuff
-      "M-j" #'drag-stuff-down
-      "M-k" #'drag-stuff-up
       ;; Tab Navigation
       "M-1" #'tab-bar-select-tab
       "M-2" #'tab-bar-select-tab
@@ -113,7 +77,11 @@
       :i "C-S-j" nil
       :i "C-S-k" nil
       ;; Unbind C-x C-n
-      "C-x C-n" nil)
+      "C-x C-n" nil
+      "M-<up>"    #'drag-stuff-up
+      "M-<down>"  #'drag-stuff-down
+      "M-k"    #'drag-stuff-up
+      "M-j"  #'drag-stuff-down)
 
 ;; Evil Mode States (Normal, Visual, Insert specific)
 ;; --------------------------------------------------
@@ -269,25 +237,6 @@
       )
 (map! :map org-roam-backlinks-mode-map "return" #'org-open-at-point) ; Open link in backlinks buffer
 
-;; Python
-;; ------
-(map! :map (python-mode-map python-ts-mode-map)
-      ;; Jupyter Integration
-      :nv "C-<return>" #'jupyter-eval-line-or-region
-      :nv "S-<return>" #'jupyter-eval-line-or-region ; Alternative
-      :v "C-c <return>" #'python-shell-send-region ; Send region to shell (standard python.el)
-      :localleader
-      :n :desc "eval buffer" "eb" #'jupyter-eval-buffer
-      :n :desc "eval function" "ed" #'jupyter-eval-defun
-      :nv :desc "eval region" "er" #'jupyter-eval-region)
-(map! :map inferior-python-mode ; Bindings for the Python REPL buffer
-      :nvi "C-k" #'windmove-up ; Allow windmove in REPL
-      :nvi "C-j" #'windmove-down
-      :nv "C-h" #'windmove-left)
-(evil-define-key 'insert jupyter-repl-mode-map (kbd "C-j") nil) ; Unbind C-j in Jupyter REPL insert
-(evil-define-key 'insert jupyter-repl-mode-map (kbd "C-k") nil) ; Unbind C-k in Jupyter REPL insert
-(evil-define-key 'insert jupyter-repl-mode-map (kbd "C-S-j") #'evil-mc-make-cursor-move-next-line) ; MC in Jupyter REPL
-(evil-define-key 'insert jupyter-repl-mode-map (kbd "C-S-k") #'evil-mc-make-cursor-move-prev-line) ; MC in Jupyter REPL
 
 ;; Matlab
 ;; ------
@@ -300,6 +249,7 @@
       :desc "eval region" :n "er" #'matlab-shell-run-region
       :n "f" #'matlab-shell-help-at-point ; Help (localleader)
       :n "s" #'matlab-shell) ; Start shell (localleader)
+
 (map! :map matlab-shell-mode-map
       :ni "C-c l" #'comint-clear-buffer ; Clear shell buffer
       :nv "C-l" #'windmove-right ; Windmove in shell
@@ -456,21 +406,20 @@
       :nv ; Unbind some default Doom leader keys first
       "bb" nil ; Replaced by consult-buffer
       "is" nil ; Replaced by search leader keys
-      "ir" nil ; Replaced by org-ref leader key
-      "fc" nil ; Replaced by custom fc
       "TAB" nil ; Replaced by custom TAB prefix map
+      "z" nil
 
       ;; Top Level Leader Keys
-      :desc "M-x" :n "x" #'execute-extended-command
-      :desc "scratch buffer" :n "z" #'doom/open-scratch-buffer
+      :desc "scratch buffer"  "Z" #'doom/open-scratch-buffer
       :desc "consult buffer" "SPC" #'consult-buffer ; Easy access to buffer list
       :desc "consult buffer to new window" "S-SPC" #'consult-buffer-other-window
+      :desc "M-x" "x" #'execute-extended-command ; Alternative
       :desc "consult buffer" "z" #'consult-buffer ; Alternative
-      :desc "consult buffer to new window" "Z" #'consult-buffer-other-window
       :desc "ace-window" "-" #'ace-window ; Select window visually
-      :desc "ace-delete-window" "D" #'ace-delete-window ; Delete window visually
+      :desc "ace-delete-window" "d" #'ace-delete-window ; Delete window visually
 
       ;; Buffer Management ("b" prefix)
+
       (:prefix ("b" . "buffer")
        :desc "switch to buffer" "b" #'consult-buffer
        :desc "buffer to new window" "B" #'consult-buffer-other-window
