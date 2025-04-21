@@ -1,0 +1,14 @@
+[Unit]
+Description=Jupytext File Monitor
+After=network.target
+
+[Service]
+ExecStart=/usr/bin/python3 /home/yonatan/.doom.d/scripts/jupytext_monitor.py /home/yonatan/Projects/spatial/code
+Restart=on-failure
+RestartSec=10
+User=yonatan
+Group=yonatan
+Environment=PATH=/home/yonatan/.local/bin:/usr/bin:/bin
+
+[Install]
+WantedBy=multi-user.target
