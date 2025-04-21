@@ -880,11 +880,11 @@ the default tab-bar name uses the buffer name."
         (copilot-accept-completion-by-word)
       (evil-insert 1))) ; Default action to insert a tab. Adjust as needed.
 
-  ;; Bind the custom function to <tab> in Evil's insert state
-  (evil-define-key 'insert 'global (kbd "<tab>") 'my/copilot-tab-or-default)
-  ;; (evil-define-key 'insert 'global (kbd "C-l")'my/copilot-tab-or-default)
-  (evil-define-key 'insert 'global (kbd "C-;")'my/copilot-tab-or-default)
-  (evil-define-key 'insert 'global (kbd "C-S-l") 'my/copilot-word-or-default))
+  ;; Use map! to bind keys in prog-mode and text-mode
+  (map! :map (prog-mode-map text-mode-map)
+        :i "<tab>" #'my/copilot-tab-or-default
+        :i "C-;" #'my/copilot-tab-or-default
+        :i "C-S-l" #'my/copilot-word-or-default))
 
 (use-package! aidermacs
   :bind (("C-c a" . aidermacs-transient-menu))
