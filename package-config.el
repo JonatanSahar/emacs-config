@@ -950,6 +950,12 @@ the default tab-bar name uses the buffer name."
 (use-package! python-black
   :after python
   :hook (python-mode . python-black-on-save-mode-enable-dwim))
+
+(use-package! vterm
+  :config
+  (define-key vterm-mode-map (kbd "C-j") (kbd "<down>"))
+  (define-key vterm-mode-map (kbd "C-k") (kbd "<up>")))
+
 (use-package! corfu-candidate-overlay
   :after corfu
   :config
