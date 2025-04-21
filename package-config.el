@@ -518,11 +518,7 @@ the directory.  `REST' is passed to the `CONSULT-RIPGREP-FUNCTION'."
   (setq lsp-pyright-use-library-code-for-types t)
   )
 
-;; Ensure eglot (or lsp) is started for python buffers
-;; This assumes you are using eglot for Python. If using lsp-mode, adjust accordingly.
-(add-hook 'python-mode-hook #'eglot-ensure)
-
-;; If you still want the specific lsp-pyright variable setting:
+(add-hook! python-mode #'eglot-ensure #'code-cells-mode)
 
 (setq ispell-personal-dictionary-en   "~/Documents/dictionaries/personal.en")
 (setq ispell-personal-dictionary-heb  "~/Documents/dictionaries/personal.heb")
@@ -886,7 +882,9 @@ the default tab-bar name uses the buffer name."
 
   ;; Bind the custom function to <tab> in Evil's insert state
   (evil-define-key 'insert 'global (kbd "<tab>") 'my/copilot-tab-or-default)
-  (evil-define-key 'insert 'global (kbd "C-l") 'my/copilot-word-or-default))
+  ;; (evil-define-key 'insert 'global (kbd "C-l")'my/copilot-tab-or-default)
+  (evil-define-key 'insert 'global (kbd "C-;")'my/copilot-tab-or-default)
+  (evil-define-key 'insert 'global (kbd "C-S-l") 'my/copilot-word-or-default))
 
 (use-package! aidermacs
   :bind (("C-c a" . aidermacs-transient-menu))
@@ -952,3 +950,14 @@ the default tab-bar name uses the buffer name."
 (use-package! python-black
   :after python
   :hook (python-mode . python-black-on-save-mode-enable-dwim))
+(use-package! corfu-candidate-overlay
+  :after corfu
+  :config
+  ;; enable corfu-candidate-overlay mode globally
+  ;; this relies on having corfu-auto set to nil
+  (corfu-candidate-overlay-mode +1)
+  ;; bind Ctrl + TAB to trigger the completion popup of corfu
+  (global-set-key (kbd "S-<tab>") 'completion-at-point)
+  ;; bind Ctrl + Shift + Tab to trigger completion of the first candidate
+  ;; (keybing <iso-lefttab> may not work for your keyboard model)
+  (global-set-key (kbd "<tab>") 'corfu-candidate-overlay-complete-at-point))
