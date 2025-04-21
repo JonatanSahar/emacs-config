@@ -953,8 +953,9 @@ the default tab-bar name uses the buffer name."
 
 (use-package! vterm
   :config
-  (define-key vterm-mode-map (kbd "C-j") (kbd "<down>"))
-  (define-key vterm-mode-map (kbd "C-k") (kbd "<up>")))
+  (map! :map vterm-mode-map
+        :i "C-j" (kbd "<down>")
+        :i "C-k" (kbd "<up>")))
 
 (use-package! corfu-candidate-overlay
   :after corfu
