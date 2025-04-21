@@ -228,6 +228,17 @@
   (interactive)
   (delete-frame nil t)) ;; The second argument (force) makes it close without confirmation.
 
+(defun my/run-jupytext-on-save ()
+  "Run jupytext to set formats to py:percent,ipynb for the current file."
+  (interactive)
+  (when (and buffer-file-name
+             (member (file-name-extension buffer-file-name) '("py" "ipynb")))
+    (let ((file-path buffer-file-name))
+      (message "Running jupytext on %s" file-path)
+      (start-process "jupytext-process" "*jupytext-output*" 
+                     "jupytext" "--set-formats" "py:percent,ipynb" file-path)
+      (message "Jupytext conversion complete for %s" file-path))))
+
 (defun my/org-move-line (direction)
   "Move line up or down with DIRECTION."
   (interactive)

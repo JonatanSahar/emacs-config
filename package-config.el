@@ -87,6 +87,10 @@
   :after (:all org python)
 
   :config
+  ;; Run jupytext on save for Jupyter notebook files
+  (add-hook 'jupyter-repl-mode-hook
+            (lambda ()
+              (add-hook 'after-save-hook #'my/run-jupytext-on-save nil t)))
   (map! :map jupyter-repl-mode-map
         :i "C-k" #'jupyter-repl-history-previous
         :i "C-j" #'jupyter-repl-history-next
@@ -921,7 +925,11 @@ the default tab-bar name uses the buffer name."
 (after! python
   :config
   (require 'eglot)
-  (setq python-check-command "ruff check"))
+  (setq python-check-command "ruff check")
+  ;; Run jupytext on save for Python files
+  (add-hook 'python-mode-hook
+            (lambda ()
+              (add-hook 'after-save-hook #'my/run-jupytext-on-save nil t))))
 
 (use-package! drag-stuff
   :defer t
