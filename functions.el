@@ -229,15 +229,28 @@
   (delete-frame nil t)) ;; The second argument (force) makes it close without confirmation.
 
 (defun my/run-jupytext-on-save ()
-  "Run jupytext to set formats to py:percent,ipynb for the current file."
+  "Run jupytext to set formats to py:percent,ipynb for the current file.
+For .py files, only run if a corresponding .ipynb file exists."
   (interactive)
-  (when (and buffer-file-name
-             (member (file-name-extension buffer-file-name) '("py" "ipynb")))
-    (let ((file-path buffer-file-name))
-      (message "Running jupytext on %s" file-path)
-      (start-process "jupytext-process" "*jupytext-output*" 
-                     "jupytext" "--set-formats" "py:percent,ipynb" file-path)
-      (message "Jupytext conversion complete for %s" file-path))))
+  (when buffer-file-name
+    (let* ((file-path buffer-file-name)
+           (extension (file-name-extension file-path))
+           (base-name (file-name-sans-extension file-path))
+           (ipynb-path (concat base-name ".ipynb")))
+      (cond
+       ;; If it's an ipynb file, always run jupytext
+       ((string= extension "ipynb")
+        (message "Running jupytext on %s" file-path)
+        (start-process "jupytext-process" "*jupytext-output*"
+                       "jupytext" "--set-formats" "py:percent,ipynb" file-path)
+        (message "Jupytext conversion initiated for %s" file-path))
+       ;; If it's a py file, only run if the corresponding ipynb exists
+       ((and (string= extension "py")
+             (file-exists-p ipynb-path))
+        (message "Running jupytext on %s (paired with %s)" file-path ipynb-path)
+        (start-process "jupytext-process" "*jupytext-output*"
+                       "jupytext" "--set-formats" "py:percent,ipynb" file-path)
+        (message "Jupytext conversion initiated for %s" file-path))))))
 
 (defun my/org-move-line (direction)
   "Move line up or down with DIRECTION."
