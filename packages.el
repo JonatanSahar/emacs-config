@@ -85,8 +85,11 @@
 (package! emigo
   :recipe (:host github :repo "MatthewZMD/emigo" :files ("*.el"))
   )
+(package! magit-gptcommit)
 
 (package! highlight-thing)
 (package! dwim-shell-command)
 (package! drag-stuff)
 (package! python-black)
+(package! corfu-candidate-overlay)
+(package! spacious-padding)

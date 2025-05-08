@@ -11,15 +11,17 @@
 
 ;; Python
 ;; ------
-(map! :map (python-mode-map python-ts-mode-map)
-      ;; Jupyter Integration
-      :nv "C-<return>" #'jupyter-eval-line-or-region
-      :nv "S-<return>" #'jupyter-eval-line-or-region ; Alternative
-      :v "C-c <return>" #'python-shell-send-region ; Send region to shell (standard python.el)
-      :localleader
-      :n :desc "eval buffer" "eb" #'jupyter-eval-buffer
-      :n :desc "eval function" "ed" #'jupyter-eval-defun
-      :nv :desc "eval region" "er" #'jupyter-eval-region)
+(after! jupyter
+ (map! :map (python-mode-map python-ts-mode-map)
+       ;; Jupyter Integration
+       :nv "C-<return>" #'jupyter-eval-line-or-region
+       :nv "S-<return>" #'jupyter-eval-line-or-region ; Alternative
+       :v "C-c <return>" #'python-shell-send-region ; Send region to shell (standard python.el)
+       :localleader
+       :n :desc "eval buffer" "eb" #'jupyter-eval-buffer
+       :n :desc "eval function" "ed" #'jupyter-eval-defun
+       :nv :desc "eval region" "er" #'jupyter-eval-region)
+ )
 
 (map! :map inferior-python-mode ; Bindings for the Python REPL buffer
       :nvi "C-k" #'windmove-up ; Allow windmove in REPL
@@ -128,7 +130,8 @@
       :nv "E" #'evil-forward-WORD-end
       :nv "W" #'evil-forward-WORD-begin
       :nv "'" #'evil-goto-mark ; Jump to mark
-      :nv "C-e" #'my-evil-end-of-visual-line ; Go to end of visual line
+      :n "C-e" #'my-evil-end-of-visual-line ; Go to end of visual line
+      :v "C-e" #'my-evil-end-of-visual-line-visual-mode ; Go to end of visual line
       ;; Windmove
       :nv "C-l" #'windmove-right
       :nv "C-h" #'windmove-left
@@ -431,7 +434,8 @@
       ;; File / Project ("f" prefix - using consult where possible)
       (:prefix ("f" . "file/find")
        :desc "copy buffer name"  "c" #'my/get-buffer-name
-       :desc "search for file in dir (fd)"  "f" #'consult-fd
+       ;; :desc "search for file in dir (fd)"  "f" #'consult-fd
+       :desc "find file"  "f" #'find-file
        :desc "Open project buffer in other window" "F" #'projectile-find-file-dwim-other-window)
 
       ;; Git ("g" prefix)
@@ -476,8 +480,8 @@
        :desc "aidermacs transient" "a" #'aidermacs-transient-menu
        :desc "select header content" "y" #'my/visual-inside-org-header
        :desc "copy header content" "h" #'my/yank-org-headline
-       :desc "gptel-send" "G" #'gptel ; Duplicate of G G?
-       :desc "gptel-send" "g" #'gptel-send ; Duplicate of G R?
+       ;; :desc "gptel-menu "g" #'gptel" ; Duplicate of G G?
+       :desc "gptel-menu" "g" #'gptel-menu ; Duplicate of G G?
        :desc "gptel-rewrite" "r" #'gptel-rewrite
        :desc "kill all other windows" "o" 'delete-other-windows
        :desc "resize window to small" "F" 'my/make-small-frame
@@ -562,7 +566,7 @@
        :desc "minimize window" "mm" #'minimize-window
        :desc "minimize window" "O" #'minimize-window ; Alternative minimize
        :desc "maximize window" "mM" #'doom/window-maximize-buffer ; Maximize (Doom specific)
-       :desc "window resize hydra" "." 'hydra-window-resize/body) ; Hydra for resizing
+       :desc "window resize hydra" "." 'hydra-window/body) ; Hydra for resizing
 
       ;; Tab Management ("TAB" prefix)
       (:prefix-map ("TAB" . "Tabs")
@@ -582,14 +586,14 @@
 ;; ======
 (defhydra hydra-window (:color red :columns 3)
   "Window Management"
-  ("h" windmove-left "←")
-  ("j" windmove-down "↓")
-  ("k" windmove-up "↑")
-  ("l" windmove-right "→")
-  (">" (window-resize nil 15 1) "Expand →")
-  ("<" (window-resize nil -15 1) "Shrink ←")
-  ("+" (window-resize nil 15 nil) "Expand ↓")
-  ("-" (window-resize nil -15 nil) "Shrink ↑")
+  ("C-h" windmove-left "←")
+  ("C-j" windmove-down "↓")
+  ("C-k" windmove-up "↑")
+  ("C-l" windmove-right "→")
+  ("l" (window-resize nil 15 1) "Expand →")
+  ("h" (window-resize nil -15 1) "Shrink ←")
+  ("j" (window-resize nil 15 nil) "Expand ↓")
+  ("k" (window-resize nil -15 nil) "Shrink ↑")
   ("|" (lambda () (interactive) (split-window-right) (windmove-right)) "Split →")
   ("_" (lambda () (interactive) (split-window-below) (windmove-down)) "Split ↓")
   ("q" nil "quit" :color blue))

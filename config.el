@@ -249,6 +249,10 @@
     (apply orig-fun args)))
 
 (advice-add 'dired-do-async-shell-command :around #'my/dired-async-no-popup)
+(add-hook! 'dired-mode-hook
+  (dired-hide-details-mode 1)
+  (dired-omit-mode 1)
+  (+zen/toggle))
 
 ;; (add-hook 'denote-backlinks-mode-hook #'+zen/toggle)
 

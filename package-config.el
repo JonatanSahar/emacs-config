@@ -87,16 +87,23 @@
   :after (:all org python)
 
   :config
-  ;; Run jupytext on save for Jupyter notebook files
-  (add-hook 'jupyter-repl-mode-hook
-            (lambda ()
-              (add-hook 'after-save-hook #'my/run-jupytext-on-save nil t)))
   (map! :map jupyter-repl-mode-map
         :i "C-k" #'jupyter-repl-history-previous
         :i "C-j" #'jupyter-repl-history-next
         :nvi "C-e" #'evil-end-of-line-or-visual-line
         :i "<up>" #'jupyter-repl-history-previous
         :i "<down>" #'jupyter-repl-history-next)
+
+  (map! :map (python-mode-map python-ts-mode-map)
+        ;; Jupyter Integration
+        :nv "C-<return>" #'jupyter-eval-line-or-region
+        :nv "S-<return>" #'jupyter-eval-line-or-region ; Alternative
+        :v "C-c <return>" #'python-shell-send-region ; Send region to shell (standard python.el)
+        :localleader
+        :n :desc "eval buffer" "eb" #'jupyter-eval-buffer
+        :n :desc "eval function" "ed" #'jupyter-eval-defun
+        :nv :desc "eval region" "er" #'jupyter-eval-region)
+
 
   (add-hook! 'jupyter-repl-mode-hook #'electric-pair-mode))
 
@@ -703,7 +710,7 @@ the default tab-bar name uses the buffer name."
 (use-package! gptel
   :init
   :config
-  (setq gptel-api-key (getenv "openai_api_key")
+  (setq gptel-api-key (getenv "OPENAI_API_KEY")
         gptel-use-curl 'nil
         gptel-stream nil
         gptel-default-mode 'org-mode)
@@ -720,13 +727,8 @@ the default tab-bar name uses the buffer name."
            (rewrite   . "you are a language model with expert programming knowledge. provide clean, correct code solutions with minimal commentary; output code and only code, do not add code fences e.g. python ''' ''' around the code.")
            ))
   (setq
-   gptel-model 'phi4:latest
-   gptel-backend (gptel-make-ollama "ollama"
-    :host "localhost:11434"
-    :stream t
-    ;; :endpoint "/api/generate"
-    :models '(phi4:latest qwen2.5-coder:32b deepseek-r1:32b)
-))
+   gptel-model 'ChatGPT:gpt-o4-mini
+   )
 
 (gptel-make-gemini "gemini" :key (getenv "GEMINI_API_KEY"):stream t)
 
@@ -847,7 +849,8 @@ the default tab-bar name uses the buffer name."
   (evil-define-key 'treemacs treemacs-mode-map (kbd "y n") #'my/treemacs-copy-name-at-point)
   )
 
-(after! spacious-padding
+(use-package! spacious-padding
+  :config
   (spacious-padding-mode 1))
 
 
@@ -860,11 +863,12 @@ the default tab-bar name uses the buffer name."
 
 (use-package! copilot
   :hook (prog-mode . copilot-mode)
-  :bind (:map copilot-completion-map
-              ("<TAB>" . 'copilot-accept-completion)
-              ("TAB" . 'copilot-accept-completion)
-              ("C-TAB" . 'copilot-accept-completion-by-word)
-              ("C-<TAB>" . 'copilot-accept-completion-by-word)))
+  ;; :bind (:map copilot-completion-map
+  ;;             ("<TAB>" . 'copilot-accept-completion)
+  ;;             ("TAB" . 'copilot-accept-completion)
+  ;;             ("C-TAB" . 'copilot-accept-completion-by-word)
+  ;;             ("C-<TAB>" . 'copilot-accept-completion-by-word))
+             )
 
 (after! (evil copilot)
   ;; Define the custom function that either accepts the completion or does the default behavior
@@ -886,7 +890,6 @@ the default tab-bar name uses the buffer name."
 
   ;; Use map! to bind keys in prog-mode and text-mode
   (map! :map (prog-mode-map text-mode-map)
-        :i "<tab>" #'my/copilot-tab-or-default
         :i "C-;" #'my/copilot-tab-or-default
         :i "C-S-l" #'my/copilot-word-or-default))
 
@@ -894,8 +897,11 @@ the default tab-bar name uses the buffer name."
   :bind (("C-c a" . aidermacs-transient-menu))
   :config
    (setq
-   aidermacs-editor-model "anthropic/claude-3-5-sonnet-20241022"
-   aidermacs-architect-model "anthropic/claude-3-7-sonnet-20250219"
+   ;; aidermacs-editor-model "anthropic/claude-3-5-sonnet-20241022"
+   ;; aidermacs-architect-model "anthropic/claude-3-7-sonnet-20250219"
+   aidermacs-editor-model "openai/o3-mini"
+   aidermacs-architect-model "openai/o3"
+   aidermacs-weak-model "openai/o4-mini"
    aidermacs-watch-files t
    aidermacs-backend 'vterm
    aidermacs-auto-commits t
@@ -925,11 +931,11 @@ the default tab-bar name uses the buffer name."
 (after! python
   :config
   (require 'eglot)
-  (setq python-check-command "ruff check")
+  (setq python-check-command "ruff check"))
   ;; Run jupytext on save for Python files
-  (add-hook 'python-mode-hook
-            (lambda ()
-              (add-hook 'after-save-hook #'my/run-jupytext-on-save nil t))))
+  ;; (add-hook 'python-mode-hook
+  ;;           (lambda ()
+  ;;             (add-hook 'after-save-hook #'my/run-jupytext-on-save nil t))))
 
 (use-package! drag-stuff
   :defer t
@@ -965,14 +971,31 @@ the default tab-bar name uses the buffer name."
         :i "C-j" (kbd "<down>")
         :i "C-k" (kbd "<up>")))
 
-(use-package! corfu-candidate-overlay
-  :after corfu
-  :config
-  ;; enable corfu-candidate-overlay mode globally
-  ;; this relies on having corfu-auto set to nil
-  (corfu-candidate-overlay-mode +1)
-  ;; bind Ctrl + TAB to trigger the completion popup of corfu
-  (global-set-key (kbd "S-<tab>") 'completion-at-point)
-  ;; bind Ctrl + Shift + Tab to trigger completion of the first candidate
-  ;; (keybing <iso-lefttab> may not work for your keyboard model)
-  (global-set-key (kbd "<tab>") 'corfu-candidate-overlay-complete-at-point))
+;; (use-package! corfu-candidate-overlay
+;;   :after corfu
+;;   :config
+;;   ;; enable corfu-candidate-overlay mode globally
+;;   ;; this relies on having corfu-auto set to nil
+;;   (corfu-candidate-overlay-mode +1)
+;;   ;; bind Ctrl + TAB to trigger the completion popup of corfu
+;;   (global-set-key (kbd "S-<tab>") 'completion-at-point)
+;;   ;; bind Ctrl + Shift + Tab to trigger completion of the first candidate
+;;   ;; (keybing <iso-lefttab> may not work for your keyboard model)
+;;   (global-set-key (kbd "<tab>") 'corfu-candidate-overlay-complete-at-point))
+
+
+(use-package! magit-gptcommit
+  :after magit
+  :bind (:map git-commit-mode-map
+              ("C-c C-g" . magit-gptcommit-commit-accept))
+  :custom
+  (magit-gptcommit-llm-provider (make-llm-gemini :key (getenv "GEMINI_API_KEY") :model "gemini-2.0-flash"))
+
+  ;; Enable magit-gptcommit-mode to watch staged changes and generate commit message automatically in magit status buffer
+  ;; This mode is optional, you can also use `magit-gptcommit-generate' to generate commit message manually
+  ;; `magit-gptcommit-generate' should only execute on magit status buffer currently
+  ;; (magit-gptcommit-mode 1)
+
+  ;; Add gptcommit transient commands to `magit-commit'
+  ;; Eval (transient-remove-suffix 'magit-commit '(1 -1)) to remove gptcommit transient commands
+  (magit-gptcommit-status-buffer-setup))

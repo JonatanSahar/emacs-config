@@ -142,7 +142,7 @@
 
 
 ;; ;; Shouldn't be here but didn't work otherwise
-(defun my/setup-jupyter-display-rules ()
+(defun my/setup-display-rules ()
   "Configure display rules for Jupyter buffers."
   (interactive)
   (add-to-list 'display-buffer-alist
@@ -153,6 +153,12 @@
 
   (add-to-list 'display-buffer-alist
                (cons "\\`\\*copilot-.*\\'"
+                     (cons 'display-buffer-reuse-window
+                           '((reusable-frames . visible)
+                             (inhibit-switch-frame . nil)))))
+
+  (add-to-list 'display-buffer-alist
+               (cons "\\`\\*aidermacs.*\\'"
                      (cons 'display-buffer-reuse-window
                            '((reusable-frames . visible)
                              (inhibit-switch-frame . nil))))))
@@ -200,6 +206,12 @@
   (interactive)
   (evil-end-of-visual-line))
 
+(defun my-evil-end-of-visual-line-visual-mode ()
+  "Wrapper for evil-end-of-visual-line that preserves visual selection."
+  (interactive)
+  (evil-end-of-visual-line)
+  (evil-forward-char))
+
 (defun my/save-and-change-to-normal ()
   (interactive)
   (evil-normal-state)
@@ -228,7 +240,7 @@
   (interactive)
   (delete-frame nil t)) ;; The second argument (force) makes it close without confirmation.
 
-(defun my/run-jupytext-on-save ()
+(defun my/jupytext-file ()
   "Run jupytext to set formats to py:percent,ipynb for the current file.
 For .py files, only run if a corresponding .ipynb file exists."
   (interactive)
