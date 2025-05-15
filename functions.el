@@ -148,19 +148,19 @@
   (add-to-list 'display-buffer-alist
                (cons "\\`\\*jupyter-.*\\'"
                      (cons 'display-buffer-reuse-window
-                           '((reusable-frames . visible)
+                           '((reusable-frames . t)
                              (inhibit-switch-frame . nil)))))
 
   (add-to-list 'display-buffer-alist
                (cons "\\`\\*copilot-.*\\'"
                      (cons 'display-buffer-reuse-window
-                           '((reusable-frames . visible)
+                           '((reusable-frames . t)
                              (inhibit-switch-frame . nil)))))
 
   (add-to-list 'display-buffer-alist
                (cons "\\`\\*aidermacs.*\\'"
                      (cons 'display-buffer-reuse-window
-                           '((reusable-frames . visible)
+                           '((reusable-frames . t)
                              (inhibit-switch-frame . nil))))))
 
 ;; Define the 'laptop-mode' minor mode
