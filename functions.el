@@ -240,12 +240,13 @@
   (interactive)
   (delete-frame nil t)) ;; The second argument (force) makes it close without confirmation.
 
-(defun my/jupytext-file ()
+(defun my/jupytext-file (prefix)
   "Run jupytext to set formats to py:percent,ipynb for the current file.
-For .py files, only run if a corresponding .ipynb file exists."
-  (interactive)
+For .py files, only run if a corresponding .ipynb file exists, unless a prefix argument (C-u) is given, which forces creation."
+  (interactive "P")
   (when buffer-file-name
-    (let* ((file-path buffer-file-name)
+    (let* ((force-create (consp prefix)) ; C-u makes prefix a list like '(4)
+           (file-path buffer-file-name)
            (extension (file-name-extension file-path))
            (base-name (file-name-sans-extension file-path))
            (ipynb-path (concat base-name ".ipynb")))
@@ -256,10 +257,12 @@ For .py files, only run if a corresponding .ipynb file exists."
         (start-process "jupytext-process" "*jupytext-output*"
                        "jupytext" "--set-formats" "py:percent,ipynb" file-path)
         (message "Jupytext conversion initiated for %s" file-path))
-       ;; If it's a py file, only run if the corresponding ipynb exists
+       ;; If it's a py file, run if the corresponding ipynb exists OR if forced by prefix arg
        ((and (string= extension "py")
-             (file-exists-p ipynb-path))
-        (message "Running jupytext on %s (paired with %s)" file-path ipynb-path)
+             (or (file-exists-p ipynb-path) force-create))
+        (if force-create
+            (message "Forcing jupytext on %s to create/pair with %s" file-path ipynb-path)
+          (message "Running jupytext on %s (paired with %s)" file-path ipynb-path))
         (start-process "jupytext-process" "*jupytext-output*"
                        "jupytext" "--set-formats" "py:percent,ipynb" file-path)
         (message "Jupytext conversion initiated for %s" file-path))))))
