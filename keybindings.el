@@ -17,6 +17,7 @@
        :nv "C-<return>" #'jupyter-eval-line-or-region
        :nv "S-<return>" #'jupyter-eval-line-or-region ; Alternative
        :v "C-c <return>" #'python-shell-send-region ; Send region to shell (standard python.el)
+       :n :desc "eval function" "C-S-<return>" #'jupyter-eval-defun
        :localleader
        :n :desc "eval buffer" "eb" #'jupyter-eval-buffer
        :n :desc "eval function" "ed" #'jupyter-eval-defun
@@ -476,7 +477,7 @@
        :desc "avy line" "l" 'evil-avy-goto-line)
 
       ;; My Custom Commands ("k" prefix)
-      (:prefix ("k" . "kennedy")
+      (:prefix ("k" . "My commands")
        :desc "aidermacs transient" "a" #'aidermacs-transient-menu
        :desc "select header content" "y" #'my/visual-inside-org-header
        :desc "copy header content" "h" #'my/yank-org-headline
@@ -499,6 +500,7 @@
        :desc "point to register" "P" #'point-to-register ; Added Shift-p
        :desc "run macro" "e" #'kmacro-end-and-call-macro
        :desc "generate laTex previews" "L" #'org-latex-preview
+       :desc "convert .py ⬄ .ipynb" "t" #'my/jupytext-file
        (:prefix ("b" . "references")
         :desc "refresh bibliography" "r" #'citar-refresh
         :desc "open bibliography" "b" #'citar-open))
@@ -627,3 +629,6 @@ _p_rev       _u_pper              _=_: upper/lower       _R_esolve
   ("K" smerge-kill-current)
   ("q" nil "cancel" :color blue))
 ;; Note: hydra-smerge/body is bound via global keys "C-c s" and "C-c m" above
+
+(map! :map evil-ex-map "M-y" #'yank)
+(map! :map evil-ex-map "C-v" #'yank)
