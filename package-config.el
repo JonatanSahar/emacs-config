@@ -568,9 +568,9 @@ the directory.  `REST' is passed to the `CONSULT-RIPGREP-FUNCTION'."
 (defun init-spellchecker()
   ;; ispell-set-spellchecker-params has to be called
   ;; before ispell-hunspell-add-multi-dic will work
-  (setq ispell-dictionary "en_us,hebrew") ; default dictionary to use
+  (setq ispell-dictionary "en_US") ;; ,hebrew") ; default dictionary to use
   (ispell-set-spellchecker-params)
-  (ispell-hunspell-add-multi-dic "en_us,hebrew"))
+  (ispell-hunspell-add-multi-dic "en_US")) ;; ,hebrew"))
 
 (use-package! tabspaces
   :hook (after-init . tabspaces-mode) ;; use this only if you want the minor-mode loaded at startup.
@@ -999,3 +999,21 @@ the default tab-bar name uses the buffer name."
   ;; Add gptcommit transient commands to `magit-commit'
   ;; Eval (transient-remove-suffix 'magit-commit '(1 -1)) to remove gptcommit transient commands
   (magit-gptcommit-status-buffer-setup))
+
+(defun copy-grep-results-as-kill (strings)
+  (embark-copy-as-kill
+   (mapcar (lambda (string)
+             (substring string
+                        (1+ (next-single-property-change
+                             (1+ (next-single-property-change 0 'face string))
+                             'face string))))
+           strings)))
+
+(add-to-list 'embark-multitarget-actions 'copy-grep-results-as-kill)
+
+;;  ai! This doesn't work, as embark-define-keymap does not exist
+(embark-define-keymap embark-consult-grep-map
+  "Keymap for actions for consult-grep results."
+  ("w" copy-grep-results-as-kill))
+
+(setf (alist-get 'consult-grep embark-keymap-alist) 'embark-consult-grep-map)
