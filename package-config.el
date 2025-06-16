@@ -242,7 +242,7 @@
    consult-buffer consult-buffer-other-window consult-ripgrep consult-git-grep consult-grep
    consult-bookmark consult-recent-file consult-xref consult-theme
    ;; consult--source-file consult--source-project-file consult--source-bookmark
-   :preview-key "C-.")
+   :preview-key "C.")
 
   ;; The :init configuration is always executed (Not lazy)
   :init
@@ -1011,9 +1011,11 @@ the default tab-bar name uses the buffer name."
 
 (add-to-list 'embark-multitarget-actions 'copy-grep-results-as-kill)
 
-;;  ai! This doesn't work, as embark-define-keymap does not exist
-(embark-define-keymap embark-consult-grep-map
+(defvar embark-consult-grep-map
+  (let ((map (make-sparse-keymap)))
+    (define-key map (kbd "w") #'copy-grep-results-as-kill)
+    map)
   "Keymap for actions for consult-grep results."
-  ("w" copy-grep-results-as-kill))
+)
 
 (setf (alist-get 'consult-grep embark-keymap-alist) 'embark-consult-grep-map)
