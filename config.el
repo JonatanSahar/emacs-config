@@ -287,3 +287,4 @@
     (yaml "https://github.com/ikatyang/tree-sitter-yaml")))
 
 (add-to-list 'tramp-remote-path "/home/yonatan/anaconda3/bin/conda")
+;; in evil mode's search (after pressing /) yank (paste) is not bound at all. Bind evil paste to C-v, and consult-yank-from-kill-ring to M-p, ai!

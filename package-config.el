@@ -242,7 +242,7 @@
    consult-buffer consult-buffer-other-window consult-ripgrep consult-git-grep consult-grep
    consult-bookmark consult-recent-file consult-xref consult-theme
    ;; consult--source-file consult--source-project-file consult--source-bookmark
-   :preview-key "C.")
+   :preview-key "C-.")
 
   ;; The :init configuration is always executed (Not lazy)
   :init
@@ -1000,22 +1000,26 @@ the default tab-bar name uses the buffer name."
   ;; Eval (transient-remove-suffix 'magit-commit '(1 -1)) to remove gptcommit transient commands
   (magit-gptcommit-status-buffer-setup))
 
-(defun copy-grep-results-as-kill (strings)
-  (embark-copy-as-kill
-   (mapcar (lambda (string)
-             (substring string
-                        (1+ (next-single-property-change
-                             (1+ (next-single-property-change 0 'face string))
-                             'face string))))
-           strings)))
+(use-package! embark
+:config
+ (defun copy-grep-results-as-kill (strings)
+   (embark-copy-as-kill
+    (mapcar (lambda (string)
+              (substring string
+                         (1+ (next-single-property-change
+                              (1+ (next-single-property-change 0 'face string))
+                              'face string))))
+            strings)))
 
-(add-to-list 'embark-multitarget-actions 'copy-grep-results-as-kill)
+ (add-to-list 'embark-multitarget-actions 'copy-grep-results-as-kill)
 
-(defvar embark-consult-grep-map
-  (let ((map (make-sparse-keymap)))
-    (define-key map (kbd "w") #'copy-grep-results-as-kill)
-    map)
-  "Keymap for actions for consult-grep results."
-)
+ (defvar embark-consult-grep-map
+   (let ((map (make-sparse-keymap)))
+     (define-key map (kbd "w") #'copy-grep-results-as-kill)
+     map)
+   "Keymap for actions for consult-grep results."
+   )
 
-(setf (alist-get 'consult-grep embark-keymap-alist) 'embark-consult-grep-map)
+ (setf (alist-get 'consult-grep embark-keymap-alist) 'embark-consult-grep-map)
+
+ )
