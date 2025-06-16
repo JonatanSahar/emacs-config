@@ -133,6 +133,8 @@
   (+zen/toggle)
   )
 
+(add-hook! 'dirvish-directory-view-mode (+zen/toggle))
+
 (after! tramp
   (add-to-list 'tramp-remote-path "/home/yonatan/.local/bin")
   )
@@ -283,3 +285,5 @@
     (tsx "https://github.com/tree-sitter/tree-sitter-typescript" "master" "tsx/src")
     (typescript "https://github.com/tree-sitter/tree-sitter-typescript" "master" "typescript/src")
     (yaml "https://github.com/ikatyang/tree-sitter-yaml")))
+
+(add-to-list 'tramp-remote-path "/home/yonatan/anaconda3/bin/conda")
