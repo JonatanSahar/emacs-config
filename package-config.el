@@ -508,15 +508,13 @@ the directory.  `REST' is passed to the `CONSULT-RIPGREP-FUNCTION'."
   ;; open PDFs with system viewer instead of pdf-tools
   (add-to-list 'citar-file-open-functions (cons "pdf" #'citar-file-open-external))
 
-  ;;ai! I don't have all the icons anymore, I use nerd fonts instead. fix below please.
   (setq citar-symbols
-        `((file . (,(all-the-icons-icon-for-file "foo.pdf" :face 'all-the-icons-dred) .
-                   ,(all-the-icons-icon-for-file "foo.pdf" :face 'citar-icon-dim)))
-          (note . (,(all-the-icons-icon-for-file "foo.txt") .
-                   ,(all-the-icons-icon-for-file "foo.txt" :face 'citar-icon-dim)))
-          (link .
-                (,(all-the-icons-faicon "external-link-square" :v-adjust 0.02 :face 'all-the-icons-dpurple) .
-                 ,(all-the-icons-faicon "external-link-square" :v-adjust 0.02 :face 'citar-icon-dim)))))
+        `((file . (,(propertize " " 'face 'error) .
+                   ,(propertize " " 'face 'citar-icon-dim)))
+          (note . (,(propertize " " 'face 'success) .
+                   ,(propertize " " 'face 'citar-icon-dim)))
+          (link . (,(propertize " " 'face 'link) .
+                   ,(propertize " " 'face 'citar-icon-dim)))))
 
   ;; Here we define a face to dim non 'active' icons, but preserve alignment
   (defface citar-icon-dim
