@@ -508,6 +508,7 @@ the directory.  `REST' is passed to the `CONSULT-RIPGREP-FUNCTION'."
   ;; open PDFs with system viewer instead of pdf-tools
   (add-to-list 'citar-file-open-functions (cons "pdf" #'citar-file-open-external))
 
+  ;;ai! I don't have all the icons anymore, I use nerd fonts instead. fix below please.
   (setq citar-symbols
         `((file . (,(all-the-icons-icon-for-file "foo.pdf" :face 'all-the-icons-dred) .
                    ,(all-the-icons-icon-for-file "foo.pdf" :face 'citar-icon-dim)))
@@ -516,6 +517,7 @@ the directory.  `REST' is passed to the `CONSULT-RIPGREP-FUNCTION'."
           (link .
                 (,(all-the-icons-faicon "external-link-square" :v-adjust 0.02 :face 'all-the-icons-dpurple) .
                  ,(all-the-icons-faicon "external-link-square" :v-adjust 0.02 :face 'citar-icon-dim)))))
+
   ;; Here we define a face to dim non 'active' icons, but preserve alignment
   (defface citar-icon-dim
     '((((background dark)) :foreground "#282c34")
@@ -727,7 +729,7 @@ the default tab-bar name uses the buffer name."
            (rewrite   . "you are a language model with expert programming knowledge. provide clean, correct code solutions with minimal commentary; output code and only code, do not add code fences e.g. python ''' ''' around the code.")
            ))
   (setq
-   gptel-model 'ChatGPT:gpt-o4-mini
+   gptel-model 'gemini:gemini-2.5-flash-preview-05-20
    )
 
 (gptel-make-gemini "gemini" :key (getenv "GEMINI_API_KEY"):stream t)
@@ -897,11 +899,10 @@ the default tab-bar name uses the buffer name."
   :bind (("C-c a" . aidermacs-transient-menu))
   :config
    (setq
-   ;; aidermacs-editor-model "anthropic/claude-3-5-sonnet-20241022"
-   ;; aidermacs-architect-model "anthropic/claude-3-7-sonnet-20250219"
-   aidermacs-editor-model "openai/o3-mini"
-   aidermacs-architect-model "openai/o3"
-   aidermacs-weak-model "openai/o4-mini"
+    aidermacs-default-model "gemini/gemini-2.5-flash"
+   aidermacs-editor-model "gemini/gemini-2.5-flash"
+   aidermacs-architect-model "gemini/gemini-2.5-flash"
+   aidermacs-weak-model "gemini/gemini-2.5-flash"
    aidermacs-watch-files t
    aidermacs-backend 'vterm
    aidermacs-auto-commits t
@@ -969,7 +970,10 @@ the default tab-bar name uses the buffer name."
   :config
   (map! :map vterm-mode-map
         :i "C-j" (kbd "<down>")
-        :i "C-k" (kbd "<up>")))
+        :i "C-k" (kbd "<up>")
+        :i "C-z" #'evil-emacs-state)
+  ;; (add-hook! vterm-mode #'evil-emacs-state)
+)
 
 ;; (use-package! corfu-candidate-overlay
 ;;   :after corfu
@@ -1023,3 +1027,7 @@ the default tab-bar name uses the buffer name."
  (setf (alist-get 'consult-grep embark-keymap-alist) 'embark-consult-grep-map)
 
  )
+
+;; (use-package! magit-todos
+;;   :after magit
+;;   :config (magit-todos-mode 1))
