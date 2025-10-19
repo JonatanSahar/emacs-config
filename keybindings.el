@@ -174,14 +174,18 @@
 (map! :map prog-mode-map
       ;; Flyspell correction (C-c prefix) - Inherited by many prog modes
       :ni "C-c +" #'(lambda () (interactive) (call-interactively #'evil-next-flyspell-error) (call-interactively #'flyspell-correct-at-point))
-      :ni "C-c =" #'(lambda () (interactive) (call-interactively #'evil-prev-flyspell-error) (call-interactively #'flyspell-correct-at-point)))
+      :ni "C-c =" #'(lambda () (interactive) (call-interactively #'evil-prev-flyspell-error) (call-interactively #'flyspell-correct-at-point))
+      :n  "gj" #'evil-avy-goto-char-timer
+      )
 
 ;; Text Mode (Base for text modes)
 ;; -------------------------------
 (map! :map text-mode-map
       ;; Flyspell correction (C-c prefix) - Inherited by Org, Markdown etc.
       :ni "C-c +" #'(lambda () (interactive) (call-interactively #'evil-next-flyspell-error) (call-interactively #'flyspell-correct-at-point))
-      :ni "C-c =" #'(lambda () (interactive) (call-interactively #'evil-prev-flyspell-error) (call-interactively #'flyspell-correct-at-point)))
+      :ni "C-c =" #'(lambda () (interactive) (call-interactively #'evil-prev-flyspell-error) (call-interactively #'flyspell-correct-at-point))
+      :n  "gj" #'evil-avy-goto-char-timer
+      )
 
 ;; Org Mode
 ;; --------

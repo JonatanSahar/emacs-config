@@ -308,3 +308,56 @@ select."
          (out-contents (json-encode (list :venvPath venvPath :venv venv))))
     (with-temp-file out-file (insert out-contents))
     (message (concat "Configured `" out-file "` to use environment `" venv-dir))))
+
+;; vterm helpers
+;; =============
+(defvar-local my/vterm-sticky-scroll nil
+  "When non-nil, keep vterm from auto-following new output in the current buffer.")
+
+(defun my/vterm--at-bottom-p (&optional window)
+  "Return non-nil when WINDOW (or the selected window) shows the buffer end.
+Treat partially visible end-of-buffer as being at the bottom."
+  (let ((win (or window (selected-window))))
+    (and (window-live-p win)
+         (eq (window-buffer win) (current-buffer))
+         (pos-visible-in-window-p (point-max) win t))))
+
+(defun my/vterm--recompute-sticky (&optional window)
+  "Update `my/vterm-sticky-scroll' based on WINDOW visibility state."
+  (when (derived-mode-p 'vterm-mode)
+    (if (my/vterm--at-bottom-p window)
+        (when my/vterm-sticky-scroll
+          (setq my/vterm-sticky-scroll nil)
+          (when (fboundp 'vterm-reset-cursor-point)
+            (vterm-reset-cursor-point)))
+      (setq my/vterm-sticky-scroll t))))
+
+(defun my/vterm--handle-window-scroll (window _start)
+  "Track manual WINDOW scrolling to toggle sticky scroll."
+  (with-current-buffer (window-buffer window)
+    (my/vterm--recompute-sticky window)))
+
+(defun my/vterm--post-command (&rest _)
+  "Update sticky scroll state after each command."
+  (my/vterm--recompute-sticky (selected-window)))
+
+(defun my/vterm-enable-sticky-scroll ()
+  "Enable sticky-scroll tracking for the current vterm buffer."
+  (setq my/vterm-sticky-scroll nil)
+  (add-hook 'window-scroll-functions #'my/vterm--handle-window-scroll nil t)
+  (add-hook 'post-command-hook #'my/vterm--post-command nil t))
+
+(defun my/vterm-resume-follow ()
+  "Jump to the prompt and resume auto-following output in vterm."
+  (interactive)
+  (when (derived-mode-p 'vterm-mode)
+    (setq my/vterm-sticky-scroll nil)
+    (goto-char (point-max))
+    (when (fboundp 'vterm-reset-cursor-point)
+      (vterm-reset-cursor-point))
+    (recenter -1)))
+
+(defun my/vterm--skip-reset-when-sticky (orig &rest args)
+  "Skip `vterm-reset-cursor-point' via ORIG when sticky scrolling is active."
+  (unless my/vterm-sticky-scroll
+    (apply orig args)))

@@ -94,11 +94,11 @@
         :i "<up>" #'jupyter-repl-history-previous
         :i "<down>" #'jupyter-repl-history-next)
 
-  (map! :map (python-mode-map python-ts-mode-map)
+  (map! :map (python-mode-map python-ts-mode-map ess-mode-map)
         ;; Jupyter Integration
         :nv "C-<return>" #'jupyter-eval-line-or-region
         :nv "S-<return>" #'jupyter-eval-line-or-region ; Alternative
-        :v "C-c <return>" #'python-shell-send-region ; Send region to shell (standard python.el)
+        ;; :v "C-c <return>" #'python-shell-send-region ; Send region to shell (standard python.el)
         :localleader
         :n :desc "eval buffer" "eb" #'jupyter-eval-buffer
         :n :desc "eval function" "ed" #'jupyter-eval-defun
@@ -582,8 +582,8 @@ the directory.  `REST' is passed to the `CONSULT-RIPGREP-FUNCTION'."
   (tabspaces-remove-to-default t)
   (tabspaces-include-buffers '("*scratch*"))
   ;; sessions
-  (tabspaces-session t)
-  (tabspaces-session-auto-restore t)
+  (tabspaces-session nil)
+  (tabspaces-session-auto-restore nil)
 
   :config
 
@@ -726,9 +726,6 @@ the default tab-bar name uses the buffer name."
 
            (rewrite   . "you are a language model with expert programming knowledge. provide clean, correct code solutions with minimal commentary; output code and only code, do not add code fences e.g. python ''' ''' around the code.")
            ))
-  (setq
-   gptel-model 'gemini:gemini-2.5-flash-preview-05-20
-   )
 
 (gptel-make-gemini "gemini" :key (getenv "GEMINI_API_KEY"):stream t)
 
@@ -754,7 +751,11 @@ the default tab-bar name uses the buffer name."
     :host "localhost:11434"
     :stream t
     ;; :endpoint "/api/generate"
-    :models '(phi4:latest qwen2.5-coder:32b deepseek-r1:32b)))
+    :models '(phi4:latest qwen2.5-coder:32b deepseek-r1:32b))
+
+  (setq gptel-model 'gemini:gemini-2.5-flash)
+
+  )
 
 
 (use-package! org-download
@@ -918,14 +919,6 @@ the default tab-bar name uses the buffer name."
               )
   )
 
-(use-package! emigo
-  :config
-  (emigo-enable) ;; Starts the background process automatically
-  :custom
-  ;; Encourage using OpenRouter with Deepseek
-  (emigo-model "openrouter/deepseek/deepseek-chat-v3-0324")
-  (emigo-base-url "https://openrouter.ai/api/v1")
-  (emigo-api-key (getenv "OPENROUTER_API_KEY")))
 
 (after! python
   :config
@@ -966,10 +959,14 @@ the default tab-bar name uses the buffer name."
 
 (use-package! vterm
   :config
+  (add-hook 'vterm-mode-hook #'my/vterm-enable-sticky-scroll)
+  (unless (advice-member-p #'my/vterm--skip-reset-when-sticky 'vterm-reset-cursor-point)
+    (advice-add 'vterm-reset-cursor-point :around #'my/vterm--skip-reset-when-sticky))
   (map! :map vterm-mode-map
         :i "C-j" (kbd "<down>")
         :i "C-k" (kbd "<up>")
-        :i "C-z" #'evil-emacs-state)
+        :i "C-z" #'evil-emacs-state
+        :nvi "C-c C-b" #'my/vterm-resume-follow)
   ;; (add-hook! vterm-mode #'evil-emacs-state)
 )
 

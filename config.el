@@ -35,6 +35,7 @@
  doom-variable-pitch-font (font-spec :family "Iosevka Comfy Duo" :weight 'regular :size 15)
  )
 
+(setq doom-theme 'modus-operandi-tinted)
 (load! "themes-and-fonts.el")
 
 ;;
@@ -287,4 +288,7 @@
     (yaml "https://github.com/ikatyang/tree-sitter-yaml")))
 
 (add-to-list 'tramp-remote-path "/home/yonatan/anaconda3/bin/conda")
-;; in evil mode's search (after pressing /) yank (paste) is not bound at all. Bind evil paste to C-v, and consult-yank-from-kill-ring to M-p, ai!
+
+(defadvice compile (before ad-compile-smart activate)
+  "Advises `compile' so it sets the argument COMINT to t."
+  (ad-set-arg 1 t))
