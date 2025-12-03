@@ -80,7 +80,7 @@
   :recipe (:host github :repo "copilot-emacs/copilot.el" :files ("*.el")))
 (package! copilot-chat
   :recipe (:host github :repo "chep/copilot-chat.el" :files ("*.el")))
-(package! aidermacs
+(package! aidermac
 :recipe (:host github :repo "MatthewZMD/aidermacs" :files ("*.el")))
 (package! magit-gptcommit)
 (package! magit-todos)
@@ -91,3 +91,27 @@
 (package! python-black)
 (package! corfu-candidate-overlay)
 (package! spacious-padding)
+(package! aidermacs)
+(package! eat
+  :recipe (:type git
+                   :host codeberg
+                   :repo "akib/emacs-eat"
+                   :files ("*.el" ("term" "term/*.el") "*.texi"
+                           "*.ti" ("terminfo/e" "terminfo/e/*")
+                           ("terminfo/65" "terminfo/65/*")
+                           ("integration" "integration/*")
+                           (:exclude ".dir-locals.el" "*-tests.el"))))
+(package! ai-code-interface
+  :recipe (:host github :repo  "tninja/ai-code-interface.el":files ("*.el")))
+(package! inheritenv
+  :recipe (:type git :host github :repo "purcell/inheritenv"))
+(package! claude-code
+  :recipe (:type git :host github :repo "stevemolitor/claude-code.el" :branch "main" :depth 1
+                   :files ("*.el" (:exclude "images/*"))))
+(package! popup)
+(package! gemini-cli
+  :recipe (:type git :host github :repo "linchen2chris/gemini-cli.el" :branch "main"
+                   :files ("*.el" (:exclude "demo.gif"))))
+(package! shell-maker)
+(package! acp)
+(package! agent-shell)

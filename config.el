@@ -292,3 +292,16 @@
 (defadvice compile (before ad-compile-smart activate)
   "Advises `compile' so it sets the argument COMINT to t."
   (ad-set-arg 1 t))
+
+(setq gc-cons-threshold (* 32 1024 1024))
+
+(defun my-minibuffer-setup-hook ()
+  (setq gc-cons-threshold most-positive-fixnum))
+
+(defun my-minibuffer-exit-hook ()
+  (setq gc-cons-threshold (* 32 1024 1024)))
+
+(add-hook 'minibuffer-setup-hook #'my-minibuffer-setup-hook)
+(add-hook 'minibuffer-exit-hook #'my-minibuffer-exit-hook)
+
+(delete-selection-mode 1)

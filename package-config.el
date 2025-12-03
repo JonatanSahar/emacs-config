@@ -92,6 +92,7 @@
         :i "C-j" #'jupyter-repl-history-next
         :nvi "C-e" #'evil-end-of-line-or-visual-line
         :i "<up>" #'jupyter-repl-history-previous
+        :n  "gj" #'evil-avy-goto-char-timer
         :i "<down>" #'jupyter-repl-history-next)
 
   (map! :map (python-mode-map python-ts-mode-map ess-mode-map)
@@ -494,17 +495,16 @@ the directory.  `REST' is passed to the `CONSULT-RIPGREP-FUNCTION'."
    citar-bibliography (my/get-bib-file-list)
    org-cite-global-bibliography (my/get-bib-file-list)
    citar-at-point-function 'embark-act
-   citar-file-note-org-include '(org-id org-roam-ref)
+   citar-file-note-org-include '(org-id)
    citar-notes-paths (list denote-directory)
    citar-citeproc-csl-styles-dir "~/notes/export-csl-style"
    citar-citeproc-csl-style "apa.csl"
    citar-library-paths (list "~/Documents/bibliography")
-   ;; (add-to-list 'citar-file-open-functions '("pdf" . citar-file-open-external))
-   citar-templates '((main . "${author editor:30}     ${date year issued:4}     ${title:48}")
-                     (suffix . "         ${tags keywords keywords:*}   ${=key= id:15}    ${=type=:12}")
-                     (preview . "${author editor} (${year issued date}) ${title}, ${journal journaltitle publisher container-title collection-title}.\n")
-                     (note . "")))
-
+   ;; citar-templates '((main . "${author editor:30}     ${date year issued:4}     ${title:48}")
+   ;;                   (suffix . "         ${tags keywords keywords:*}   ${=key= id:15}    ${=type=:12}")
+   ;;                   (preview . "${author editor} (${year issued date}) ${title}, ${journal journaltitle publisher container-title collection-title}.\n")
+   ;;                   (note . "")))
+   )
   ;; open PDFs with system viewer instead of pdf-tools
   (add-to-list 'citar-file-open-functions (cons "pdf" #'citar-file-open-external))
 
@@ -522,6 +522,26 @@ the directory.  `REST' is passed to the `CONSULT-RIPGREP-FUNCTION'."
       (((background light)) :foreground "#fafafa"))
     "Face for obscuring/dimming icons"
     :group 'all-the-icons-faces))
+
+(setq denote-templates
+      '((biblio . "%^{title}\n\n* Abstract\n\n* Review\n")
+        (plain . nil))
+      citar-denote-template 'biblio)
+
+(use-package! citar-denote
+  :custom
+  (citar-open-always-create-notes nil)
+  :init
+  (citar-denote-mode)
+  :bind
+  (("C-c w b c" . citar-create-note)
+   ("C-c w b n" . citar-denote-open-note)
+   ("C-c w b x" . citar-denote-nocite)
+   :map org-mode-map
+   ("C-c w b k" . citar-denote-add-citekey)
+   ("C-c w b K" . citar-denote-remove-citekey)
+   ("C-c w b d" . citar-denote-dwim)
+   ("C-c w b e" . citar-denote-open-reference-entry)))
 
 (after! lsp-pyright
   ;; Configuration specific to lsp-pyright can go here if needed in the future
@@ -1021,8 +1041,48 @@ the default tab-bar name uses the buffer name."
 
  (setf (alist-get 'consult-grep embark-keymap-alist) 'embark-consult-grep-map)
 
- )
-
 ;; (use-package! magit-todos
 ;;   :after magit
 ;;   :config (magit-todos-mode 1))
+(use-package! ai-code-interface
+  :config
+  ;; (ai-code-set-backend  'ai-code-codex-cli) ;; use claude-code-ide as backend
+  (ai-code-set-backend  'claude-code) ;; use claude-code-ide as backend
+  ;; Enable global keybinding for the main menu
+  (global-set-key (kbd "C-c a") #'ai-code-menu)
+  ;; Optional: Set up Magit integration for AI commands in Magit popups
+  (with-eval-after-load 'magit
+    (ai-code-magit-setup-transients)))
+
+;; install claude-code.el, using :depth 1 to reduce download size:
+(use-package! inheritenv)
+(use-package! claude-code
+  :bind-keymap
+  ("C-c C" . claude-code-command-map) ;; or your preferred key
+  ;; Optionally define a repeat map so that "M" will cycle thru Claude auto-accept/plan/confirm modes after invoking claude-code-cycle-mode / C-c M.
+  :bind
+  (:repeat-map my-claude-code-map ("M" . claude-code-cycle-mode)))
+  :config
+  (claude-code-mode))
+
+;; for slash commands popup
+(use-package! popup :ensure t)
+(use-package! gemini-cli
+  :bind-keymap
+  ("C-c c" . gemini-cli-command-map)
+  :config
+  (gemini-cli-mode))
+
+(use-package! eat)
+(require 'shell-maker)
+
+(require 'acp)
+(require 'agent-shell)
+
+(setq agent-shell-anthropic-claude-environment
+      (agent-shell-make-environment-variables :inherit-env t))
+;; With string
+(setq agent-shell-google-authentication
+      (agent-shell-google-make-authentication :api-key (getenv "GEMINI_API_KEY")))
+(setq agent-shell-openai-authentication
+      (agent-shell-openai-make-authentication :login t))

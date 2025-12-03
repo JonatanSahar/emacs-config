@@ -361,3 +361,60 @@ Treat partially visible end-of-buffer as being at the bottom."
   "Skip `vterm-reset-cursor-point' via ORIG when sticky scrolling is active."
   (unless my/vterm-sticky-scroll
     (apply orig args)))
+
+(defun my/org-copy-image-at-point-to-clipboard ()
+  "Copy image link at point to the system clipboard on GNU/Linux.
+
+Point must be on an Org file link whose target is an image file.
+The image data is piped to an external clipboard tool (`wl-copy',
+`xclip' or `xsel')."
+  (interactive)
+  (unless (eq system-type 'gnu/linux)
+    (user-error "This command is only implemented for GNU/Linux"))
+  (unless (derived-mode-p 'org-mode)
+    (user-error "Not in an Org buffer"))
+  (require 'org)
+  (let* ((context (org-element-context)))
+    (unless (eq (org-element-type context) 'link)
+      (user-error "Point is not on an Org link"))
+    (let* ((path (org-element-property :path context))
+           (type (org-element-property :type context)))
+      (unless (and (stringp type) (string= type "file"))
+        (user-error "Link at point is not a file link"))
+      (unless (and path (> (length path) 0))
+        (user-error "File link has no path"))
+      (let* ((file (expand-file-name
+                    path
+                    (or (and buffer-file-name
+                             (file-name-directory buffer-file-name))
+                        default-directory))))
+        (unless (file-exists-p file)
+          (user-error "File does not exist: %s" file))
+        (let* ((img-type (image-type-from-file-name file)))
+          (unless img-type
+            (user-error "Not a recognized image file: %s" file))
+          (let* ((mime-type (pcase img-type
+                              ('png "image/png")
+                              ((or 'jpeg 'image-jpeg) "image/jpeg")
+                              ('gif "image/gif")
+                              ('svg "image/svg+xml")
+                              ('tiff "image/tiff")
+                              (_ "image/png")))
+                 (program (cond
+                           ((executable-find "wl-copy") "wl-copy")
+                           ((executable-find "xclip") "xclip")
+                           ((executable-find "xsel") "xsel")))
+                 (args (cond
+                        ((string= program "wl-copy")
+                         (list "--type" mime-type))
+                        ((string= program "xclip")
+                         (list "-selection" "clipboard" "-t" mime-type "-i"))
+                        ((string= program "xsel")
+                         (list "--clipboard" "--input")))))
+            (unless program
+              (user-error "No clipboard tool found (need wl-copy, xclip, or xsel)"))
+            (let ((exit-code (apply #'call-process program file nil nil args)))
+              (if (zerop exit-code)
+                  (message "Copied image to clipboard: %s" file)
+                (user-error "Failed to copy image (exit %d)" exit-code))))))))
+)

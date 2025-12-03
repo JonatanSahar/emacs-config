@@ -158,8 +158,9 @@
       :i "C-h" #'left-char
       :i "C-S-h" #'left-word
       ;; Paste with C-c prefix / C-v
-      :i "C-v" #'(lambda () (interactive) (backward-char) (evil-paste-after 1))
-      :i "C-c p" #'(lambda () (interactive) (backward-char) (evil-paste-after 1))
+      ;; :i "C-v" #'(lambda () (interactive) (backward-char) (evil-paste-after 1))
+      :i "C-v" #'evil-paste-after
+      :i "C-c p" #'evil-paste-after
       :i "C-c P" #'(lambda () (interactive) (backward-char 2) (evil-paste-after 1))
       ;; Multiple Cursors in Insert mode
       :ni "C-S-j" #'evil-mc-make-cursor-move-next-line
@@ -209,6 +210,7 @@
       :i "C-l" #'evil-window-right
       :i "C-k" #'evil-window-up
       :i "C-j" #'evil-window-down
+      :nvi "C-M-y" #'my/org-copy-image-at-point-to-clipboard
       ;; Org Structure & Elements
       :vn "zh" #'org-up-element ; Move up structurally in visual mode
       :vn "zj" #'org-forward-heading-same-level ; Move to next heading in visual mode
@@ -482,7 +484,8 @@
 
       ;; My Custom Commands ("k" prefix)
       (:prefix ("k" . "My commands")
-       :desc "aidermacs transient" "a" #'aidermacs-transient-menu
+       :desc "ai-code-assistant" "a" #'ai-code-menu
+       :desc "aidermacs transient" "A" #'aidermacs-transient-menu
        :desc "select header content" "y" #'my/visual-inside-org-header
        :desc "copy header content" "h" #'my/yank-org-headline
        ;; :desc "gptel-menu "g" #'gptel" ; Duplicate of G G?
