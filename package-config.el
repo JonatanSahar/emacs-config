@@ -839,7 +839,8 @@ the default tab-bar name uses the buffer name."
   )
 
 
-;; ai! document
+;; Utility function for Treemacs to quickly copy the name of the file or 
+;; directory at the current cursor position to the clipboard.
 (defun my/treemacs-copy-name-at-point ()
   "copy the filename or directory name at point in treemacs."
   (interactive)
