@@ -898,14 +898,15 @@ the default tab-bar name uses the buffer name."
         :i "C-;" #'my/copilot-tab-or-default
         :i "C-S-l" #'my/copilot-word-or-default))
 
+;; ai! document
 (use-package! aidermacs
   :bind (("C-c a" . aidermacs-transient-menu))
   :config
   (setq
-   aidermacs-default-model "gemini/gemini-2.5-flash"
-   aidermacs-editor-model "gemini/gemini-2.5-flash"
-   aidermacs-architect-model "gemini/gemini-2.5-flash"
-   aidermacs-weak-model "gemini/gemini-2.5-flash"
+   aidermacs-default-model "gemini/gemini-3-flash-preview"
+   aidermacs-editor-model "gemini/gemini-3-flash-preview"
+   aidermacs-architect-model "gemini/gemini-3-flash-preview"
+   aidermacs-weak-model "gemini/gemini-3-flash-preview"
    aidermacs-watch-files t
    aidermacs-backend 'vterm
    aidermacs-auto-commits t
