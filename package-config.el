@@ -1056,7 +1056,9 @@ When exiting copy-mode, restore the previous follow vs sticky-scroll state."
 ;;   :after magit
 ;;   :config (magit-todos-mode 1))
 
-;;ai! Document this
+;; `ai-code' provides a unified interface for various AI coding assistants.
+;; It allows switching between backends like Claude Code and provides
+;; integration with Magit for AI-generated commit messages and code analysis.
 (use-package! ai-code
   :ensure nil
   :config
