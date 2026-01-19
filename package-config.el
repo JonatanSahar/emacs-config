@@ -93,7 +93,11 @@
         :nvi "C-e" #'evil-end-of-line-or-visual-line
         :i "<up>" #'jupyter-repl-history-previous
         :n  "gj" #'evil-avy-goto-char-timer
-        :i "<down>" #'jupyter-repl-history-next)
+        :i "<down>" #'jupyter-repl-history-next
+        ;; Kernel disconnection commands
+        :nvi "C-c C-d" #'jupyter-repl-disconnect-kernel
+        :nvi "C-c C-S-d" #'jupyter-repl-force-disconnect-kernel
+        :nvi "C-c C-s" #'jupyter-repl-connection-status)
 
   (map! :map (python-mode-map python-ts-mode-map ess-mode-map)
         ;; Jupyter Integration
@@ -344,101 +348,101 @@ the directory.  `REST' is passed to the `CONSULT-RIPGREP-FUNCTION'."
                         ("~/Documents/notes/20240417T172124--analysis-log-spatial-pipeline__work.org" :level . 1)
                         (nil . (:maxlevel . 9)) ;; current buffer)
 
-   org-todo-keywords '(
-                       (sequence "TODO(t)" "NEXT(n)" "HOLD(h)" "SKIM(s)" "READ(r)" "NOTE(N)" "RESOURCE(R)" "|" "DONE(d)")
-                       (sequence "[ ](T)" "[-](S)" "[?](W)" "|" "[X](D)"))
+                        org-todo-keywords '(
+                                            (sequence "TODO(t)" "NEXT(n)" "HOLD(h)" "SKIM(s)" "READ(r)" "NOTE(N)" "RESOURCE(R)" "|" "DONE(d)")
+                                            (sequence "[ ](T)" "[-](S)" "[?](W)" "|" "[X](D)"))
 
-   org-agenda-block-separator " "
+                        org-agenda-block-separator " "
 
-   org-agenda-custom-commands
-   '(
-     ("o" "my agenda"
-      (
-       (todo "NEXT" (
-                     (org-agenda-overriding-header "\n⚡ Next up:\n")
-                     (org-agenda-remove-tags t)
-                     (org-agenda-prefix-format (concat "  %-2i  %t%s" ))
-                     (org-agenda-todo-keyword-format "")))
+                        org-agenda-custom-commands
+                        '(
+                          ("o" "my agenda"
+                           (
+                            (todo "NEXT" (
+                                          (org-agenda-overriding-header "\n⚡ Next up:\n")
+                                          (org-agenda-remove-tags t)
+                                          (org-agenda-prefix-format (concat "  %-2i  %t%s" ))
+                                          (org-agenda-todo-keyword-format "")))
 
-       (todo "HOLD" (
-                     (org-agenda-overriding-header "\n⚡ Stuck tasks (on HOLD):\n")
-                     (org-agenda-remove-tags t)
-                     (org-agenda-prefix-format (concat "  %-2i  %t%s" ))
-                     (org-agenda-todo-keyword-format "")))
+                            (todo "HOLD" (
+                                          (org-agenda-overriding-header "\n⚡ Stuck tasks (on HOLD):\n")
+                                          (org-agenda-remove-tags t)
+                                          (org-agenda-prefix-format (concat "  %-2i  %t%s" ))
+                                          (org-agenda-todo-keyword-format "")))
 
-       (todo "TODO|HOLD" (
-                          (org-agenda-overriding-header "\n⚡ All queued tasks:\n")
-                          (org-agenda-remove-tags t)
-                          (org-agenda-prefix-format (concat "  %-2i  %t%s" ))
-                          ;; (org-agenda-prefix-format (concat "  %-2i %-13b" ))
-                          (org-agenda-todo-keyword-format "")))
+                            (todo "TODO|HOLD" (
+                                               (org-agenda-overriding-header "\n⚡ All queued tasks:\n")
+                                               (org-agenda-remove-tags t)
+                                               (org-agenda-prefix-format (concat "  %-2i  %t%s" ))
+                                               ;; (org-agenda-prefix-format (concat "  %-2i %-13b" ))
+                                               (org-agenda-todo-keyword-format "")))
 
-       (todo "READ" (
-                     (org-agenda-overriding-header "\n⚡ Reading list:\n")
-                     (org-agenda-remove-tags t)
-                     (org-agenda-prefix-format (concat "  %-2i  %t%s" ))
-                     (org-agenda-todo-keyword-format "")))
+                            (todo "READ" (
+                                          (org-agenda-overriding-header "\n⚡ Reading list:\n")
+                                          (org-agenda-remove-tags t)
+                                          (org-agenda-prefix-format (concat "  %-2i  %t%s" ))
+                                          (org-agenda-todo-keyword-format "")))
 
-       (todo "RESOURCE" (
-                         (org-agenda-overriding-header "\n⚡ Resource list:\n")
-                         (org-agenda-remove-tags t)
-                         (org-agenda-prefix-format (concat "  %-2i  %t%s" ))
-                         (org-agenda-todo-keyword-format "")))
-       (agenda "" (
-                   (org-agenda-overriding-header "⚡ Schedule:\n")
-                   (org-agenda-start-day "+0d")
-                   (org-agenda-span 5)
-                   (org-agenda-remove-tags t)
-                   (org-agenda-prefix-format   (concat "  %-3i  %t%s"))
-                   (org-agenda-current-time-string "⟸ now")
-                   (org-agenda-scheduled-leaders '("" ""))
-                   (org-agenda-time-grid (quote ((daily today remove-match)
-                                                 (0900 1200 1800 2100)
-                                                 "      " "┈┈┈┈┈┈┈┈┈┈┈┈┈")))))
-       )
-      )
+                            (todo "RESOURCE" (
+                                              (org-agenda-overriding-header "\n⚡ Resource list:\n")
+                                              (org-agenda-remove-tags t)
+                                              (org-agenda-prefix-format (concat "  %-2i  %t%s" ))
+                                              (org-agenda-todo-keyword-format "")))
+                            (agenda "" (
+                                        (org-agenda-overriding-header "⚡ Schedule:\n")
+                                        (org-agenda-start-day "+0d")
+                                        (org-agenda-span 5)
+                                        (org-agenda-remove-tags t)
+                                        (org-agenda-prefix-format   (concat "  %-3i  %t%s"))
+                                        (org-agenda-current-time-string "⟸ now")
+                                        (org-agenda-scheduled-leaders '("" ""))
+                                        (org-agenda-time-grid (quote ((daily today remove-match)
+                                                                      (0900 1200 1800 2100)
+                                                                      "      " "┈┈┈┈┈┈┈┈┈┈┈┈┈")))))
+                            )
+                           )
 
-     ("l" "literature"
-      (
-       (todo "SKIM" (
-                     (org-agenda-overriding-header "\n⚡ Next to skim:\n")
-                     (org-agenda-remove-tags t)
-                     (org-agenda-prefix-format (concat " %b  %-2i  %t%s" ))
-                     ;; (org-agenda-prefix-format "  %?-12t% s")
-                     (org-agenda-todo-keyword-format "")))
-       (todo "READ" (
-                     (org-agenda-overriding-header "\n⚡ Next to read:\n")
-                     (org-agenda-remove-tags t)
-                     ;; (org-agenda-prefix-format "  %?-12t% s")
-                     (org-agenda-prefix-format (concat " %b  %-2i  %t%s" ))
-                     (org-agenda-todo-keyword-format "")))
-       )
-      )
+                          ("l" "literature"
+                           (
+                            (todo "SKIM" (
+                                          (org-agenda-overriding-header "\n⚡ Next to skim:\n")
+                                          (org-agenda-remove-tags t)
+                                          (org-agenda-prefix-format (concat " %b  %-2i  %t%s" ))
+                                          ;; (org-agenda-prefix-format "  %?-12t% s")
+                                          (org-agenda-todo-keyword-format "")))
+                            (todo "READ" (
+                                          (org-agenda-overriding-header "\n⚡ Next to read:\n")
+                                          (org-agenda-remove-tags t)
+                                          ;; (org-agenda-prefix-format "  %?-12t% s")
+                                          (org-agenda-prefix-format (concat " %b  %-2i  %t%s" ))
+                                          (org-agenda-todo-keyword-format "")))
+                            )
+                           )
 
 
-     )
+                          )
 
-   org-capture-templates '(
-                           ("t" "Todo"
-                            entry
-                            (file org-capture-inbox-file )
-                            "* TODO %? %i")
+                        org-capture-templates '(
+                                                ("t" "Todo"
+                                                 entry
+                                                 (file org-capture-inbox-file )
+                                                 "* TODO %? %i")
 
-                           ("T" "Todo with link"
-                            entry
-                            (file+headline org-capture-inbox-file "Tasks")
-                            "* TODO %? %i\n** source: %l")
+                                                ("T" "Todo with link"
+                                                 entry
+                                                 (file+headline org-capture-inbox-file "Tasks")
+                                                 "* TODO %? %i\n** source: %l")
 
-                           ("m" "Microdosing journal entry"
-                            entry
-                            (file org-capture-microdosing-journal-file)
-                            ;; (concat "* " (format-time-string "%Y%m%d")))
-                            "* %^{תאריך}, %^{יום בשבוע}, %^{שעה}")
+                                                ("m" "Microdosing journal entry"
+                                                 entry
+                                                 (file org-capture-microdosing-journal-file)
+                                                 ;; (concat "* " (format-time-string "%Y%m%d")))
+                                                 "* %^{תאריך}, %^{יום בשבוע}, %^{שעה}")
 
-                           ("p" "Paper ref to read "
-                            entry
-                            (file org-capture-papers-file)
-                            "* SKIM %^{title?|%i}
+                                                ("p" "Paper ref to read "
+                                                 entry
+                                                 (file org-capture-papers-file)
+                                                 "* SKIM %^{title?|%i}
 - link/cite: %^{link/DOI?}
 - type of paper: %^{type?|study|review|theoretical|theory & study}
 - why read it?
@@ -447,22 +451,22 @@ the directory.  `REST' is passed to the `CONSULT-RIPGREP-FUNCTION'."
 
 %^{a short summary?}"
 
-                            :empty-lines-after 1)
+                                                 :empty-lines-after 1)
 
-                           ;;                          ("n" "Note"
-                           ;;                           entry
-                           ;;                           (file+headline org-capture-writing-inbox-file "Notes")
-                           ;;                           "* NOTE %? \n")
+                                                ;;                          ("n" "Note"
+                                                ;;                           entry
+                                                ;;                           (file+headline org-capture-writing-inbox-file "Notes")
+                                                ;;                           "* NOTE %? \n")
 
-                           ;;                          ("j" "Journal entry" entry (function org-journal-find-location)
-                           ;;                           "* %(format-time-string org-journal-time-format)%^{Title}\n%i%?")
-                           ;;
-                           ("i" "Interesting things"
-                            entry
-                            (file+headline org-capture-someday-file "To read/watch")
-                            "** %? :bucket_list:\n")
-                           )
-   ))
+                                                ;;                          ("j" "Journal entry" entry (function org-journal-find-location)
+                                                ;;                           "* %(format-time-string org-journal-time-format)%^{Title}\n%i%?")
+                                                ;;
+                                                ("i" "Interesting things"
+                                                 entry
+                                                 (file+headline org-capture-someday-file "To read/watch")
+                                                 "** %? :bucket_list:\n")
+                                                )
+                        ))
 
   (setq org-format-latex-options
         (quote
@@ -730,52 +734,32 @@ the default tab-bar name uses the buffer name."
 (use-package! gptel
   :init
   :config
-  (setq gptel-api-key (getenv "OPENAI_API_KEY")
-        gptel-use-curl 'nil
-        gptel-stream nil
-        gptel-default-mode 'org-mode)
+  (setq
+   gptel-model 'gemini:gemini-flash-latest
+   gptel-backend (gptel-make-gemini "Gemini"
+                   :key (getenv "GEMINI_API_KEY")
+                   :stream t))
 
-  (setq! gptel-directives
-         '(
-           (default   . "you are a large language model and a helpful assistant. answer the user’s questions accurately and concisely.")
-           (programming . "you are a language model with expert programming knowledge. provide clean, correct code solutions with minimal commentary")
-           (writing   . "you are a skilled writing assistant. help improve text for clarity, style, and correctness. respond succinctly and to the point.")
-           (chat      . "you are a friendly conversational partner and knowledgeable assistant. engage naturally and helpfully in conversation, keeping your responses concise.")
-
-           (refactor  . "your primary task is to produce code for in-place refactoring with modifications based on the included request. you are to do this with precise line number ranges. follow these instructions meticulously:\n1. carefully analyze the original code, paying close attention to its structure and line numbers. line numbers start from 1 and include all lines, even empty ones.\n2. when suggesting modifications include all of the code supplied, with the relevant changes applied.\nb. provide the exact code snippet to be replaced without enclosing it in a code block\n3. crucial guidelines for suggested code snippets:\n- only apply the change(s) suggested by the most recent assistant message (before your generation).\n- do not make any unrelated changes to the code.\n- produce a valid full rewrite of the entire original code without skipping any lines. do not be lazy!\n- do not arbitrarily delete pre-existing comments/empty lines.\n- do not omit large parts of the original file for no reason.\n- do not omit any needed changes from the requisite messages/code blocks.\n- if there is a clicked code block, bias towards just applying that (and applying other changes implied).\n- please keep your suggested code changes minimal, and do not include irrelevant lines in the code snippet.\n- maintain the same indentation in the returned code as in the source code\n4. final check:\n- review all suggestions, ensuring each line number is correct, especially the start_line and end_line.\n- confirm that no unrelated code is accidentally modified or deleted.\n- verify that the start_line and end_line correctly include all intended lines for replacement.\n- perform a final alignment check to ensure your line numbers haven't shifted, especially the start_line.\n- double-check that your line numbers align perfectly with the original code structure.\n- do not show the full content after these modifications.\nremember: accurate line numbers are critical. the range start_line to end_line must include all lines to be replaced, from the very first to the very last. double-check every range before finalizing your response, paying special attention to the start_line to ensure it hasn't shifted down. ensure that your line numbers perfectly match the original code structure without any overall shift.\nfinally, make sure to output only code, as text, without code block fences or anything, perfectly prepared for insertion into the original code.")
-
-           (rewrite   . "you are a language model with expert programming knowledge. provide clean, correct code solutions with minimal commentary; output code and only code, do not add code fences e.g. python ''' ''' around the code.")
-           ))
-
-(gptel-make-gemini "gemini" :key (getenv "GEMINI_API_KEY"):stream t)
+  )
+(setq gptel-api-key (getenv "OPENAI_API_KEY")
+      gptel-use-curl 'nil
+      gptel-stream nil
+      gptel-default-mode 'org-mode)
 
 (gptel-make-anthropic "claude"          ;any name you want
   :stream t                             ;streaming responses
   :key(getenv "ANTHROPIC_API_KEY"))
 
-;; github models offers an openai compatible api
-(gptel-make-openai "github models" ;any name you want
-  :host "models.inference.ai.azure.com"
-  :endpoint "/chat/completions?api-version=2024-05-01-preview"
+(gptel-make-ollama "ollama-local"
+  :host "localhost:11434"
   :stream t
-  :key(getenv "GITHUB_API_KEY")
-  :models '(deepseek-v3 codestral-2501 cohere-command-r-08-2024))
+  ;; :endpoint "/api/generate"
+  :models '(phi4:latest qwen2.5-coder:32b deepseek-r1:32b))
 
-  (gptel-make-ollama "ollama"
-    :host "localhost:11434"
-    :stream t
-    ;; :endpoint "/api/generate"
-    :models '(phi4:latest qwen2.5-coder:32b deepseek-r1:32b))
+(setq gptel-org-branching-context t)
 
-  (gptel-make-ollama "ollama-local"
-    :host "localhost:11434"
-    :stream t
-    ;; :endpoint "/api/generate"
-    :models '(phi4:latest qwen2.5-coder:32b deepseek-r1:32b))
-
-  (setq gptel-model 'gemini:gemini-2.5-flash)
-
-  )
+(setf (alist-get 'org-mode gptel-prompt-prefix-alist) "@user\n")
+(setf (alist-get 'org-mode gptel-response-prefix-alist) "@assistant\n")
 
 
 (use-package! org-download
@@ -889,7 +873,7 @@ the default tab-bar name uses the buffer name."
   ;;             ("TAB" . 'copilot-accept-completion)
   ;;             ("C-TAB" . 'copilot-accept-completion-by-word)
   ;;             ("C-<TAB>" . 'copilot-accept-completion-by-word))
-             )
+  )
 
 (after! (evil copilot)
   ;; Define the custom function that either accepts the completion or does the default behavior
@@ -917,8 +901,8 @@ the default tab-bar name uses the buffer name."
 (use-package! aidermacs
   :bind (("C-c a" . aidermacs-transient-menu))
   :config
-   (setq
-    aidermacs-default-model "gemini/gemini-2.5-flash"
+  (setq
+   aidermacs-default-model "gemini/gemini-2.5-flash"
    aidermacs-editor-model "gemini/gemini-2.5-flash"
    aidermacs-architect-model "gemini/gemini-2.5-flash"
    aidermacs-weak-model "gemini/gemini-2.5-flash"
@@ -941,13 +925,21 @@ the default tab-bar name uses the buffer name."
 
 
 (after! python
-  :config
   (require 'eglot)
   (setq python-check-command "ruff check"))
-  ;; Run jupytext on save for Python files
-  ;; (add-hook 'python-mode-hook
-  ;;           (lambda ()
-  ;;             (add-hook 'after-save-hook #'my/run-jupytext-on-save nil t))))
+;; Run jupytext on save for Python files
+;; (add-hook 'python-mode-hook
+;;           (lambda ()
+;;             (add-hook 'after-save-hook #'my/run-jupytext-on-save nil t))))
+
+(after! format
+  (setq +format-on-save-enabled-modes '(prog-mode))
+  (set-formatter! 'ruff-format
+    '("ruff" "format" "--stdin-filename" "%file" "-")
+    :modes '(python-mode python-ts-mode)))
+
+(after! flycheck
+  (setq flycheck-check-syntax-automatically '(save mode-enabled)))
 
 (use-package! drag-stuff
   :defer t
@@ -969,16 +961,31 @@ the default tab-bar name uses the buffer name."
              :jedi_completion (:enabled t))))
 
           (:pyright .
-           (:typeCheckingMode "off"
-            :disableLanguageServices :json-true
-            :disableOrganizeImports :json-false)))))
-
-(use-package! python-black
-  :after python
-  :hook (python-mode . python-black-on-save-mode-enable-dwim))
+                    (:typeCheckingMode "off"
+                     :disableLanguageServices :json-true
+                     :disableOrganizeImports :json-false)))))
 
 (use-package! vterm
   :config
+  (defvar-local my/vterm--copy-mode-prev-sticky-scroll nil
+    "Saved value of `my/vterm-sticky-scroll' before entering `vterm-copy-mode'.")
+
+  (defun my/vterm-copy-mode-toggle ()
+    "Toggle `vterm-copy-mode'.
+
+When exiting copy-mode, restore the previous follow vs sticky-scroll state."
+    (interactive)
+    (unless (derived-mode-p 'vterm-mode)
+      (user-error "Not in a vterm buffer"))
+    (if (bound-and-true-p vterm-copy-mode)
+        (progn
+          (vterm-copy-mode -1)
+          (if my/vterm--copy-mode-prev-sticky-scroll
+              (setq my/vterm-sticky-scroll t)
+            (my/vterm-resume-follow)))
+      (setq my/vterm--copy-mode-prev-sticky-scroll my/vterm-sticky-scroll)
+      (vterm-copy-mode 1)))
+
   (add-hook 'vterm-mode-hook #'my/vterm-enable-sticky-scroll)
   (unless (advice-member-p #'my/vterm--skip-reset-when-sticky 'vterm-reset-cursor-point)
     (advice-add 'vterm-reset-cursor-point :around #'my/vterm--skip-reset-when-sticky))
@@ -986,9 +993,13 @@ the default tab-bar name uses the buffer name."
         :i "C-j" (kbd "<down>")
         :i "C-k" (kbd "<up>")
         :i "C-z" #'evil-emacs-state
+        :nvi "C-c C-t" #'vterm-copy-mode
+        :nvi "C-c C-u" #'vterm-copy-mode
         :nvi "C-c C-b" #'my/vterm-resume-follow)
-  ;; (add-hook! vterm-mode #'evil-emacs-state)
-)
+  (map! :map vterm-copy-mode-map
+        "q" #'my/vterm-resume-follow
+        "C-c C-u" #'my/vterm-copy-mode-toggle)
+  )
 
 ;; (use-package! corfu-candidate-overlay
 ;;   :after corfu
@@ -1020,36 +1031,40 @@ the default tab-bar name uses the buffer name."
   (magit-gptcommit-status-buffer-setup))
 
 (use-package! embark
-:config
- (defun copy-grep-results-as-kill (strings)
-   (embark-copy-as-kill
-    (mapcar (lambda (string)
-              (substring string
-                         (1+ (next-single-property-change
-                              (1+ (next-single-property-change 0 'face string))
-                              'face string))))
-            strings)))
+  :config
+  (defun copy-grep-results-as-kill (strings)
+    (embark-copy-as-kill
+     (mapcar (lambda (string)
+               (substring string
+                          (1+ (next-single-property-change
+                               (1+ (next-single-property-change 0 'face string))
+                               'face string))))
+             strings)))
 
- (add-to-list 'embark-multitarget-actions 'copy-grep-results-as-kill)
+  (add-to-list 'embark-multitarget-actions 'copy-grep-results-as-kill)
 
- (defvar embark-consult-grep-map
-   (let ((map (make-sparse-keymap)))
-     (define-key map (kbd "w") #'copy-grep-results-as-kill)
-     map)
-   "Keymap for actions for consult-grep results."
-   )
+  (defvar embark-consult-grep-map
+    (let ((map (make-sparse-keymap)))
+      (define-key map (kbd "w") #'copy-grep-results-as-kill)
+      map)
+    "Keymap for actions for consult-grep results."
+    )
 
- (setf (alist-get 'consult-grep embark-keymap-alist) 'embark-consult-grep-map)
+  (setf (alist-get 'consult-grep embark-keymap-alist) 'embark-consult-grep-map))
 
 ;; (use-package! magit-todos
 ;;   :after magit
 ;;   :config (magit-todos-mode 1))
-(use-package! ai-code-interface
+
+;;ai! Document this
+(use-package! ai-code
+  :ensure nil
   :config
-  ;; (ai-code-set-backend  'ai-code-codex-cli) ;; use claude-code-ide as backend
   (ai-code-set-backend  'claude-code) ;; use claude-code-ide as backend
   ;; Enable global keybinding for the main menu
   (global-set-key (kbd "C-c a") #'ai-code-menu)
+  (setq claude-code-terminal-backend 'vterm)
+  ;; (setq claude-code-terminal-backend 'eat)
   ;; Optional: Set up Magit integration for AI commands in Magit popups
   (with-eval-after-load 'magit
     (ai-code-magit-setup-transients)))
@@ -1062,8 +1077,12 @@ the default tab-bar name uses the buffer name."
   ;; Optionally define a repeat map so that "M" will cycle thru Claude auto-accept/plan/confirm modes after invoking claude-code-cycle-mode / C-c M.
   :bind
   (:repeat-map my-claude-code-map ("M" . claude-code-cycle-mode)))
-  :config
-  (claude-code-mode))
+:config
+(add-hook 'claude-code-process-environment-functions
+          (lambda (claude-buffer-name directory)
+            '("ANTHROPIC_BASE_URL=http://0.0.0.0:4000"
+              "ANTHROPIC_API_KEY=sk-ant-dummy")))
+(claude-code-mode)
 
 ;; for slash commands popup
 (use-package! popup :ensure t)
@@ -1086,3 +1105,9 @@ the default tab-bar name uses the buffer name."
       (agent-shell-google-make-authentication :api-key (getenv "GEMINI_API_KEY")))
 (setq agent-shell-openai-authentication
       (agent-shell-openai-make-authentication :login t))
+
+(use-package! logview)
+(use-package! aider
+  :config
+  (setq aider-args '("--model" "gemini/gemini-3-flash-preview"))
+  (require 'aider-doom))
