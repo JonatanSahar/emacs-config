@@ -839,6 +839,7 @@ the default tab-bar name uses the buffer name."
   )
 
 
+;; ai! document
 (defun my/treemacs-copy-name-at-point ()
   "copy the filename or directory name at point in treemacs."
   (interactive)
@@ -898,7 +899,9 @@ the default tab-bar name uses the buffer name."
         :i "C-;" #'my/copilot-tab-or-default
         :i "C-S-l" #'my/copilot-word-or-default))
 
-;; ai! document
+;; `aidermacs' provides an Emacs interface for the Aider AI pair programming tool.
+;; It allows for seamless interaction with Aider within Emacs buffers,
+;; supporting various LLM backends and providing a transient menu for common tasks.
 (use-package! aidermacs
   :bind (("C-c a" . aidermacs-transient-menu))
   :config
