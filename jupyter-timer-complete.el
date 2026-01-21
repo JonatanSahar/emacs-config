@@ -48,17 +48,28 @@
 (defvar-local jupyter-repl--previous-execution-state nil
   "Previous execution state for detecting transitions.")
 
+(defun jupyter-timer--with-associated-buffers (client fn)
+  "Call FN in each buffer associated with CLIENT."
+  (if (fboundp 'jupyter-repl--with-associated-buffers)
+      (jupyter-repl--with-associated-buffers client fn)
+    (when (and client (object-of-class-p client 'jupyter-repl-client))
+      (let ((repl-buffer (oref client buffer)))
+        (when (buffer-live-p repl-buffer)
+          (with-current-buffer repl-buffer
+            (funcall fn)))))))
+
 ;; Override the jupyter-handle-status method with proper state tracking and error handling
 (cl-defmethod jupyter-handle-status ((client jupyter-repl-client) req msg)
   (condition-case err
-      (let* ((old-state (or jupyter-repl--previous-execution-state
-                            (jupyter-execution-state client)))
+      (let* ((stored-state (jupyter-with-repl-buffer client
+                             jupyter-repl--previous-execution-state))
+             (old-state (or stored-state "idle"))
              ;; Check if msg is valid before trying to use it
              (new-state (if (and msg (not (vectorp msg)))
                             (jupyter-with-message-content msg (execution_state)
                               execution_state)
-                          ;; If msg is invalid/vector, try to get state from client or ignore
-                          (or old-state "idle"))))
+                          ;; If msg is invalid/vector, use prior state
+                          old-state)))
 
         ;; Only proceed if we have valid states
         (when (and old-state new-state)
@@ -67,14 +78,15 @@
            ;; Transition to busy - start timer
            ((and (equal new-state "busy")
                  (not (equal old-state "busy")))
-            (jupyter-with-repl-buffer client
-              (jupyter-repl--on-execution-start)))
+            (jupyter-timer--with-associated-buffers
+             client #'jupyter-repl--on-execution-start))
 
            ;; Transition to idle - stop timer
            ((and (equal new-state "idle")
                  (equal old-state "busy"))
-            (jupyter-with-repl-buffer client
-              (jupyter-repl--on-execution-complete t))))
+            (jupyter-timer--with-associated-buffers
+             client (lambda ()
+                      (jupyter-repl--on-execution-complete t)))))
 
           ;; Store current state for next time
           (jupyter-with-repl-buffer client
@@ -94,29 +106,38 @@
      (message "Error in jupyter-handle-status: %s (msg type: %s)"
               err (type-of msg))))
 
-  (force-mode-line-update))
+  (jupyter-timer--with-associated-buffers client #'force-mode-line-update))
 
 ;; Protect execute-reply as well, just in case
 (cl-defmethod jupyter-handle-execute-reply ((client jupyter-repl-client) req msg)
   (condition-case err
-      (jupyter-with-message-content msg (status)
-        (if (equal status "error")
-            (jupyter-with-repl-buffer client
-              (jupyter-repl--on-execution-complete nil))
+      (jupyter-with-message-content msg (status payload)
+        (let ((completion-status (if (equal status "ok") 'success 'error)))
+          (jupyter-timer--with-associated-buffers
+           client
+           (lambda ()
+             (when (and jupyter-repl--completion-timestamp
+                        (< (- (float-time) jupyter-repl--completion-timestamp) 0.5))
+               (setq jupyter-repl--last-completion-status completion-status)
+               (force-mode-line-update)))))
+        (when payload
           (jupyter-with-repl-buffer client
-            (jupyter-repl--on-execution-complete t))))
+            (jupyter-handle-payload payload))))
     (error
      (message "Error in jupyter-handle-execute-reply: %s" err))))
 
 (message "  ✓ Patched handlers with error protection")
 
 ;; Redefine the timer function with safety wrapper
-(defun jupyter-repl--update-execution-display ()
+(defun jupyter-repl--update-execution-display (buffer)
   "Called by timer to update modeline during execution."
   (condition-case err
-      (when (and (derived-mode-p 'jupyter-repl-mode)
-                 jupyter-repl--execution-start-time)
-        (force-mode-line-update))
+      (when (buffer-live-p buffer)
+        (with-current-buffer buffer
+          (when (and jupyter-repl--execution-start-time
+                     (or (derived-mode-p 'jupyter-repl-mode)
+                         jupyter-repl-interaction-mode))
+            (force-mode-line-update))))
     (error
      (message "Error in timer update: %s" err))))
 
@@ -134,14 +155,18 @@
      " Jupyter[Error]")))
 
 (defun jupyter-timer-display ()
-  "Display jupyter status from associated REPL buffer."
+  "Display jupyter status in the current buffer when possible."
   (condition-case err
-      (when (and (boundp 'jupyter-current-client)
-                 jupyter-current-client)
+      (cond
+       ((or (derived-mode-p 'jupyter-repl-mode)
+            (bound-and-true-p jupyter-repl-interaction-mode))
+        (jupyter-safe-interaction-mode-line))
+       ((and (boundp 'jupyter-current-client)
+             jupyter-current-client)
         (let ((repl-buf (oref jupyter-current-client buffer)))
           (when (buffer-live-p repl-buf)
             (with-current-buffer repl-buf
-              (jupyter-safe-interaction-mode-line)))))
+              (jupyter-safe-interaction-mode-line))))))
     (error
      (message "Error in display function: %s" err)
      " Jupyter[?]")))
@@ -182,7 +207,8 @@
 (let ((cleared-count 0))
   (dolist (buf (buffer-list))
     (with-current-buffer buf
-      (when (derived-mode-p 'jupyter-repl-mode)
+      (when (or (derived-mode-p 'jupyter-repl-mode)
+                (bound-and-true-p jupyter-repl-interaction-mode))
         ;; Stop timer
         (when (and (boundp 'jupyter-repl--execution-timer)
                    jupyter-repl--execution-timer)
@@ -197,7 +223,7 @@
           (setq jupyter-repl--completion-timestamp nil))
         (setq jupyter-repl--previous-execution-state nil)
         (setq cleared-count (1+ cleared-count)))))
-  (message "  ✓ Cleared %d REPL buffer(s)" cleared-count))
+  (message "  ✓ Cleared %d buffer(s)" cleared-count))
 
 (message "")
 (message "[6/6] Applying to existing buffers...")
@@ -260,7 +286,8 @@
   (let ((cleared-count 0))
     (dolist (buf (buffer-list))
       (with-current-buffer buf
-        (when (derived-mode-p 'jupyter-repl-mode)
+        (when (or (derived-mode-p 'jupyter-repl-mode)
+                  (bound-and-true-p jupyter-repl-interaction-mode))
           (when (and (boundp 'jupyter-repl--execution-timer)
                      jupyter-repl--execution-timer)
             (cancel-timer jupyter-repl--execution-timer)
@@ -274,7 +301,7 @@
           (setq jupyter-repl--previous-execution-state nil)
           (setq cleared-count (1+ cleared-count)))))
     (force-mode-line-update t)
-    (message "✓ Cleared timer state in %d REPL buffer(s)" cleared-count)))
+    (message "✓ Cleared timer state in %d buffer(s)" cleared-count)))
 
 ;;; Troubleshooting function
 
@@ -318,22 +345,23 @@
           (setq jupyter-repl--execution-start-time (float-time))
           (unless jupyter-repl--execution-timer
             (setq jupyter-repl--execution-timer
-                  (run-at-time 0.5 0.5 #'jupyter-repl--update-execution-display))))
+                  (run-at-time 0.5 0.5 #'jupyter-repl--update-execution-display
+                               (current-buffer))))))
 
-        (force-mode-line-update t)
-        (sit-for 0.1)
+      (force-mode-line-update t)
+      (sit-for 0.1)
 
-        (message "")
-        (message "Display should now show: %S" (jupyter-timer-display))
-        (message "")
-        (message "✓ Check the HEADER-LINE at the top of this window!")
-        (message "  It should show: Jupyter ⏳ X.Xs")
-        (message "")
-        (message "If you don't see anything:")
-        (message "  1. Look at the very TOP of the window (header-line)")
-        (message "  2. Make sure header-line-format is set:")
-        (message "     M-: header-line-format")
-        (message "  3. Check if it returns the :eval form")))))
+      (message "")
+      (message "Display should now show: %S" (jupyter-timer-display))
+      (message "")
+      (message "✓ Check the HEADER-LINE at the top of this window!")
+      (message "  It should show: Jupyter ⏳ X.Xs")
+      (message "")
+      (message "If you don't see anything:")
+      (message "  1. Look at the very TOP of the window (header-line)")
+      (message "  2. Make sure header-line-format is set:")
+      (message "     M-: header-line-format")
+      (message "  3. Check if it returns the :eval form"))))
 
 ;;; Make it permanent (optional)
 
