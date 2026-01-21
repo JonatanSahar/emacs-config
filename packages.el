@@ -72,7 +72,7 @@
 (package! zmq)
 
 (package! code-cells
-:recipe (:host github :repo "astoff/code-cells.el" :files ("*.el")))
+  :recipe (:host github :repo "astoff/code-cells.el" :files ("*.el")))
 (package! elysium
   :recipe (:host github :repo "lanceberge/elysium" :files ("*.el"))
   )
@@ -81,37 +81,38 @@
 (package! copilot-chat
   :recipe (:host github :repo "chep/copilot-chat.el" :files ("*.el")))
 (package! aidermac
-:recipe (:host github :repo "MatthewZMD/aidermacs" :files ("*.el")))
+  :recipe (:host github :repo "MatthewZMD/aidermacs" :files ("*.el")))
 (package! magit-gptcommit)
 (package! magit-todos)
 
 (package! highlight-thing)
 (package! dwim-shell-command)
 (package! drag-stuff)
-(package! python-black)
 (package! corfu-candidate-overlay)
 (package! spacious-padding)
 (package! aidermacs)
 (package! eat
   :recipe (:type git
-                   :host codeberg
-                   :repo "akib/emacs-eat"
-                   :files ("*.el" ("term" "term/*.el") "*.texi"
-                           "*.ti" ("terminfo/e" "terminfo/e/*")
-                           ("terminfo/65" "terminfo/65/*")
-                           ("integration" "integration/*")
-                           (:exclude ".dir-locals.el" "*-tests.el"))))
+           :host codeberg
+           :repo "akib/emacs-eat"
+           :files ("*.el" ("term" "term/*.el") "*.texi"
+                   "*.ti" ("terminfo/e" "terminfo/e/*")
+                   ("terminfo/65" "terminfo/65/*")
+                   ("integration" "integration/*")
+                   (:exclude ".dir-locals.el" "*-tests.el"))))
 (package! ai-code-interface
   :recipe (:host github :repo  "tninja/ai-code-interface.el":files ("*.el")))
+(package! aider :recipe (:host github :repo "tninja/aider.el" ))
 (package! inheritenv
   :recipe (:type git :host github :repo "purcell/inheritenv"))
 (package! claude-code
   :recipe (:type git :host github :repo "stevemolitor/claude-code.el" :branch "main" :depth 1
-                   :files ("*.el" (:exclude "images/*"))))
+           :files ("*.el" (:exclude "images/*"))))
 (package! popup)
 (package! gemini-cli
   :recipe (:type git :host github :repo "linchen2chris/gemini-cli.el" :branch "main"
-                   :files ("*.el" (:exclude "demo.gif"))))
+           :files ("*.el" (:exclude "demo.gif"))))
 (package! shell-maker)
 (package! acp)
 (package! agent-shell)
+(package! logview)

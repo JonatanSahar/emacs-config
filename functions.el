@@ -163,6 +163,136 @@
                            '((reusable-frames . t)
                              (inhibit-switch-frame . nil))))))
 
+;; Jupyter cell execution status (per buffer)
+(defface my/jupyter-cell-status-running
+  '((t :inherit warning))
+  "Face for running Jupyter cell status.")
+
+(defface my/jupyter-cell-status-done
+  '((t :inherit success))
+  "Face for completed Jupyter cell status.")
+
+(defface my/jupyter-cell-status-idle
+  '((t :inherit shadow))
+  "Face for idle Jupyter cell status.")
+
+(defvar-local my/jupyter-cell-status--overlay nil)
+(defvar-local my/jupyter-cell-status--requests nil)
+(defvar-local my/jupyter-cell-status--pending 0)
+(defvar-local my/jupyter-cell-status--last-start nil)
+(defvar-local my/jupyter-cell-status--last-finish nil)
+(defvar-local my/jupyter-cell-status--timer nil)
+(defvar-local my/jupyter-cell-status--cleanup-hook-added nil)
+
+(defun my/jupyter-cell-status--ensure-overlay ()
+  (unless (overlayp my/jupyter-cell-status--overlay)
+    (setq my/jupyter-cell-status--overlay (make-overlay (point-min) (point-min) nil t t))
+    (overlay-put my/jupyter-cell-status--overlay 'priority 9999)
+    (overlay-put my/jupyter-cell-status--overlay 'evaporate t))
+  (move-overlay my/jupyter-cell-status--overlay (point-min) (point-min))
+  (unless my/jupyter-cell-status--cleanup-hook-added
+    (add-hook 'kill-buffer-hook #'my/jupyter-cell-status--cleanup nil t)
+    (setq my/jupyter-cell-status--cleanup-hook-added t)))
+
+(defun my/jupyter-cell-status--format-elapsed (start-time)
+  (when start-time
+    (let* ((elapsed (float-time (time-subtract (current-time) start-time)))
+           (total (max 0 (floor elapsed)))
+           (minutes (/ total 60))
+           (seconds (% total 60))
+           (hours (/ minutes 60))
+           (minutes (% minutes 60)))
+      (if (> hours 0)
+          (format "%dh%02dm%02ds" hours minutes seconds)
+        (format "%02dm%02ds" minutes seconds)))))
+
+(defun my/jupyter-cell-status--format-line ()
+  (cond
+   ((> my/jupyter-cell-status--pending 0)
+    (let* ((count (if (> my/jupyter-cell-status--pending 1)
+                      (format " (%d)" my/jupyter-cell-status--pending)
+                    ""))
+           (elapsed (my/jupyter-cell-status--format-elapsed
+                     my/jupyter-cell-status--last-start))
+           (elapsed-suffix (if elapsed (format " %s" elapsed) "")))
+      (format "Jupyter: running%s%s\n" count elapsed-suffix)))
+   (my/jupyter-cell-status--last-finish
+    (format "Jupyter: done at %s\n"
+            (format-time-string "%H:%M:%S" my/jupyter-cell-status--last-finish)))
+   (t
+    "Jupyter: idle\n")))
+
+(defun my/jupyter-cell-status--update ()
+  (my/jupyter-cell-status--ensure-overlay)
+  (let* ((text (my/jupyter-cell-status--format-line))
+         (face (cond
+                ((> my/jupyter-cell-status--pending 0) 'my/jupyter-cell-status-running)
+                (my/jupyter-cell-status--last-finish 'my/jupyter-cell-status-done)
+                (t 'my/jupyter-cell-status-idle))))
+    (overlay-put my/jupyter-cell-status--overlay
+                 'before-string
+                 (propertize text 'face face))))
+
+(defun my/jupyter-cell-status--ensure-timer ()
+  (unless (timerp my/jupyter-cell-status--timer)
+    (setq my/jupyter-cell-status--timer
+          (run-with-timer 1 1 #'my/jupyter-cell-status--tick (current-buffer)))))
+
+(defun my/jupyter-cell-status--stop-timer ()
+  (when (timerp my/jupyter-cell-status--timer)
+    (cancel-timer my/jupyter-cell-status--timer)
+    (setq my/jupyter-cell-status--timer nil)))
+
+(defun my/jupyter-cell-status--prune-requests ()
+  (let (pending)
+    (dolist (req my/jupyter-cell-status--requests)
+      (when (and req (not (jupyter-request-idle-p req)))
+        (push req pending)))
+    (setq my/jupyter-cell-status--requests (nreverse pending))
+    (setq my/jupyter-cell-status--pending (length my/jupyter-cell-status--requests))))
+
+(defun my/jupyter-cell-status--tick (buffer)
+  (when (buffer-live-p buffer)
+    (with-current-buffer buffer
+      (let ((was-running (> my/jupyter-cell-status--pending 0)))
+        (when my/jupyter-cell-status--requests
+          (my/jupyter-cell-status--prune-requests))
+        (when (and was-running (zerop my/jupyter-cell-status--pending))
+          (setq my/jupyter-cell-status--last-finish (current-time))
+          (my/jupyter-cell-status--stop-timer))
+        (my/jupyter-cell-status--update)))))
+
+(defun my/jupyter-cell-status--start (req buffer)
+  (when (buffer-live-p buffer)
+    (with-current-buffer buffer
+      (setq my/jupyter-cell-status--requests
+            (cons req my/jupyter-cell-status--requests))
+      (setq my/jupyter-cell-status--pending (length my/jupyter-cell-status--requests))
+      (setq my/jupyter-cell-status--last-start (current-time))
+      (setq my/jupyter-cell-status--last-finish nil)
+      (my/jupyter-cell-status--ensure-timer)
+      (my/jupyter-cell-status--update))))
+
+(defun my/jupyter-cell-status--cleanup ()
+  (my/jupyter-cell-status--stop-timer)
+  (setq my/jupyter-cell-status--requests nil)
+  (setq my/jupyter-cell-status--pending 0)
+  (setq my/jupyter-cell-status--last-start nil)
+  (setq my/jupyter-cell-status--last-finish nil)
+  (when (overlayp my/jupyter-cell-status--overlay)
+    (delete-overlay my/jupyter-cell-status--overlay)
+    (setq my/jupyter-cell-status--overlay nil)))
+
+(defun my/jupyter-cell-status--around-eval (orig-fn &rest args)
+  (let ((buffer (current-buffer))
+        (req (apply orig-fn args)))
+    (when (and (buffer-live-p buffer) (jupyter-request-p req))
+      (my/jupyter-cell-status--start req buffer))
+    req))
+
+(after! jupyter
+  (advice-add 'jupyter-eval-string :around #'my/jupyter-cell-status--around-eval))
+
 ;; Define the 'laptop-mode' minor mode
 (define-minor-mode laptop-mode
   "A mode for adjusting settings when working on a laptop."
@@ -267,6 +397,10 @@ For .py files, only run if a corresponding .ipynb file exists, unless a prefix a
                        "jupytext" "--set-formats" "py:percent,ipynb" file-path)
         (message "Jupytext conversion initiated for %s" file-path))))))
 
+(defun my/mount_chronos ()
+  (interactive)
+  (start-process "mount-chronos-process" "*mount-chronos-output*" "bash" "-ic" "mount_chronos"))
+
 (defun my/org-move-line (direction)
   "Move line up or down with DIRECTION."
   (interactive)
@@ -316,11 +450,15 @@ select."
 
 (defun my/vterm--at-bottom-p (&optional window)
   "Return non-nil when WINDOW (or the selected window) shows the buffer end.
-Treat partially visible end-of-buffer as being at the bottom."
+Treat partially visible end-of-buffer as NOT being at the bottom (so that
+scrolling up even slightly disables auto-follow during streaming output)."
   (let ((win (or window (selected-window))))
     (and (window-live-p win)
          (eq (window-buffer win) (current-buffer))
-         (pos-visible-in-window-p (point-max) win t))))
+         ;; `pos-visible-in-window-p' returns nil for partially visible chars
+         ;; unless PARTIALLY is non-nil. We want strict visibility here so that
+         ;; scrollback mode engages immediately.
+         (pos-visible-in-window-p (point-max) win))))
 
 (defun my/vterm--recompute-sticky (&optional window)
   "Update `my/vterm-sticky-scroll' based on WINDOW visibility state."
@@ -351,6 +489,8 @@ Treat partially visible end-of-buffer as being at the bottom."
   "Jump to the prompt and resume auto-following output in vterm."
   (interactive)
   (when (derived-mode-p 'vterm-mode)
+    (when (bound-and-true-p vterm-copy-mode)
+      (vterm-copy-mode -1))
     (setq my/vterm-sticky-scroll nil)
     (goto-char (point-max))
     (when (fboundp 'vterm-reset-cursor-point)
@@ -359,7 +499,8 @@ Treat partially visible end-of-buffer as being at the bottom."
 
 (defun my/vterm--skip-reset-when-sticky (orig &rest args)
   "Skip `vterm-reset-cursor-point' via ORIG when sticky scrolling is active."
-  (unless my/vterm-sticky-scroll
+  (if my/vterm-sticky-scroll
+      (point)
     (apply orig args)))
 
 (defun my/org-copy-image-at-point-to-clipboard ()
@@ -418,3 +559,32 @@ The image data is piped to an external clipboard tool (`wl-copy',
                   (message "Copied image to clipboard: %s" file)
                 (user-error "Failed to copy image (exit %d)" exit-code))))))))
 )
+
+;;DONE don't convet in place, create a new file with the same base name
+(defun my/markdown-buffer-to-org ()
+  "Convert the current buffer from Markdown to Org using pandoc."
+  (interactive)
+  (unless (executable-find "pandoc")
+    (user-error "pandoc not found in PATH"))
+  (unless buffer-file-name
+    (user-error "Current buffer is not visiting a file"))
+  (let* ((input (buffer-substring-no-properties (point-min) (point-max)))
+         (output-file (concat (file-name-sans-extension buffer-file-name) ".org")))
+    (when (and (file-exists-p output-file)
+               (not (y-or-n-p (format "Overwrite existing file %s? " output-file))))
+      (user-error "Aborted"))
+    (with-temp-buffer
+      (insert input)
+      (let ((exit-code (call-process-region (point-min) (point-max)
+                                            "pandoc" t t nil
+                                            "-f" "markdown" "-t" "org")))
+        (unless (zerop exit-code)
+          (user-error "pandoc failed with exit code %d" exit-code))
+        (let ((output (buffer-string)))
+          (with-current-buffer (find-file-noselect output-file)
+            (let ((inhibit-read-only t))
+              (erase-buffer)
+              (insert output)
+              (org-mode)
+              (save-buffer)))
+          (message "Wrote Org file via pandoc: %s" output-file))))))

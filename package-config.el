@@ -1118,3 +1118,6 @@ When exiting copy-mode, restore the previous follow vs sticky-scroll state."
   :config
   (setq aider-args '("--model" "gemini/gemini-3-flash-preview"))
   (require 'aider-doom))
+
+(after! jupyter                                                                                                                                                                             
+  (load-file "~/.doom.d/jupyter-timer-complete.el"))                                                                                                                                        
