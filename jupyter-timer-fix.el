@@ -54,7 +54,7 @@
     (jupyter-repl--stop-execution-timer) ; Ensure no duplicate timers
     ;; Pass current client to the timer
     (setq jupyter-repl--execution-timer
-          (run-with-timer 0.5 0.5 #'jupyter-repl--update-execution-display
+          (run-with-timer 0.1 0.1 #'jupyter-repl--update-execution-display
                           jupyter-current-client))))
 
 (defun jupyter-repl--stop-execution-timer ()
@@ -75,7 +75,6 @@
   "Called when a cell execution starts."
   (let* ((client (and (boundp 'jupyter-current-client) jupyter-current-client))
          (target (jupyter-repl--execution-state-buffer client)))
-    (message "[Jupyter-Timer] Execution started in buffer: %s" (buffer-name target))
     (with-current-buffer target
       (setq jupyter-repl--execution-start-time (float-time))
       (setq jupyter-repl--last-completion-status nil)
@@ -86,7 +85,6 @@
   "Called when execution completes.  SUCCESS indicates if execution succeeded."
   (let* ((client (and (boundp 'jupyter-current-client) jupyter-current-client))
          (target (jupyter-repl--execution-state-buffer client)))
-    (message "[Jupyter-Timer] Execution completed. Success: %s" success)
     (with-current-buffer target
       (jupyter-repl--stop-execution-timer)
       (setq jupyter-repl--last-completion-status (if success 'success 'error))
@@ -133,12 +131,10 @@ or standard idle/busy/disconnected indicators."
         ((and busy jupyter-repl-show-execution-time start-time)
          (let* ((elapsed (- (float-time) start-time))
                 (formatted-time (jupyter-repl--format-execution-time elapsed)))
-           (format " Jupyter ⏳ %s" formatted-time)))
+           (format " JuPy[%s]" formatted-time)))
 
         ;; Busy without timer (fallback)
         (busy
-         ;; Debug why timer is missing
-         (unless start-time (message "[Jupyter-Timer] Busy but no start-time in %s" (buffer-name repl-buffer)))
          (format jupyter-repl-interaction-mode-line-format "*"))
 
         ;; Recently completed - show flash
@@ -201,7 +197,6 @@ This ensures the timer starts even if jupyter-repl.el is outdated."
                (object-of-class-p client 'jupyter-repl-client))
       (jupyter-with-repl-buffer client
         (unless jupyter-repl--execution-start-time
-          (message "[Jupyter-Timer] FORCE START: busy state received")
           (jupyter-repl--on-execution-start))))
 
     ;; FORCE FIX: If state is idle, ensure timer is stopped
@@ -209,7 +204,6 @@ This ensures the timer starts even if jupyter-repl.el is outdated."
                (object-of-class-p client 'jupyter-repl-client))
       (jupyter-with-repl-buffer client
         (when jupyter-repl--execution-start-time
-          (message "[Jupyter-Timer] FORCE COMPLETE: idle state received")
           ;; If completion status wasn't set by execute_reply, default to success
           (unless jupyter-repl--last-completion-status
             (jupyter-repl--on-execution-complete t)))))
@@ -240,12 +234,10 @@ This ensures the timer starts even if jupyter-repl.el is outdated."
          ((equal new-state "busy")
           (jupyter-with-repl-buffer client
             (unless jupyter-repl--execution-start-time
-              (message "[Jupyter-Timer] FORCE START (handle-message)")
               (jupyter-repl--on-execution-start))))
          ((equal new-state "idle")
           (jupyter-with-repl-buffer client
             (when jupyter-repl--execution-start-time
-              (message "[Jupyter-Timer] FORCE COMPLETE (handle-message)")
               (unless jupyter-repl--last-completion-status
                 (jupyter-repl--on-execution-complete t))))))))
     res))
