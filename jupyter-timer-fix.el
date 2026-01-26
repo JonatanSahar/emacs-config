@@ -22,6 +22,18 @@
 (defvar-local jupyter-repl--completion-timestamp nil
   "Float-time when last execution completed (for flash effect).")
 
+;;; 0.1 Helper to choose where execution state lives
+(defun jupyter-repl--execution-state-buffer (&optional client)
+  "Return the REPL buffer for CLIENT if available, else the current buffer."
+  (let ((client (or client (and (boundp 'jupyter-current-client)
+                                jupyter-current-client))))
+    (if (and client
+             (object-of-class-p client 'jupyter-repl-client)
+             (slot-boundp client 'buffer)
+             (buffer-live-p (oref client buffer)))
+        (oref client buffer)
+      (current-buffer))))
+
 ;;; 1. Helper to update all client buffers
 (defun jupyter-repl--update-client-modelines (client)
   "Update mode lines and header lines for all buffers associated with CLIENT."
@@ -61,23 +73,29 @@
 
 (defun jupyter-repl--on-execution-start ()
   "Called when a cell execution starts."
-  (message "[Jupyter-Timer] Execution started in buffer: %s" (buffer-name))
-  (setq jupyter-repl--execution-start-time (float-time))
-  (setq jupyter-repl--last-completion-status nil)
-  (setq jupyter-repl--completion-timestamp nil)
-  (jupyter-repl--start-execution-timer))
+  (let* ((client (and (boundp 'jupyter-current-client) jupyter-current-client))
+         (target (jupyter-repl--execution-state-buffer client)))
+    (message "[Jupyter-Timer] Execution started in buffer: %s" (buffer-name target))
+    (with-current-buffer target
+      (setq jupyter-repl--execution-start-time (float-time))
+      (setq jupyter-repl--last-completion-status nil)
+      (setq jupyter-repl--completion-timestamp nil)
+      (jupyter-repl--start-execution-timer))))
 
 (defun jupyter-repl--on-execution-complete (&optional success)
   "Called when execution completes.  SUCCESS indicates if execution succeeded."
-  (message "[Jupyter-Timer] Execution completed. Success: %s" success)
-  (jupyter-repl--stop-execution-timer)
-  (setq jupyter-repl--last-completion-status (if success 'success 'error))
-  (setq jupyter-repl--completion-timestamp (float-time))
-  (setq jupyter-repl--execution-start-time nil)
-  ;; Schedule return to idle display, passing the client
-  (run-with-timer jupyter-repl-completion-flash-duration nil
-                  #'jupyter-repl--clear-completion-flash
-                  jupyter-current-client))
+  (let* ((client (and (boundp 'jupyter-current-client) jupyter-current-client))
+         (target (jupyter-repl--execution-state-buffer client)))
+    (message "[Jupyter-Timer] Execution completed. Success: %s" success)
+    (with-current-buffer target
+      (jupyter-repl--stop-execution-timer)
+      (setq jupyter-repl--last-completion-status (if success 'success 'error))
+      (setq jupyter-repl--completion-timestamp (float-time))
+      (setq jupyter-repl--execution-start-time nil))
+    ;; Schedule return to idle display, passing the client
+    (run-with-timer jupyter-repl-completion-flash-duration nil
+                    #'jupyter-repl--clear-completion-flash
+                    client)))
 
 (defun jupyter-repl--clear-completion-flash (client)
   "Clear the completion flash effect."
@@ -209,11 +227,35 @@ This ensures the timer starts even if jupyter-repl.el is outdated."
     (jupyter-repl--update-client-modelines client)
     res))
 
+;;; 6. Fallback: handle status in jupyter-handle-message (req may be nil)
+
+(defun jupyter-timer-fix--handle-message-around (orig-fun client channel msg)
+  "Ensure status transitions start/stop the timer even if no handler runs."
+  (let ((res (funcall orig-fun client channel msg)))
+    (when (and (object-of-class-p client 'jupyter-repl-client)
+               (listp msg)
+               (string= (jupyter-message-type msg) "status"))
+      (let ((new-state (jupyter-message-get msg :execution_state)))
+        (cond
+         ((equal new-state "busy")
+          (jupyter-with-repl-buffer client
+            (unless jupyter-repl--execution-start-time
+              (message "[Jupyter-Timer] FORCE START (handle-message)")
+              (jupyter-repl--on-execution-start))))
+         ((equal new-state "idle")
+          (jupyter-with-repl-buffer client
+            (when jupyter-repl--execution-start-time
+              (message "[Jupyter-Timer] FORCE COMPLETE (handle-message)")
+              (unless jupyter-repl--last-completion-status
+                (jupyter-repl--on-execution-complete t))))))))
+    res))
+
 ;; Remove old advice if exists (cleanup from previous attempts)
 (advice-remove 'jupyter-handle-status #'jupyter-timer-fix--update-status-after)
 ;; Apply new advice
 (advice-add 'jupyter-handle-status :around #'jupyter-timer-fix--handle-status-around)
 (advice-add 'jupyter-handle-execute-reply :around #'jupyter-timer-fix--update-reply-after)
+(advice-add 'jupyter-handle-message :around #'jupyter-timer-fix--handle-message-around)
 
 (message "Loaded jupyter-timer-fix.el (FORCE FIX Version)")
 (provide 'jupyter-timer-fix)
