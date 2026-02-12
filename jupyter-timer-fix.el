@@ -22,6 +22,9 @@
 (defvar-local jupyter-repl--completion-timestamp nil
   "Float-time when last execution completed (for flash effect).")
 
+(defvar-local jupyter-repl--last-duration nil
+  "Duration of the last completed execution in seconds.")
+
 ;;; 0.1 Helper to choose where execution state lives
 (defun jupyter-repl--execution-state-buffer (&optional client)
   "Return the REPL buffer for CLIENT if available, else the current buffer."
@@ -88,6 +91,8 @@
     (with-current-buffer target
       (jupyter-repl--stop-execution-timer)
       (setq jupyter-repl--last-completion-status (if success 'success 'error))
+      (when jupyter-repl--execution-start-time
+        (setq jupyter-repl--last-duration (- (float-time) jupyter-repl--execution-start-time)))
       (setq jupyter-repl--completion-timestamp (float-time))
       (setq jupyter-repl--execution-start-time nil))
     ;; Schedule return to idle display, passing the client
@@ -118,10 +123,11 @@ or standard idle/busy/disconnected indicators."
             (start-time (buffer-local-value 'jupyter-repl--execution-start-time repl-buffer))
             (completion-status (buffer-local-value 'jupyter-repl--last-completion-status repl-buffer))
             (completion-timestamp (buffer-local-value 'jupyter-repl--completion-timestamp repl-buffer))
+            (last-duration (buffer-local-value 'jupyter-repl--last-duration repl-buffer))
             (disconnected (not (jupyter-hb-beating-p client)))
             (exec-state (jupyter-execution-state client))
             (busy (equal exec-state "busy")))
-       
+
        (cond
         ;; Disconnected state
         (disconnected
@@ -148,7 +154,10 @@ or standard idle/busy/disconnected indicators."
 
         ;; Idle
         (t
-         (format jupyter-repl-interaction-mode-line-format "-")))))))
+         (let ((idle-str (format jupyter-repl-interaction-mode-line-format "-")))
+           (if last-duration
+               (concat idle-str (format " [%s]" (jupyter-repl--format-execution-time last-duration)))
+             idle-str))))))))
 
 ;;; 4. Header Line Setup
 

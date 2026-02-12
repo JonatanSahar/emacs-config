@@ -225,7 +225,7 @@
         :nvi "C-c M" #'my/md-cell-to-code
         :nvi "C-c d" #'my/delete-code-cell
         :nvi "C-c t" #'my/tag-cell
-        :nvi "C-c C-v" #'code-cells-mark-cell)
+        :nvi "C-c C-v" (lambda () (interactive) (code-cells-mark-cell) (exchange-point-and-mark)))
 
   (map! :map python-mode-map
         :nvi "C-c C-o" #'jupyter-eval-line-or-region

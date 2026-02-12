@@ -6,23 +6,23 @@
 ;; ===========
 
 (map!
-      "M-k"  nil
-      "M-j"   nil)
+ "M-k"  nil
+ "M-j"   nil)
 
 ;; Python
 ;; ------
 (after! jupyter
- (map! :map (python-mode-map python-ts-mode-map)
-       ;; Jupyter Integration
-       :nv "C-<return>" #'jupyter-eval-line-or-region
-       :nv "S-<return>" #'jupyter-eval-line-or-region ; Alternative
-       :v "C-c <return>" #'python-shell-send-region ; Send region to shell (standard python.el)
-       :n :desc "eval function" "C-S-<return>" #'jupyter-eval-defun
-       :localleader
-       :n :desc "eval buffer" "eb" #'jupyter-eval-buffer
-       :n :desc "eval function" "ed" #'jupyter-eval-defun
-       :nv :desc "eval region" "er" #'jupyter-eval-region)
- )
+  (map! :map (python-mode-map python-ts-mode-map)
+        ;; Jupyter Integration
+        :nv "C-<return>" #'jupyter-eval-line-or-region
+        :nv "S-<return>" #'jupyter-eval-line-or-region ; Alternative
+        :v "C-c <return>" #'python-shell-send-region ; Send region to shell (standard python.el)
+        :n :desc "eval function" "C-S-<return>" #'jupyter-eval-defun
+        :localleader
+        :n :desc "eval buffer" "eb" #'jupyter-eval-buffer
+        :n :desc "eval function" "ed" #'jupyter-eval-defun
+        :nv :desc "eval region" "er" #'jupyter-eval-region)
+  )
 
 (map! :map inferior-python-mode ; Bindings for the Python REPL buffer
       :nvi "C-k" #'windmove-up ; Allow windmove in REPL
@@ -89,83 +89,83 @@
 ;; Evil Mode States (Normal, Visual, Insert specific)
 ;; --------------------------------------------------
 (map! ;; Normal Mode (:n)
-      :n "k" #'evil-previous-visual-line
-      :n "j" #'evil-next-visual-line
-      :n "<up>"   (lambda () (interactive) (scroll-down-command 1)) ; Scroll view down
-      :n "<down>" (lambda () (interactive) (scroll-up-command 1)) ; Scroll view up
-      :n "h" #'left-char ; Ensure h/l move by char even with visual-line-mode
-      :n "l" #'right-char
-      :n [left] #'left-char
-      :n [right] #'right-char
-      :n "J" #'evil-join ; Join lines (standard Vim J)
-      :n "K" #'join-line ; Join lines without space (like Emacs default)
-      :n "gO" #'+evil/insert-newline-above
-      :n "go" #'+evil/insert-newline-below
-      :n "gK" #'+evil/insert-newline-above ; Alternative binding
-      :n "gJ" #'+evil/insert-newline-below ; Alternative binding
-      :n "g]" #'kmacro-end-an-call-macro ; Run last keyboard macro
-      :n "g." #'er/expand-region ; Expand region
-      :n "gh" #'avy-goto-char-timer ; Avy jump
-      :n "gf" #'execute-extended-command ; M-x
-      :n "g+" #'evil-numbers/inc-at-pt ; Increment number
-      :n "z=" #'my/indent-buffer ; Indent entire buffer
-      :n "!" #'+workspace/close-window-or-workspace ; Close window/workspace (vterm override)
-      ;; Flyspell Correction (g prefix)
-      :n "gl" #'(lambda () (interactive) (call-interactively #'evil-next-flyspell-error) (call-interactively #'flyspell-correct-at-point))
-      :n "gh" #'(lambda () (interactive) (call-interactively #'evil-prev-flyspell-error) (call-interactively #'flyspell-correct-at-point))
-      ;; Flyspell Correction (z prefix)
-      (:prefix "z"
-       :nv "z" #'(lambda () (interactive) (call-interactively #'evil-next-flyspell-error) (call-interactively #'flyspell-correct-at-point))
-       :nv "Z" #'(lambda () (interactive) (call-interactively #'evil-prev-flyspell-error) (call-interactively #'flyspell-correct-at-point)))
-      ;; Multiple Cursors Hydra (g prefix)
-      (:when (modulep! :editor multiple-cursors)
-        :prefix "g"
-        :nv "z" #'my/mc-hydra/body)
+ :n "k" #'evil-previous-visual-line
+ :n "j" #'evil-next-visual-line
+ :n "<up>"   (lambda () (interactive) (scroll-down-command 1)) ; Scroll view down
+ :n "<down>" (lambda () (interactive) (scroll-up-command 1)) ; Scroll view up
+ :n "h" #'left-char ; Ensure h/l move by char even with visual-line-mode
+ :n "l" #'right-char
+ :n [left] #'left-char
+ :n [right] #'right-char
+ :n "J" #'evil-join ; Join lines (standard Vim J)
+ :n "K" #'join-line ; Join lines without space (like Emacs default)
+ :n "gO" #'+evil/insert-newline-above
+ :n "go" #'+evil/insert-newline-below
+ :n "gK" #'+evil/insert-newline-above ; Alternative binding
+ :n "gJ" #'+evil/insert-newline-below ; Alternative binding
+ :n "g]" #'kmacro-end-an-call-macro ; Run last keyboard macro
+ :n "g." #'er/expand-region ; Expand region
+ :n "gh" #'avy-goto-char-timer ; Avy jump
+ :n "gf" #'execute-extended-command ; M-x
+ :n "g+" #'evil-numbers/inc-at-pt ; Increment number
+ :n "z=" #'my/indent-buffer ; Indent entire buffer
+ :n "!" #'+workspace/close-window-or-workspace ; Close window/workspace (vterm override)
+ ;; Flyspell Correction (g prefix)
+ :n "gl" #'(lambda () (interactive) (call-interactively #'evil-next-flyspell-error) (call-interactively #'flyspell-correct-at-point))
+ :n "gh" #'(lambda () (interactive) (call-interactively #'evil-prev-flyspell-error) (call-interactively #'flyspell-correct-at-point))
+ ;; Flyspell Correction (z prefix)
+ (:prefix "z"
+  :nv "z" #'(lambda () (interactive) (call-interactively #'evil-next-flyspell-error) (call-interactively #'flyspell-correct-at-point))
+  :nv "Z" #'(lambda () (interactive) (call-interactively #'evil-prev-flyspell-error) (call-interactively #'flyspell-correct-at-point)))
+ ;; Multiple Cursors Hydra (g prefix)
+ (:when (modulep! :editor multiple-cursors)
+   :prefix "g"
+   :nv "z" #'my/mc-hydra/body)
 
-      ;; Visual Mode (:v)
-      :v "<up>" #'evil-previous-visual-line
-      :v "<down>" #'evil-next-visual-line
-      :vn "gs" nil ; Unbind gs (often used for surround)
+ ;; Visual Mode (:v)
+ :v "<up>" #'evil-previous-visual-line
+ :v "<down>" #'evil-next-visual-line
+ :vn "gs" nil ; Unbind gs (often used for surround)
 
-      ;; Normal & Visual Mode (:nv)
-      :nv "E" #'evil-forward-WORD-end
-      :nv "W" #'evil-forward-WORD-begin
-      :nv "'" #'evil-goto-mark ; Jump to mark
-      :n "C-e" #'my-evil-end-of-visual-line ; Go to end of visual line
-      :v "C-e" #'my-evil-end-of-visual-line-visual-mode ; Go to end of visual line
-      ;; Windmove
-      :nv "C-l" #'windmove-right
-      :nv "C-h" #'windmove-left
-      :nv "C-j" #'windmove-down
-      :nv "C-k" #'windmove-up
-      ;; Paste with C-c prefix
-      :nv "C-c p" #'evil-paste-after
-      :nv "C-c P" #'evil-paste-before
+ ;; Normal & Visual Mode (:nv)
+ :nv "E" #'evil-forward-WORD-end
+ :nv "W" #'evil-forward-WORD-begin
+ :nv "'" #'evil-goto-mark ; Jump to mark
+ :n "C-e" #'my-evil-end-of-visual-line ; Go to end of visual line
+ :v "C-e" #'my-evil-end-of-visual-line-visual-mode ; Go to end of visual line
+ ;; Windmove
+ :nv "C-l" #'windmove-right
+ :nv "C-h" #'windmove-left
+ :nv "C-j" #'windmove-down
+ :nv "C-k" #'windmove-up
+ ;; Paste with C-c prefix
+ :nv "C-c p" #'evil-paste-after
+ :nv "C-c P" #'evil-paste-before
 
-      ;; Insert Mode (:i)
-      :i "C-Z" #'evil-emacs-state ; Enter Emacs state
-      :i "C-M-SPC" #'evil-normal-state ; Enter Normal state
-      :i "S-<return>" #'evil-normal-state ; Enter Normal state
-      ;; Basic navigation in Insert mode (using Control+Shift or Control)
-      :i "C-S-j" #'next-line ; Move down (might conflict with MC binding below, check behavior)
-      :i "C-S-k" #'previous-line ; Move up (might conflict with MC binding below, check behavior)
-      :i "C-'" #'right-char
-      :i "C-;" #'left-char
-      :i "C-k" #'previous-line
-      :i "C-j" #'next-line
-      :i "C-l" #'right-char
-      :i "C-S-l" #'right-word
-      :i "C-h" #'left-char
-      :i "C-S-h" #'left-word
-      ;; Paste with C-c prefix / C-v
-      ;; :i "C-v" #'(lambda () (interactive) (backward-char) (evil-paste-after 1))
-      :i "C-v" #'evil-paste-after
-      :i "C-c p" #'evil-paste-after
-      :i "C-c P" #'(lambda () (interactive) (backward-char 2) (evil-paste-after 1))
-      ;; Multiple Cursors in Insert mode
-      :ni "C-S-j" #'evil-mc-make-cursor-move-next-line
-      :ni "C-S-k" #'evil-mc-make-cursor-move-prev-line
-      )
+ ;; Insert Mode (:i)
+ :i "C-Z" #'evil-emacs-state ; Enter Emacs state
+ :i "C-M-SPC" #'evil-normal-state ; Enter Normal state
+ :i "S-<return>" #'evil-normal-state ; Enter Normal state
+ ;; Basic navigation in Insert mode (using Control+Shift or Control)
+ :i "C-S-j" #'next-line ; Move down (might conflict with MC binding below, check behavior)
+ :i "C-S-k" #'previous-line ; Move up (might conflict with MC binding below, check behavior)
+ :i "C-'" #'right-char
+ :i "C-;" #'left-char
+ :i "C-k" #'previous-line
+ :i "C-j" #'next-line
+ :i "C-l" #'right-char
+ :i "C-S-l" #'right-word
+ :i "C-h" #'left-char
+ :i "C-S-h" #'left-word
+ ;; Paste with C-c prefix / C-v
+ ;; :i "C-v" #'(lambda () (interactive) (backward-char) (evil-paste-after 1))
+ :i "C-v" #'evil-paste-after
+ :i "C-c p" #'evil-paste-after
+ :i "C-c P" #'(lambda () (interactive) (backward-char 2) (evil-paste-after 1))
+ ;; Multiple Cursors in Insert mode
+ :ni "C-S-j" #'evil-mc-make-cursor-move-next-line
+ :ni "C-S-k" #'evil-mc-make-cursor-move-prev-line
+ )
 
 ;; Mode Specific Bindings
 ;; ======================
@@ -434,8 +434,9 @@
        :desc "switch to buffer" "b" #'consult-buffer
        :desc "buffer to new window" "B" #'consult-buffer-other-window
        :desc "buffer to new frame" "F" #'consult-buffer-other-frame
-       :desc "reload buffer" "r" #'my/revert-buffer-no-confirm
-       :desc "revert buffer (confirm)" "R" #'revert-buffer
+       :desc "revert buffer" "r" #'my/revert-buffer-no-confirm
+       ;; :desc "revert buffer (confirm)" "R" #'revert-buffer
+       :desc "rename buffer" "R" #'rename-buffer
        :desc "open buffer and switch tabspace" "t" #'tabspaces-switch-buffer-and-tab)
 
       ;; File / Project ("f" prefix - using consult where possible)
@@ -488,7 +489,6 @@
        :desc "aidermacs transient" "A" #'aidermacs-transient-menu
        :desc "select header content" "y" #'my/visual-inside-org-header
        :desc "copy header content" "h" #'my/yank-org-headline
-       ;; :desc "gptel-menu "g" #'gptel" ; Duplicate of G G?
        :desc "gptel-menu" "g" #'gptel-menu ; Duplicate of G G?
        :desc "gptel-rewrite" "r" #'gptel-rewrite
        :desc "kill all other windows" "o" 'delete-other-windows
@@ -508,9 +508,11 @@
        :desc "run macro" "e" #'kmacro-end-and-call-macro
        :desc "generate laTex previews" "L" #'org-latex-preview
        :desc "convert .py ⬄ .ipynb" "t" #'my/jupytext-file
-       (:prefix ("b" . "references")
-        :desc "refresh bibliography" "r" #'citar-refresh
-        :desc "open bibliography" "b" #'citar-open))
+       :desc "refresh bibliography" "r" #'citar-refresh
+       ;; (:prefix ("b" . "bibliography")
+       ;;  :desc "refresh bibliography" "r" #'citar-refresh
+       ;;  :desc "open bibliography" "b" #'citar-open)
+       )
 
       ;; Notes / Denote ("n" prefix) - Org Mode Specific
       (:prefix ("n" . "notes") :map org-mode-map
