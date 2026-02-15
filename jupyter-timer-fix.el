@@ -156,7 +156,7 @@ or standard idle/busy/disconnected indicators."
         (t
          (let ((idle-str (format jupyter-repl-interaction-mode-line-format "-")))
            (if last-duration
-               (concat idle-str (format " [%s]" (jupyter-repl--format-execution-time last-duration)))
+               (concat idle-str (format " [last: %s]" (jupyter-repl--format-execution-time last-duration)))
              idle-str))))))))
 
 ;;; 4. Header Line Setup

@@ -508,7 +508,7 @@
        :desc "run macro" "e" #'kmacro-end-and-call-macro
        :desc "generate laTex previews" "L" #'org-latex-preview
        :desc "convert .py ⬄ .ipynb" "t" #'my/jupytext-file
-       :desc "refresh bibliography" "r" #'citar-refresh
+       :desc "open bibliography" "b" #'citar-open
        ;; (:prefix ("b" . "bibliography")
        ;;  :desc "refresh bibliography" "r" #'citar-refresh
        ;;  :desc "open bibliography" "b" #'citar-open)

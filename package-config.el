@@ -87,6 +87,7 @@
   :after (:all org python)
 
   :config
+  (setq jupyter-eval-short-result-max-lines 5)
   (map! :map jupyter-repl-mode-map
         :i "C-k" #'jupyter-repl-history-previous
         :i "C-j" #'jupyter-repl-history-next
@@ -653,6 +654,22 @@ the default tab-bar name uses the buffer name."
 
       "set workspace buffer list for consult-buffer.")
     (add-to-list 'consult-buffer-sources 'consult--source-workspace))
+
+  ;; set dired buffer list for consult-buffer
+  (defvar consult--source-dired
+    (list :name     "Dired"
+          :narrow   ?d
+          :category 'buffer
+          :face     'consult-buffer
+          :history  'buffer-name-history
+          :state    #'consult--buffer-state
+          :items    (lambda () (consult--buffer-query
+                                :mode 'dired-mode
+                                :sort 'visibility
+                                :as #'buffer-name)))
+    "Set dired buffer list for consult-buffer.")
+  (add-to-list 'consult-buffer-sources 'consult--source-dired)
+
   )
 
 (use-package! popper
@@ -998,12 +1015,8 @@ When exiting copy-mode, restore the previous follow vs sticky-scroll state."
         :i "C-j" (kbd "<down>")
         :i "C-k" (kbd "<up>")
         :i "C-z" #'evil-emacs-state
-        :nvi "C-c C-t" #'vterm-copy-mode
-        :nvi "C-c C-u" #'vterm-copy-mode
-        :nvi "C-c C-b" #'my/vterm-resume-follow)
-  (map! :map vterm-copy-mode-map
-        "q" #'my/vterm-resume-follow
-        "C-c C-u" #'my/vterm-copy-mode-toggle)
+        :nvi "C-u" #'vterm-copy-mode
+        )
   )
 
 ;; (use-package! corfu-candidate-overlay
