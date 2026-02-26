@@ -135,6 +135,8 @@
   )
 
 (add-hook! 'dirvish-directory-view-mode (+zen/toggle))
+(setq! dirvish-reuse-session 'resume)
+
 
 (after! tramp
   (add-to-list 'tramp-remote-path "/home/yonatan/.local/bin")

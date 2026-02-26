@@ -309,7 +309,7 @@
       :n "/" nil
       ;; Custom bindings
       :nv "C-c C-y" #'diredp-copy-abs-filenames-as-kill ; Copy filenames
-      :nv "q" #'+dired/quit-all ; Quit dired (Doom specific)
+      :nv "q" #'quit-window ; Quit current dired buffer
       :n [f5] #'revert-buffer ; Refresh dired buffer
       :n "=" #'diredp-ediff) ; Ediff files
 
@@ -523,9 +523,9 @@
        :nv "R" #'denote-rename-file-using-front-matter
        :nv "k" #'denote-keywords-add
        :nv "K" #'denote-keywords-remove
-       :nv "D" #'denote-date ; Add date to front matter
+       :nv "d" #'denote-dired
        :nv "z" #'denote-signature ; Add signature
-       :nv "s" #'denote-subdirectory ; Move note to subdirectory
+       :nv "s" #'denote-grep; 
        :nv "t" #'denote-template ; Create note from template
        :nv "i" #'denote-link-or-create ; Insert link or create note
        :nv "I" #'denote-link ; Insert link to existing note

@@ -15,7 +15,9 @@
          denote-excluded-keywords-regexp nil)
 
   (denote-rename-buffer-mode 1)
-
+  (setq! denote-sort-dired-default-sort-component 'last-modified
+         denote-sort-dired-default-reverse-sort nil
+         denote-sort-dired-extra-prompts nil)
   (setq denote-date-prompt-use-org-read-date t)
   (setq denote-allow-multi-word-keywords nil)
   (setq denote-date-format nil)
@@ -144,7 +146,7 @@
       (code-cells-backward-cell))
     (evil-append-line 1)
     (insert " [markdown]")
-    (evil-normal-state)
+    (evil-force-normal-state)
     )
 
   (defun my/md-cell-to-code()
@@ -161,8 +163,19 @@
   (defun my/eval-code-cell-and-next()
     (interactive)
     (call-interactively #'code-cells-eval)
-    (call-interactively #'windmove-up)
     (call-interactively #'code-cells-forward-cell)
+    (evil-force-normal-state)
+    )
+
+  (defun my/code-cells-eval-text-object()
+    (interactive)
+    (when (evil-insert-state-p)
+      (evil-normal-state))
+    (unless (evil-visual-state-p)
+      (evil-visual-char))
+    (call-interactively #'evil-inner-symbol)
+    (evil-visual-expand-region)
+    (code-cells-eval (region-beginning) (region-end))
     )
 
   (defun my/code-cells-eval-line ()
@@ -216,7 +229,8 @@
         ;; :n "C-<return>" #'my-code-cells-eval-line-normal
         ;; :i "C-<return>" #'my-code-cells-eval-line-insert
         :nvi "S-<return>" #'my/eval-code-cell-and-next
-        :nvi "C-c C-o" #'jupyter-eval-line-or-region
+        :nvi "C-S-<return>" #'my/code-cells-eval-text-object
+        :nvi "C-c C-o" #'my/code-cells-eval-text-object
         :nvi "C-c i" #'my/insert-code-cell
         :i "C-c i" #'my/insert-code-cell
 
@@ -914,8 +928,10 @@ the default tab-bar name uses the buffer name."
 
   ;; Use map! to bind keys in prog-mode and text-mode
   (map! :map (prog-mode-map text-mode-map)
-        :i "C-;" #'my/copilot-tab-or-default
-        :i "C-S-l" #'my/copilot-word-or-default))
+        ;; :i "C-;" #'my/copilot-tab-or-default
+        :i "<backtab>" #'my/copilot-tab-or-default
+        ;; :i "C-S-l" #'my/copilot-word-or-default))
+        :i "C-;" #'my/copilot-word-or-default))
 
 ;; `aidermacs' provides an Emacs interface for the Aider AI pair programming tool.
 ;; It allows for seamless interaction with Aider within Emacs buffers,
