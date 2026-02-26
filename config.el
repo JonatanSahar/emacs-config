@@ -212,6 +212,21 @@
 (setq ibuffer-old-time 48)
 (add-hook 'ibuffer-mode-hook #'hl-line-mode)
 
+;; Guard against an ibuffer internal range error seen on `x' (execute marks).
+(defun my/ibuffer-map-lines-safe (orig-fn function &optional nomodify group)
+  "Run ORIG-FN and recover once from `args-out-of-range' in ibuffer buffers."
+  (condition-case err
+      (funcall orig-fn function nomodify group)
+    (args-out-of-range
+     (let ((inhibit-read-only t))
+       (save-excursion
+         (goto-char (point-max))
+         (unless (or (bobp) (eq (char-before) ?\n))
+           (insert "\n"))))
+     (funcall orig-fn function nomodify group))))
+
+(advice-add 'ibuffer-map-lines :around #'my/ibuffer-map-lines-safe)
+
 
 (setq citar--multiple-setup (cons "<tab>"  "RET"))
 (setq writeroom-mode-line 't)

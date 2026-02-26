@@ -81,6 +81,86 @@
   :commands (consult-notes)
   :config
   (setq consult-notes-denote-display-id nil)
+  ;; Override default Denote source formatting to show keywords before titles.
+  (setq consult-notes-denote--source
+        (list :name (propertize "Denote notes" 'face 'consult-notes-sep)
+              :narrow ?d
+              :category consult-notes-category
+              :annotate consult-notes-denote-annotate-function
+              :items
+              (lambda ()
+                (let* ((window-width (window-width (minibuffer-window)))
+                       (kw-width consult-notes-denote-display-keywords-width)
+                       (title-column (+ kw-width 2))
+                       (dir-min-width 20)
+                       (entries
+                        (mapcar
+                         (lambda (f)
+                           (let* ((id (denote-retrieve-filename-identifier f))
+                                  (title-1
+                                   (or (denote-retrieve-title-value
+                                        f (denote-filetype-heuristics f))
+                                       (denote-retrieve-filename-title f)))
+                                  (title
+                                   (if consult-notes-denote-display-id
+                                       (concat id " " title-1)
+                                     title-1))
+                                  (keywords (denote-extract-keywords-from-path f)))
+                             (list :path f :title title :keywords keywords)))
+                         (funcall consult-notes-denote-files-function)))
+                       (max-title-width
+                        (apply #'max 0 (mapcar (lambda (e) (string-width (plist-get e :title))) entries)))
+                       (title-width
+                        (if consult-notes-denote-dir
+                            ;; Keep a visible, aligned dir column within minibuffer width.
+                            (max 12 (min max-title-width
+                                         (- window-width title-column dir-min-width 2)))
+                          (max 12 (min max-title-width
+                                       (- window-width title-column 2)))))
+                       (dir-column (+ title-column title-width 2)))
+                  (mapcar
+                   (lambda (entry)
+                     (let* ((path (plist-get entry :path))
+                            (keywords (plist-get entry :keywords))
+                            (kw-str
+                             (string-trim
+                              (funcall consult-notes-denote-display-keywords-function
+                                       keywords)))
+                            (kw-cell-base
+                             (truncate-string-to-width kw-str kw-width nil nil ""))
+                            (kw-pad (max 0 (- kw-width (string-width kw-cell-base))))
+                            (kw-cell (concat kw-cell-base (make-string kw-pad ? )))
+                            (title-cell
+                             (truncate-string-to-width
+                              (plist-get entry :title) title-width nil nil ""))
+                            (dirs
+                             (directory-file-name
+                              (file-relative-name
+                               (file-name-directory path) denote-directory)))
+                            (candidate
+                             (concat
+                              (propertize kw-cell 'face 'consult-notes-name)
+                              "  "
+                              title-cell
+                              (when consult-notes-denote-dir
+                                (concat
+                                 (propertize
+                                  " "
+                                  'display
+                                  `(space :align-to (+ left ,dir-column)))
+                                 (propertize
+                                  (funcall consult-notes-denote-display-dir-function dirs)
+                                  'face 'consult-notes-name))))))
+                       (propertize candidate
+                                   'denote-path path
+                                   'denote-keywords keywords)))
+                   entries)))
+              :state #'consult-notes-denote--state
+              :action (lambda (cand)
+                        (if-let ((path (get-text-property 0 'denote-path cand)))
+                            (find-file path)
+                          (user-error "No Denote path found for candidate")))
+              :new #'consult-notes-denote--new-note))
   )
 
 
@@ -312,6 +392,36 @@ the directory.  `REST' is passed to the `CONSULT-RIPGREP-FUNCTION'."
   ;; Use Consult to select xref locations with preview
   (setq xref-show-xrefs-function #'consult-xref
         xref-show-definitions-function #'consult-xref)
+
+  (defun my/xref--current-group-header-pos ()
+    "Return buffer position of current xref group header, or nil."
+    (save-excursion
+      (beginning-of-line)
+      (while (and (not (bobp))
+                  (not (get-text-property (point) 'xref-group)))
+        (forward-line -1)
+        (beginning-of-line))
+      (when (get-text-property (point) 'xref-group)
+        (point))))
+
+  (defun my/xref-toggle-current-group ()
+    "Toggle fold for the xref group (file subtree) at point."
+    (interactive)
+    (unless (derived-mode-p 'xref--xref-buffer-mode)
+      (user-error "Not in an xref results buffer"))
+    (let ((group-pos (my/xref--current-group-header-pos)))
+      (unless group-pos
+        (user-error "No xref group at point"))
+      (save-excursion
+        (goto-char group-pos)
+        (let ((subtree-start (save-excursion (forward-line 1) (point))))
+          (if (and (< subtree-start (point-max))
+                   (outline-invisible-p subtree-start))
+              (outline-show-subtree)
+            (outline-hide-subtree))))))
+
+  (with-eval-after-load 'xref
+    (keymap-set xref--xref-buffer-mode-map "<backtab>" #'my/xref-toggle-current-group))
 
   ;; Updating the default to include "--ignore-case"
   (setq consult-ripgrep-command "rg --null --line-buffered --color=ansi --max-columns=1000 --ignore-case --no-heading --line-number . -e ARG OPTS")
@@ -1084,7 +1194,40 @@ When exiting copy-mode, restore the previous follow vs sticky-scroll state."
     "Keymap for actions for consult-grep results."
     )
 
-  (setf (alist-get 'consult-grep embark-keymap-alist) 'embark-consult-grep-map))
+  (setf (alist-get 'consult-grep embark-keymap-alist) 'embark-consult-grep-map)
+
+  (defun my/consult-notes--denote-path (cand)
+    "Return Denote path text-property from CAND, or nil."
+    (let ((path (get-text-property 0 'denote-path cand)))
+      (and (stringp path) path)))
+
+  (defun my/consult-notes--cand->xref (cand)
+    "Convert consult-notes CAND to an xref item when possible."
+    (when-let* ((path (my/consult-notes--denote-path cand)))
+      (xref-make (abbreviate-file-name path)
+                 (xref-make-file-location path 1 0))))
+
+  (defun my/consult-notes-export-denote-xref (items)
+    "Export consult-notes ITEMS to a navigable xref buffer."
+    (require 'xref)
+    (let ((xrefs (delq nil (mapcar #'my/consult-notes--cand->xref items))))
+      (unless xrefs
+        (user-error "No Denote-backed consult-notes candidates to export"))
+      ;; Bypass `xref-show-xrefs-function' entirely (which may be `consult-xref')
+      ;; and open a real persistent *xref* buffer.
+      (set-buffer
+       (xref--show-xref-buffer
+        (lambda () xrefs)
+        `((fetched-xrefs . ,xrefs)
+          (window . ,(selected-window))
+          (auto-jump . nil)
+          (display-action))))))
+
+  (with-eval-after-load 'consult-notes
+    (setf (alist-get consult-notes-category embark-exporters-alist nil nil #'equal)
+          #'my/consult-notes-export-denote-xref)
+    (setf (alist-get `(file . ,consult-notes-category) embark-exporters-alist nil nil #'equal)
+          #'my/consult-notes-export-denote-xref)))
 
 ;; (use-package! magit-todos
 ;;   :after magit
@@ -1150,4 +1293,3 @@ When exiting copy-mode, restore the previous follow vs sticky-scroll state."
 
 (after! jupyter
   (load! "jupyter-timer-fix"))
-
