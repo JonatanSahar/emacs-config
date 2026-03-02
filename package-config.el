@@ -1292,4 +1292,57 @@ When exiting copy-mode, restore the previous follow vs sticky-scroll state."
   (require 'aider-doom))
 
 (after! jupyter
-  (load! "jupyter-timer-fix"))
+  (load! "jupyter-timer-fix")
+  (load! "jupyter-claude-bridge"))
+
+(use-package! denote-markdown
+  :config
+  (defun my/denote-markdown-convert-links-in-md-dir (dir &optional absolute)
+    "Convert Denote links in all Markdown files under DIR.
+
+For each `*.md' file, iterate all Denote link positions and call
+`denote-markdown-convert-links-to-file-paths' at each position.
+With optional ABSOLUTE, convert to absolute paths."
+    (interactive "DMarkdown directory: \nP")
+    (let* ((root (expand-file-name dir))
+           (files (directory-files-recursively root "\\.md\\'"))
+           (changed-files 0))
+      (dolist (file files)
+        (let* ((existing (get-file-buffer file))
+               (buf (or existing (find-file-noselect file)))
+               (modified nil))
+          (with-current-buffer buf
+            (unless (derived-mode-p 'markdown-mode)
+              (set-auto-mode t))
+            (when (derived-mode-p 'markdown-mode)
+              (let (positions)
+                (save-excursion
+                  (goto-char (point-min))
+                  (while (re-search-forward (denote-markdown--get-regexp 'denote) nil t)
+                    (push (match-beginning 0) positions)))
+                (dolist (pos (nreverse positions))
+                  (save-excursion
+                    (goto-char pos)
+                    (denote-markdown-convert-links-to-file-paths absolute)))
+                (setq modified (buffer-modified-p))
+                (when modified
+                  (save-buffer)))))
+          (unless existing
+            (kill-buffer buf))
+          (when modified
+            (setq changed-files (1+ changed-files)))))
+      (message "Processed %d markdown files; changed %d"
+               (length files) changed-files))))
+(use-package! denote-silo
+  ;; Bind these commands to key bindings of your choice.
+  :commands ( denote-silo-create-note
+              denote-silo-open-or-create
+              denote-silo-select-silo-then-command
+              denote-silo-dired
+              denote-silo-cd )
+  :config
+  ;; Add your silos to this list.  By default, it only includes the
+  ;; value of the variable `denote-directory'.
+  (setq denote-silo-directories
+        (list denote-directory
+              "~/Documents/silverbullet-notes/")))
