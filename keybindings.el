@@ -444,7 +444,8 @@
        :desc "copy buffer name"  "c" #'my/get-buffer-name
        ;; :desc "search for file in dir (fd)"  "f" #'consult-fd
        :desc "find file"  "f" #'find-file
-       :desc "Open project buffer in other window" "F" #'projectile-find-file-dwim-other-window)
+       :desc "Open project buffer in other window" "F" #'projectile-find-file-dwim-other-window
+       :desc "yank buffer path relative to project (prefix: other window)" "Y" #'my/yank-buffer-path-relative-to-project)
 
       ;; Git ("g" prefix)
       (:prefix ("g" . "git")

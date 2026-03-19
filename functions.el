@@ -300,28 +300,24 @@
   :lighter " Laptop"
   :keymap nil
   (if laptop-mode
+      ;; DONE also toggle fullscreen mode when enabling laptop-mode, don't disable it when disabling laptop-mode
       (progn
-        ;; Enable settings for all existing buffers
-        (setq doom-font (font-spec :family "Iosevka Comfy" :weight 'regular :size 22))
+        (setq doom-font (font-spec :family "Iosevka Comfy" :weight 'regular :size 40))
         (doom/reload-font)
-        (dolist (buf (buffer-list)) ;; Apply text scale to all open buffers
-          (with-current-buffer buf
-            (text-scale-increase 1)))
-        ;; Apply settings for all new files
+        (unless (eq (frame-parameter nil 'fullscreen) 'fullboth)
+          (toggle-frame-fullscreen))
         (add-hook 'find-file-hook 'enable-laptop-mode-on-file-open))
-    ;; Disable settings for all existing buffers
-    (setq doom-font (font-spec :family "Iosevka Comfy" :weight 'regular :size 15))
+    (setq doom-font (font-spec :family "Iosevka Comfy" :weight 'regular :size 20))
     (doom/reload-font)
-    (dolist (buf (buffer-list)) ;; Reset text scale for all open buffers
+    (dolist (buf (buffer-list))
       (with-current-buffer buf
         (text-scale-set 0)))
-    ;; Remove the hook for new files
     (remove-hook 'find-file-hook 'enable-laptop-mode-on-file-open)))
 
 ;; Function to apply laptop-mode settings to a new buffer
 (defun enable-laptop-mode-on-file-open ()
-  "Apply laptop mode font and text scaling to a newly opened buffer."
-  (text-scale-increase 1))
+  "Apply laptop mode font to a newly opened buffer."
+  nil)
 
 ;; Bind laptop-mode to SPC t L in Doom Emacs
 (map! :leader
@@ -558,7 +554,37 @@ The image data is piped to an external clipboard tool (`wl-copy',
               (if (zerop exit-code)
                   (message "Copied image to clipboard: %s" file)
                 (user-error "Failed to copy image (exit %d)" exit-code))))))))
-)
+  )
+
+(defun my/jupyter-show-buffer-repl-map ()
+  "Display a buffer showing the mapping between Python files and their Jupyter REPLs."
+  (interactive)
+  (let ((entries '()))
+    (dolist (buf (buffer-list))
+      (with-current-buffer buf
+        (when (and jupyter-current-client
+                   buffer-file-name
+                   (not (derived-mode-p 'jupyter-repl-mode)))
+          (let* ((client jupyter-current-client)
+                 (repl-buffer (condition-case nil
+                                  (oref client buffer)
+                                (error nil)))
+                 (repl-name (if (buffer-live-p repl-buffer)
+                                (buffer-name repl-buffer)
+                              "<dead REPL>")))
+            (push (cons (buffer-name buf) repl-name) entries)))))
+    (let ((map-buf (get-buffer-create "*jupyter-buffer-repl-map*")))
+      (with-current-buffer map-buf
+        (let ((inhibit-read-only t))
+          (erase-buffer)
+          (insert "Python Buffer → Jupyter REPL Mapping\n")
+          (insert (make-string 50 ?=) "\n\n")
+          (if entries
+              (dolist (entry (nreverse entries))
+                (insert (format "%-40s → %s\n" (car entry) (cdr entry))))
+            (insert "(no Python buffers associated with a Jupyter REPL)\n"))
+          (special-mode)))
+      (pop-to-buffer map-buf))))
 
 ;;DONE don't convet in place, create a new file with the same base name
 (defun my/markdown-buffer-to-org ()
@@ -588,3 +614,20 @@ The image data is piped to an external clipboard tool (`wl-copy',
               (org-mode)
               (save-buffer)))
           (message "Wrote Org file via pandoc: %s" output-file))))))
+
+(defun my/yank-buffer-path-relative-to-project (&optional other-window)
+  "Copy the current buffer's path relative to its project root.
+With prefix arg OTHER-WINDOW, copy the path of the buffer in the other window instead."
+  (interactive "P")
+  (let* ((buf (if other-window
+                  (window-buffer (next-window (selected-window) 'no-minibuf))
+                (current-buffer)))
+         (filename (or (buffer-file-name (or (buffer-base-buffer buf) buf))
+                       (buffer-local-value 'list-buffers-directory buf)
+                       (buffer-local-value 'default-directory buf))))
+    (let* ((project-root (with-current-buffer buf (doom-project-root)))
+           (path (abbreviate-file-name
+                  (file-relative-name filename (or project-root (file-name-directory
+                                                                 (directory-file-name filename)))))))
+      (kill-new path)
+      (message "Copied path (%s): %s" (buffer-name buf) path))))

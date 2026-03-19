@@ -169,7 +169,7 @@
   :after (:all org python)
 
   :config
-  (setq jupyter-eval-short-result-max-lines 5)
+  (setq jupyter-eval-short-result-max-lines 1)
   (map! :map jupyter-repl-mode-map
         :i "C-k" #'jupyter-repl-history-previous
         :i "C-j" #'jupyter-repl-history-next
@@ -190,8 +190,20 @@
         :localleader
         :n :desc "eval buffer" "eb" #'jupyter-eval-buffer
         :n :desc "eval function" "ed" #'jupyter-eval-defun
-        :nv :desc "eval region" "er" #'jupyter-eval-region)
+        :nv :desc "eval region" "er" #'jupyter-eval-region
+        :n :desc "eval enclosing block" "ef" #'my/jupyter-eval-enclosing-block)
 
+  ;; DONE I want to map "ef" to a new function that goes to the prev open paren
+  ;; being either ( or {, then evil-visual-line and evil-jump-item, and then
+  ;; calls jupyter-eval-region
+  (defun my/jupyter-eval-enclosing-block ()
+    "Eval the enclosing paren/brace block, expanded to full lines."
+    (interactive)
+    (save-excursion
+      (backward-up-list 1 t t)
+      (let* ((beg (line-beginning-position))
+             (end (progn (forward-sexp) (line-end-position))))
+        (jupyter-eval-region nil beg end))))
 
   (add-hook! 'jupyter-repl-mode-hook #'electric-pair-mode))
 
@@ -995,7 +1007,18 @@ the default tab-bar name uses the buffer name."
 (after! treemacs
   (setq! treemacs-sorting 'mod-time-desc)
   (evil-define-key 'treemacs treemacs-mode-map (kbd "y n") #'my/treemacs-copy-name-at-point)
-  )
+  ;; Hide heavy data dirs on SSHFS mounts to avoid stat'ing ~100k files.
+  (add-to-list 'treemacs-ignored-file-predicates
+               (lambda (filename absolute-path)
+                 (and (string-match-p "chronos-mount" absolute-path)
+                      (string= filename "data"))))
+  ;; Disable git for SSHFS mounts only — git status traverses the full
+  ;; worktree (including data/) over the network. Local projects keep git.
+  (defun my/treemacs--skip-sshfs-git (orig-fn path &rest args)
+    "Skip git status for paths under SSHFS mounts."
+    (unless (string-match-p "chronos-mount" path)
+      (apply orig-fn path args)))
+  (advice-add 'treemacs--git-status-process-function :around #'my/treemacs--skip-sshfs-git))
 
 (use-package! spacious-padding
   :config
@@ -1243,10 +1266,24 @@ When exiting copy-mode, restore the previous follow vs sticky-scroll state."
   ;; Enable global keybinding for the main menu
   (global-set-key (kbd "C-c a") #'ai-code-menu)
   (setq claude-code-terminal-backend 'vterm)
+  (setq claude-code-program-switches '("--dangerously-skip-permissions"))
   ;; (setq claude-code-terminal-backend 'eat)
   ;; Optional: Set up Magit integration for AI commands in Magit popups
   (with-eval-after-load 'magit
     (ai-code-magit-setup-transients)))
+
+(defun my/dired-add-marked-files-to-claude ()
+  "Add paths of marked Dired files to a Claude Code session.
+If multiple sessions exist for the current directory, prompt to select one.
+Uses the same session-selection mechanism as claude-code.el."
+  (interactive)
+  (unless (derived-mode-p 'dired-mode)
+    (user-error "Not in a Dired buffer"))
+  (let* ((files (dired-get-marked-files))
+         (cmd (mapconcat (lambda (f) (concat "@" f)) files " ")))
+    (when (string-empty-p cmd)
+      (user-error "No files marked"))
+    (claude-code--do-send-command cmd)))
 
 ;; install claude-code.el, using :depth 1 to reduce download size:
 (use-package! inheritenv)
@@ -1257,10 +1294,10 @@ When exiting copy-mode, restore the previous follow vs sticky-scroll state."
   :bind
   (:repeat-map my-claude-code-map ("M" . claude-code-cycle-mode)))
 :config
-(add-hook 'claude-code-process-environment-functions
-          (lambda (claude-buffer-name directory)
-            '("ANTHROPIC_BASE_URL=http://0.0.0.0:4000"
-              "ANTHROPIC_API_KEY=sk-ant-dummy")))
+;; (add-hook 'claude-code-process-environment-functions
+;;           (lambda (claude-buffer-name directory)
+;;             '("ANTHROPIC_BASE_URL=http://0.0.0.0:4000"
+;;               "ANTHROPIC_API_KEY=sk-ant-dummy")))
 (claude-code-mode)
 
 ;; for slash commands popup
@@ -1346,3 +1383,9 @@ With optional ABSOLUTE, convert to absolute paths."
   (setq denote-silo-directories
         (list denote-directory
               "~/Documents/silverbullet-notes/")))
+
+(use-package! dirvish
+  :config
+  (setq! dirvish-reuse-session t)
+  )
+

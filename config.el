@@ -257,6 +257,7 @@
 (put 'tab-bar-tab-inactive 'face-alias 'tab-bar)
 
 ;; Dired
+(setq dired-listing-switches "-laht --group-directories-first")
 (dired-async-mode 1)
 (setq dired-compress-file-alist '(("\\.gz\\'" . "gzip -9f %i") ("\\.bz2\\'" . "bzip2 -9f %i") ("\\.xz\\'" . "xz -9f %i") ("\\.zst\\'" . "zstd -qf -19 --rm -o %o %i") ("\\.zip\\'" . "zip %o -r --filesync %i")))
 

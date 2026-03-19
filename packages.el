@@ -50,6 +50,8 @@
 
 (package! org-download)
 (package! denote)
+(package! denote-markdown)
+(package! denote-silo)
 (package! consult-notes)
 (package! citar-denote)
 (package! olivetti)

@@ -74,7 +74,17 @@
 
 ;; Load the theme of your choice.
 (setq modus-themes-to-toggle '(modus-operandi-tinted modus-vivendi-tinted))
-(set-face-attribute 'modus-themes-completion-match-0 nil :weight 'semibold :foreground "#808000")
+(add-hook 'modus-themes-after-load-theme-hook
+          (lambda ()
+            (set-face-attribute 'modus-themes-completion-match-0 nil
+                                :weight 'semibold :foreground "#808000")))
+
+;; Doom loads the theme via plain load-theme, which skips modus-themes'
+;; own loading function and doesn't apply palette overrides or run hooks.
+;; This forces a proper reload after Doom's full init is done.
+(add-hook 'doom-after-init-hook
+          (lambda () (modus-themes-select 'modus-operandi-tinted))
+          100)
 
 (set-face-attribute 'fixed-pitch nil :height 1.0)
 (set-face-attribute 'variable-pitch nil :height 1.0)
