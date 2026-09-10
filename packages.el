@@ -102,8 +102,6 @@
                    ("terminfo/65" "terminfo/65/*")
                    ("integration" "integration/*")
                    (:exclude ".dir-locals.el" "*-tests.el"))))
-(package! ai-code-interface
-  :recipe (:host github :repo  "tninja/ai-code-interface.el":files ("*.el")))
 (package! aider :recipe (:host github :repo "tninja/aider.el" ))
 (package! inheritenv
   :recipe (:type git :host github :repo "purcell/inheritenv"))

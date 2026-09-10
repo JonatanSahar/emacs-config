@@ -1256,90 +1256,6 @@ When exiting copy-mode, restore the previous follow vs sticky-scroll state."
 ;;   :after magit
 ;;   :config (magit-todos-mode 1))
 
-;; `ai-code' provides a unified interface for various AI coding assistants.
-;; It allows switching between backends like Claude Code and provides
-;; integration with Magit for AI-generated commit messages and code analysis.
-(use-package! ai-code
-  :ensure nil
-  :config
-  (ai-code-set-backend 'codex)
-  ;; Enable global keybinding for the main menu
-  (global-set-key (kbd "C-c a") #'ai-code-menu)
-  (setq claude-code-terminal-backend 'vterm)
-  (add-hook! 'vterm-mode-hook
-    (defun my/claude-buffer-setup ()
-      (when (string-match-p "^\\*claude:" (buffer-name))
-        (evil-emacs-state)
-        (setq-local writeroom-width 90)
-        (writeroom-mode 1)
-        (text-scale-decrease 1))))
-  (setq ai-code-codex-cli-program-switches
-        '("--ask-for-approval" "never"
-          "--sandbox" "danger-full-access"))
-  (setq claude-code-program-switches
-        '("--dangerously-skip-permissions"))
-  ;; (setq claude-code-terminal-backend 'eat)
-  ;; Optional: Set up Magit integration for AI commands in Magit popups
-  (with-eval-after-load 'magit
-    (ai-code-magit-setup-transients))
-
-  ;; Advice: when a region is selected, append it as context to the prompt
-  ;; (with file path and line range) instead of using it as initial input.
-  (defun my/ai-code-send-command-with-region (orig-fn arg)
-    "Around advice for `ai-code-send-command'.
-When a region is active, capture it and append as context after the user's prompt."
-    (let* ((clipboard-context (when arg (ai-code--get-clipboard-text)))
-           (has-clipboard-context (and clipboard-context
-                                       (string-match-p "\\S-" clipboard-context)))
-           (relative-path
-            (let (path)
-              (cl-letf (((symbol-function 'kill-new)
-                         (lambda (string &optional _replace _yank-handler)
-                           (setq path string)))
-                        ((symbol-function 'message)
-                         (lambda (&rest _args) nil)))
-                (my/yank-buffer-path-relative-to-project))
-              path)))
-      (if (use-region-p)
-          (let* ((region-start (region-beginning))
-                 (region-end (region-end))
-                 (region-text (buffer-substring-no-properties region-start region-end))
-                 (start-line (line-number-at-pos region-start))
-                 (end-line (line-number-at-pos region-end))
-                 (region-location-info
-                  (when relative-path
-                    (format "%s#L%d-L%d" relative-path start-line end-line)))
-                 (prompt-label (if has-clipboard-context
-                                   "Send to AI (selected code + clipboard context): "
-                                 "Send to AI (selected code): ")))
-            (deactivate-mark)
-            (when-let* ((prompt (ai-code-read-string prompt-label "")))
-              (let ((final-prompt
-                     (concat prompt
-                             "\n\n\nSelected region:\n\n"
-                             (when region-location-info
-                               (concat region-location-info "\n"))
-                             region-text
-                             (when relative-path
-                               (concat "\n\nFiles: @" relative-path))
-                             (when has-clipboard-context
-                               (concat "\n\nClipboard context:\n" clipboard-context)))))
-                (ai-code--insert-prompt final-prompt))))
-        (if relative-path
-            (when-let* ((prompt-label
-                         (if has-clipboard-context
-                             "Send to AI (file path + clipboard context): "
-                           "Send to AI (file path): "))
-                        (prompt (ai-code-read-string prompt-label "")))
-              (let ((final-prompt
-                     (concat prompt
-                             "\n\nFiles: @" relative-path
-                             (when has-clipboard-context
-                               (concat "\n\nClipboard context:\n" clipboard-context)))))
-                (ai-code--insert-prompt final-prompt)))
-          (funcall orig-fn arg)))))
-
-  (advice-add 'ai-code-send-command :around #'my/ai-code-send-command-with-region))
 
 (defun my/dired-add-marked-files-to-claude ()
   "Add paths of marked Dired files to a Claude Code session.
@@ -1390,6 +1306,31 @@ Uses the same session-selection mechanism as claude-code.el."
       (agent-shell-google-make-authentication :api-key (getenv "GEMINI_API_KEY")))
 (setq agent-shell-openai-authentication
       (agent-shell-openai-make-authentication :login t))
+
+;; Show the agent in a right-hand side window instead of taking over the
+;; current one. `agent-shell-toggle' (SPC a a) shows/hides it.
+(setq agent-shell-display-action
+      '(display-buffer-in-side-window
+        (side . right)
+        (window-width . 0.42)))
+
+;; Files opened from @mentions / links open beside the conversation,
+;; rather than replacing it.
+(setq agent-shell-file-display-action '(display-buffer-pop-up-window))
+
+;; TUI-style queueing: while the agent is busy, just start typing in the
+;; shell buffer and the keystroke opens the queue minibuffer (prefilled
+;; with that char). RET there enqueues; C-g abandons. Same upstream idiom
+;; `agent-shell-send-region' uses when the shell is busy.
+(defun my/agent-shell-self-insert-or-queue (n)
+  "Queue a prompt when the shell is busy, else `self-insert-command'."
+  (interactive "p")
+  (if (and (derived-mode-p 'agent-shell-mode) (shell-maker-busy))
+      (agent-shell-prompt-queue
+       (agent-shell--prompt-queue-read :initial (string last-command-event)))
+    (self-insert-command n last-command-event)))
+(define-key agent-shell-mode-map [remap self-insert-command]
+            #'my/agent-shell-self-insert-or-queue)
 
 (use-package! logview)
 (use-package! aider

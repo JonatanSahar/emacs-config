@@ -433,7 +433,7 @@
 
       ;; Buffer Management ("b" prefix)
 
-      (:prefix ("b" . "buffer")
+      (:prefix "b"   ; plain string: extend Doom's map, don't replace it
        :desc "switch to buffer" "b" #'consult-buffer
        :desc "buffer to new window" "B" #'consult-buffer-other-window
        :desc "buffer to new frame" "F" #'consult-buffer-other-frame
@@ -443,7 +443,7 @@
        :desc "open buffer and switch tabspace" "t" #'tabspaces-switch-buffer-and-tab)
 
       ;; File / Project ("f" prefix - using consult where possible)
-      (:prefix ("f" . "file/find")
+      (:prefix "f"   ; plain string: extend Doom's map, don't replace it
        :desc "copy buffer name"  "c" #'my/get-buffer-name
        ;; :desc "search for file in dir (fd)"  "f" #'consult-fd
        :desc "find file"  "f" #'find-file
@@ -451,7 +451,7 @@
        :desc "yank buffer path relative to project (prefix: other window)" "Y" #'my/yank-buffer-path-relative-to-project)
 
       ;; Git ("g" prefix)
-      (:prefix ("g" . "git")
+      (:prefix "g"   ; plain string: extend Doom's map, don't replace it
        :nv "F" #'magit-pull ; Pull changes
        :nv "p" #'magit-push) ; Push changes
 
@@ -461,7 +461,7 @@
        :desc "send the current region to GPTel" "R" #'gptel-send)
 
       ;; Insert Stuff ("i" prefix)
-      (:prefix ("i" . "insert")
+      (:prefix "i"   ; plain string: extend Doom's map, don't replace it
        :nv :desc "copy and comment line(s)" "C" #'evilnc-copy-and-comment-lines
        :desc "make evil-mc-cursor here" "c" #'my/make-cursor-here
        :desc "add line above" "k" #'+evil/insert-newline-above
@@ -489,8 +489,6 @@
 
       ;; My Custom Commands ("k" prefix)
       (:prefix ("k" . "My commands")
-       :desc "ai-code-assistant" "a" #'ai-code-menu
-       :desc "aidermacs transient" "A" #'aidermacs-transient-menu
        :desc "select header content" "y" #'my/visual-inside-org-header
        :desc "copy header content" "h" #'my/yank-org-headline
        :desc "gptel-menu" "g" #'gptel-menu ; Duplicate of G G?
@@ -540,7 +538,7 @@
        :nv "B" #'denote-link-find-backlink) ; Find backlink for link at point
 
       ;; Org Mode ("o" prefix)
-      (:prefix ("o" . "org")
+      (:prefix "o"   ; plain string: extend Doom's map, don't replace it
        :desc "agenda for literature followup" "al" #'(lambda () (interactive) (org-agenda nil "l"))
        :desc "insert org-ref link" "r" #'org-ref-insert-link ; Moved from global ir
        ;; Shell related commands under 'o' prefix
@@ -550,11 +548,13 @@
        :nv :desc "dired in a new window" "D" #'consult-dir) ; Open dired in other window
 
       ;; Quit / Frame ("q" prefix)
-      (:prefix ("q" . "quit/frame")
+      ;; Plain-string :prefix binds INTO Doom's existing quit/session map.
+      ;; A cons (KEY . DESC) would create a fresh map and drop all 11 defaults.
+      (:prefix "q"
        :desc "force delete frame" "f" #'my/force-delete-frame) ; Close frame without prompt
 
       ;; Search ("s" prefix)
-      (:prefix ("s" . "search")
+      (:prefix "s"   ; plain string: extend Doom's map, don't replace it
        :desc "search online" "G" #'+lookup/online ; Lookup online (Doom specific?)
        :desc "search org outline" "o" #'consult-outline ; Search headings in Org buffer
        :desc "search project/dir (rg)" "p" #'consult-ripgrep ; Ripgrep in project
@@ -565,7 +565,7 @@
        :desc "send query to gtp" "g" #'gptel-quick) ; Quick GPT query
 
       ;; Toggle / Treemacs ("t" prefix)
-      (:prefix ("t" . "toggle/treemacs")
+      (:prefix "t"   ; plain string: extend Doom's map, don't replace it
        :nv "t" #'treemacs ; Toggle Treemacs file tree
        :nv "T" #'popper-toggle ; Toggle Popper popup window
        :nv "j" #'popper-toggle ; Alternative toggle Popper
@@ -574,14 +574,10 @@
        :nv "i" #'my/toggle-org-timer ; Toggle Org timer
        :nv "I" #'tmr) ; Start/show timer (tmr package?)
 
-      ;; Window Management ("w" prefix)
-      (:prefix ("w" . "window")
-       :desc "ace-window" "w" #'ace-window ; Select window visually (alternative)
-       :desc "equate window sizes" "e" #'balance-windows
-       :desc "minimize window" "mm" #'minimize-window
-       :desc "minimize window" "O" #'minimize-window ; Alternative minimize
-       :desc "maximize window" "mM" #'doom/window-maximize-buffer ; Maximize (Doom specific)
-       :desc "window resize hydra" "." 'hydra-window/body) ; Hydra for resizing
+      ;; Window Management: see the `evil-window-map' block below. SPC w is
+      ;; Doom's `evil-window-map'; defining a :prefix here would replace it
+      ;; wholesale and lose every default (d delete, u winner-undo, s/v split,
+      ;; hjkl motion, o enlargen, ...).
 
       ;; Tab Management ("TAB" prefix)
       (:prefix-map ("TAB" . "Tabs")
@@ -645,3 +641,89 @@ _p_rev       _u_pper              _=_: upper/lower       _R_esolve
 
 (map! :map evil-ex-map "M-y" #'yank)
 (map! :map evil-ex-map "C-v" #'yank)
+
+;; =========================
+;; Agents ("a" prefix)
+;; =========================
+;; Doom+ binds SPC a to `embark-act' (sources/doom+/modules/completion/vertico/config.el).
+;; This file loads after the modules, so the rebind below wins. Embark moves to SPC A.
+(map! :leader
+      :desc "Actions (embark)" "A" #'embark-act
+
+      (:prefix ("a" . "agents")
+       ;; agent-shell: session
+       :desc "toggle shell"        "a" #'agent-shell-toggle
+       :desc "new shell"           "n" #'agent-shell-new-shell
+       :desc "switch shell buffer" "b" #'agent-shell-switch-buffer
+       :desc "fork session"        "F" #'agent-shell-fork
+       :desc "resume session"      "R" #'agent-shell-resume-session
+       :desc "open transcript"     "t" #'agent-shell-open-transcript
+
+       ;; agent-shell: sending context
+       :desc "send region/dwim"    "r" #'agent-shell-send-dwim
+       :desc "send file"           "f" #'agent-shell-send-file
+       :desc "send screenshot"     "S" #'agent-shell-send-screenshot
+       :desc "send clipboard image" "p" #'agent-shell-send-clipboard-image
+
+       ;; agent-shell: driving the turn
+       :desc "queue prompt"        "q" #'agent-shell-prompt-queue
+       :desc "steer (mid-turn)"    "s" #'agent-shell-prompt-steer
+       :desc "interrupt"           "k" #'agent-shell-interrupt
+
+       ;; agent-shell: session config
+       :desc "set model"           "m" #'agent-shell-set-session-model
+       :desc "set session mode"    "M" #'agent-shell-set-session-mode
+       :desc "set thought level"   "T" #'agent-shell-set-session-thought-level
+
+       ;; other agent frontends
+       (:prefix ("o" . "other frontends")
+        :desc "aidermacs"   "a" #'aidermacs-transient-menu
+        :desc "claude-code" "c" #'claude-code-transient
+        :desc "gemini-cli"  "g" #'gemini-cli-transient)))
+
+;; agent-shell buffer: `agent-shell-mode-map' binds bare letters (n p r TAB + - 0),
+;; which evil's normal state shadows. Re-bind them per-state so they work.
+;; The map's C-c bindings already work and are left untouched.
+(map! :map agent-shell-mode-map
+      ;; No bare-letter bindings here: this is a buffer you type into, and
+      ;; :n scoping does not hold reliably in comint-derived buffers (q was
+      ;; quitting the window mid-insert). Only chorded / g- / bracket-prefixed.
+      ;; Upstream's own C-c bindings still apply: C-c C-c interrupt,
+      ;; C-c C-m mode, C-c C-v model, C-c C-t thought level, C-c C-s config.
+      :n "gj"    #'agent-shell-next-item
+      :n "gk"    #'agent-shell-previous-item
+      :n "C-M-u" #'agent-shell-backward-up-item
+      ;; permission prompt navigation
+      :n "]p"    #'agent-shell-next-permission-button
+      :n "[p"    #'agent-shell-previous-permission-button
+      :n "gp"    #'agent-shell-jump-to-latest-permission-button-row
+      ;; queue/steer without leaving the shell
+      ;; (C-c C-s is taken upstream by agent-shell-set-session-config-option)
+      :ni "C-c C-q" #'agent-shell-prompt-queue
+      :ni "C-c C-r" #'agent-shell-prompt-steer)
+
+;; Insert state: C-c o opens the SPC a "agents" submenu (SPC is not leader
+;; while inserting). Org's own C-c o (agenda) still wins in org buffers.
+(map! :i "C-c o" (lookup-key doom-leader-map "a"))
+
+;; Diff review buffers. Mirrors the upstream `agent-shell-diff-mode-map'
+;; (y accept, C-c C-c reject, n/p hunks, RET open, q kill) into evil normal
+;; state, where the bare letters would otherwise be shadowed.
+(map! :map agent-shell-diff-mode-map
+      :n "n"   #'diff-hunk-next
+      :n "p"   #'diff-hunk-prev
+      :n "y"   #'agent-shell-diff-accept-all
+      :n "RET" #'agent-shell-diff-open-file
+      :n "q"   #'kill-current-buffer)
+
+;; SPC w -- extend Doom's `evil-window-map' rather than replacing it, so all
+;; the built-in window commands survive alongside these additions.
+;; Defaults worth remembering: d delete, u/C-r winner undo/redo, s/v split,
+;; hjkl move, HJKL relocate, o enlargen, = balance, | / _ set width/height.
+(map! :map evil-window-map
+      :desc "ace-window"            "w"  #'ace-window ; replaces evil-window-next
+      :desc "equate window sizes"   "e"  #'balance-windows ; alias for =
+      :desc "minimize window"       "O"  #'minimize-window
+      :desc "minimize window"       "mm" #'minimize-window
+      :desc "maximize buffer"       "mM" #'doom/window-maximize-buffer
+      :desc "window resize hydra"   "."  #'hydra-window/body)

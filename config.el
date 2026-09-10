@@ -330,3 +330,12 @@
 (delete-selection-mode 1)
 
 (setq dired-kill-when-opening-new-dired-buffer t)
+
+;; The :emacs undo module sets undo-limit/strong-limit inside undo-fu's
+;; :config, which runs on `doom-first-buffer' -- i.e. AFTER the top-level
+;; `setq undo-limit 80000000' above, silently clobbering it back to 256kb.
+;; Re-assert after the package loads so the intent actually sticks.
+;; (undo-outer-limit left at the module's 36mb; nothing here needs it raised.)
+(after! undo-fu
+  (setq undo-limit        80000000     ; 80mb  (module default: 256kb)
+        undo-strong-limit 120000000))  ; 120mb (module default: 2mb)
