@@ -1,0 +1,1 @@
+{"scripts/jupytext_monitor.py::start_watching": {"line_start": 62, "line_end": 98, "body_hash": "556c408c", "confidence": "high", "path": "scripts/jupytext_monitor.py"}, "scripts/jupytext_monitor.py::JupytextHandler": {"line_start": 22, "line_end": 60, "body_hash": "5481942b", "confidence": "high", "path": "scripts/jupytext_monitor.py"}}

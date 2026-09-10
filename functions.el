@@ -161,7 +161,21 @@
                (cons "\\`\\*aidermacs.*\\'"
                      (cons 'display-buffer-reuse-window
                            '((reusable-frames . t)
+                             (inhibit-switch-frame . nil)))))
+
+  (add-to-list 'display-buffer-alist
+               (cons "\\`\\*claude.*\\'"
+                     (cons 'display-buffer-reuse-window
+                           '((reusable-frames . t)
+                             (inhibit-switch-frame . nil)))))
+
+  (add-to-list 'display-buffer-alist
+               (cons "\\`\\*codex.*\\'"
+                     (cons 'display-buffer-reuse-window
+                           '((reusable-frames . t)
                              (inhibit-switch-frame . nil))))))
+
+(my/setup-display-rules)
 
 ;; Jupyter cell execution status (per buffer)
 (defface my/jupyter-cell-status-running

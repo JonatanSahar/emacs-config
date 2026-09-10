@@ -1,0 +1,76 @@
+
+
+** [2025-11-24 Mon 18:24]
+Please implement this requirement comment on line 365 in-place: ';; add a function for use in org-mode buffers when standing on an image link. I want to copy the image to clipboard, I'm thinking of running a shell command on the actual file path, since as far as I know images are only rendered on screen and not really present in the buffer. Write it for linux only, I'll use it on this machine.'. It is already inside current code. Please replace it with implementation. Keep the existing code structure and implement just this specific comment. Files: @functions.el
+
+
+** [2025-12-10 Wed 09:14]
+mount_chronos is defined in my .bashrc, and is not recognized as a command Selected region: functions.el#L270-L273 (defun my/mount_chronos () (interactive) (start-process "mount-chronos-process" "*mount-chronos-output*" "mount_chronos")) Function: my/mount_chronos Files: @functions.el Note: Please apply the code change to the selected region specified above.
+
+
+** [2026-01-07 Wed 14:24]
+Please implement code for this requirement comment on line 426: ';;write a function converting the current md buffer to org mode using pandoc'. Keep the comment in place and ensure it begins with a DONE prefix (change TODO to DONE or prepend DONE if needed). If this is a pure new code block, place it after the comment; otherwise keep the existing structure and make corresponding change for the context. Files: @functions.el
+
+
+** [2026-01-07 Wed 14:24]
+Please implement code for this requirement comment on line 426: ';;write a function converting the current md buffer to org mode using pandoc'. Keep the comment in place and ensure it begins with a DONE prefix (change TODO to DONE or prepend DONE if needed). If this is a pure new code block, place it after the comment; otherwise keep the existing structure and make corresponding change for the context. Files: @functions.el
+
+
+** [2026-01-07 Wed 14:28]
+Please implement code for this requirement comment on line 426: ';; don't convet in place, create a new file with the same base name'. Keep the comment in place and ensure it begins with a DONE prefix (change TODO to DONE or prepend DONE if needed). If this is a pure new code block, place it after the comment; otherwise keep the existing structure and make corresponding change for the context. Function: my/markdown-buffer-to-org Files: @functions.el
+
+
+** [2026-01-12 Mon 14:36]
+Please implement code for this requirement comment block in the selected region first. After implementing, keep the comment in place and ensure it begins with a DONE prefix (change TODO to DONE or prepend DONE if no prefix). If this is a pure new code block, place it after the comment; otherwise keep the existing structure and make corresponding change for the context. Selected region: package-config.el#L1003-L1004 ;; I want you to write a function that toggles vterm copy mode on and off, and bind it to C-c C-u so C-c C-u resumes the previous follow mode if in copy mode. Or better yet, make q exit copy mode and resume follow mode. Function: vterm Files: @package-config.el
+
+
+** [2026-01-14 Wed 09:03]
+How to fix the error in this code? Please analyze the error, explain the root cause, and provide the corrected code to resolve the issue: Context: Debugger entered--Lisp error: (wrong-type-argument number-or-marker-p nil) vterm-cursor-in-command-buffer-p() vterm-goto-char(431) evil-collection-vterm-insert() funcall-interactively(evil-collection-vterm-insert) command-execute(evil-collection-vterm-insert) Note: Please focus on how to fix the error. Your response should include: 1. A brief explanation of the root cause of the error. 2. A code snippet with the fix. 3. An explanation of how the fix addresses the error.
+
+
+** [2026-01-14 Wed 09:03]
+How to fix the error in this code? Please analyze the error, explain the root cause, and provide the corrected code to resolve the issue: Context: Debugger entered--Lisp error: (wrong-type-argument number-or-marker-p nil) vterm-cursor-in-command-buffer-p() vterm-goto-char(431) evil-collection-vterm-insert() funcall-interactively(evil-collection-vterm-insert) command-execute(evil-collection-vterm-insert) Note: Please focus on how to fix the error. Your response should include: 1. A brief explanation of the root cause of the error. 2. A code snippet with the fix. 3. An explanation of how the fix addresses the error.
+
+
+** [2026-01-19 Mon 11:41]
+How to fix the error in this code? Please analyze the error, explain the root cause, and provide the corrected code to resolve the issue: Context: Selected code: (use-package! claude-code :bind-keymap ("C-c C" . claude-code-command-map) ;; or your preferred key ;; Optionally define a repeat map so that "M" will cycle thru Claude auto-accept/plan/confirm modes after invoking claude-code-cycle-mode / C-c M. :bind (:repeat-map my-claude-code-map ("M" . claude-code-cycle-mode))) Files: @package-config.el Note: Please focus on how to fix the error. Your response should include: 1. A brief explanation of the root cause of the error. 2. A code snippet with the fix. 3. An explanation of how the fix addresses the error.
+
+
+** [2026-01-21 Wed 10:50]
+How to fix the error in this code? Please analyze the error, explain the root cause, and provide the corrected code to resolve the issue: Context: --------------------------------------------------------------------------- ValueError Traceback (most recent call last) Cell In[65], line 1 ----> 1 A, h = mmc.classify( 2 adata, 3 h, 4 "lin", 5 retrain=True, 6 weight_integration=True, 7 data_key="protein", 8 batch_key=None, 9 ) 10 A = mmc.terminal_names(A) 11 h.display() File /media/chronos/Env_Storage/yonatan/rapids_singlecell/lib/python3.13/site-packages/mmochi/classifier.py:307, in classify(adata, hierarchy, key_added, data_key, x_data_key, x_modalities, batch_key, retrain, plot_thresholds, reduce_features_min_cells, allow_spike_ins, enforce_holdout, probabilities_suffix, resample_method, weight_integration, X, features_used, probability_cutoff, features_limit, skip_to, end_at, reference, external_holdout) 305 if retrain is False: 306 reduce_features_min_cells = 0 --> 307 X,features_used = classifier_setup(adata,x_modalities,x_data_key,reduce_features_min_cells,features_limit=features_limit) 308 features_used_X = features_used 309 logg.print(f"Set up complete.\nUsing {len(features_used_X)} features") File /media/chronos/Env_Storage/yonatan/rapids_singlecell/lib/python3.13/site-packages/mmochi/classifier.py:83, in classifier_setup(adata, x_modalities, data_key, reduce_features_min_cells, features_limit) 81 obsm_key = list(obsm_key)[0] 82 logg.print('Using .X and '+str(obsm_key)) ---> 83 X = sp.csr_matrix(adata.X) 84 X = sp.hstack([X,sp.csr_matrix(adata.obsm[obsm_key])],format='csr') 85 utils._validate_names(adata.var_names) File /media/chronos/Env_Storage/yonatan/rapids_singlecell/lib/python3.13/site-packages/scipy/sparse/_compressed.py:95, in _cs_matrix.__init__(self, arg1, shape, dtype, copy, maxprint) 92 if arg1.ndim > 2: 93 raise ValueError(f"CSR arrays don't yet support {arg1.ndim}D.") ---> 95 coo = self._coo_container(arg1, dtype=dtype) 96 arrays = coo._coo_to_compressed(self._swap) 97 self.indptr, self.indices, self.data, self._shape = arrays File /media/chronos/Env_Storage/yonatan/rapids_singlecell/lib/python3.13/site-packages/scipy/sparse/_coo.py:92, in _coo_base.__init__(self, arg1, shape, dtype, copy, maxprint) 89 raise ValueError(message) 91 index_dtype = self._get_index_dtype(maxval=max(self._shape)) ---> 92 coords = M.nonzero() 93 self.coords = tuple(idx.astype(index_dtype, copy=False) 94 for idx in coords) 95 self.data = getdata(M[coords], copy=copy, dtype=dtype) File /media/chronos/Env_Storage/yonatan/rapids_singlecell/lib/python3.13/site-packages/cupyx/scipy/sparse/_base.py:74, in spmatrix.__bool__(self) 72 return self.nnz != 0 73 else: ---> 74 raise ValueError('The truth value of an array with more than one ' 75 'element is ambiguous. Use a.any() or a.all().') ValueError: The truth value of an array with more than one element is ambiguous. Use a.any() or a.all(). Note: Please focus on how to fix the error. Your response should include: 1. A brief explanation of the root cause of the error. 2. A code snippet with the fix. 3. An explanation of how the fix addresses the error.
+
+
+** [2026-02-11 Wed 16:27]
+Please implement code for this requirement comment on line 228: ';; add exchange-point-and-mark after calling code-cells-mark-cell' first. After implementing, keep the comment in place and ensure it begins with a DONE prefix (change TODO to DONE or prepend DONE if needed). If this is a pure new code block, place it after the comment; otherwise keep the existing structure and make corresponding change for the context. Files: @package-config.el
+
+
+** [2026-02-19 Thu 15:09]
+what I want here it to invoke evil's visual mode inside object, to mark the current object Selected region: package-config.el#L169-L170 (kbd "v i o") Function: code-cells Files: @package-config.el Note: Please apply the code change to the selected region specified above.
+
+
+** [2026-02-19 Thu 15:39]
+for some reason the mark still appears on screen after this, even though it's not really - any key press makes it disappear Selected region: package-config.el#L165-L166 (evil-force-normal-state) Function: code-cells Files: @package-config.el Note: Please apply the code change to the selected region specified above.
+
+
+** [2026-03-05 Thu 15:54]
+Please implement code for this requirement comment block in the selected region first. After implementing, keep the comment in place and ensure it begins with a DONE prefix (change TODO to DONE or prepend DONE if no prefix). If this is a pure new code block, place it after the comment; otherwise keep the existing structure and make corresponding change for the context. Selected region: package-config.el#L193-L194 ;; I want to map "ef" to a new function that goes to the prev open paren being either ( or {, then evil-visual-line and evil-jump-item, and then calls jupyter-eval-region Function: jupyter Files: @package-config.el
+
+
+** [2026-03-19 Thu 12:18]
+Please implement code for this requirement comment on line 303: ';; also toggle fullscreen mode when enabling laptop-mode, don't disable it when disabling laptop-mode' first. After implementing, keep the comment in place and ensure it begins with a DONE prefix (change TODO to DONE or prepend DONE if needed). If this is a pure new code block, place it after the comment; otherwise keep the existing structure and make corresponding change for the context. Function: laptop-mode Files: @functions.el
+
+
+** [2026-03-19 Thu 16:28]
+add evil prev line after entering copy mode Selected region: package-config.el#L1167-L1168 :nvi "C-u" #'vterm-copy-mode Function: vterm Files: @package-config.el Note: Please apply the code change to the selected region specified above.
+
+
+** [2026-03-26 Thu 10:00]
+test Selected region: package-config.el#L1275-L1276 ;; Advice: when a region is selected, append it as context to the prompt
+
+
+** [2026-04-09 Thu 13:53]
+when no code is selected, I want to append just the file's relative path. also make sure relative path is what's appended when region is active Selected region: package-config.el#L1278-L1279 (defun my/ai-code-send-command-with-region (orig-fn arg) Function: ai-code Files: @package-config.el Note: Please apply the code change to the selected region specified above.
+
+
+** [2026-05-25 Mon 14:39]
+add the equivalent for claude code Selected region: package-config.el#L1276-L1279 (setq ai-code-codex-cli-program-switches '("--ask-for-approval" "never" "--sandbox" "danger-full-access")) Function: ai-code Files: @package-config.el Note: This is a question about the selected region - please do not modify the code.

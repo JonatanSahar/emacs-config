@@ -30,6 +30,9 @@
       :nv "C-h" #'windmove-left)
 (evil-define-key 'insert jupyter-repl-mode-map (kbd "C-j") nil) ; Unbind C-j in Jupyter REPL insert
 (evil-define-key 'insert jupyter-repl-mode-map (kbd "C-k") nil) ; Unbind C-k in Jupyter REPL insert
+;; Let C-j pass through to vterm as a newline (needed for coding agents)
+(after! vterm
+  (evil-define-key 'insert vterm-mode-map (kbd "C-j") #'vterm-send-C-j))
 (evil-define-key 'insert jupyter-repl-mode-map (kbd "C-S-j") #'evil-mc-make-cursor-move-next-line) ; MC in Jupyter REPL
 (evil-define-key 'insert jupyter-repl-mode-map (kbd "C-S-k") #'evil-mc-make-cursor-move-prev-line) ; MC in Jupyter REPL
 
