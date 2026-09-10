@@ -1,7 +1,5 @@
 ;;; jupyter-timer-fix.el --- Fix for Jupyter execution timer in source buffers -*- lexical-binding: t; -*-
 
-(require 'jupyter-repl)
-
 ;;; 0. Safety Definitions & Variables
 (defvar jupyter-repl-show-execution-time t
   "Whether to show execution time in modeline during cell execution.")
@@ -24,6 +22,20 @@
 
 (defvar-local jupyter-repl--last-duration nil
   "Duration of the last completed execution in seconds.")
+
+;;; 0.05 Duration formatting
+(defun jupyter-repl--format-execution-time (seconds)
+  "Format SECONDS (a float) as a short human-readable duration.
+Examples: \"0.4s\", \"1.2s\", \"1m 03s\", \"1h 02m 03s\"."
+  (let* ((secs (max 0 (float seconds)))
+         (total (floor secs))
+         (h (/ total 3600))
+         (m (/ (% total 3600) 60))
+         (s (% total 60)))
+    (cond
+     ((> h 0) (format "%dh %02dm %02ds" h m s))
+     ((> m 0) (format "%dm %02ds" m s))
+     (t (format "%.1fs" secs)))))
 
 ;;; 0.1 Helper to choose where execution state lives
 (defun jupyter-repl--execution-state-buffer (&optional client)
@@ -182,14 +194,6 @@ Ensures we don't crash if something is missing."
 (add-hook 'jupyter-repl-mode-hook #'jupyter-timer-setup-header-line)
 (add-hook 'jupyter-repl-interaction-mode-hook #'jupyter-timer-setup-header-line)
 
-;; Apply to existing buffers immediately
-(dolist (buf (buffer-list))
-  (with-current-buffer buf
-    (when (or (derived-mode-p 'jupyter-repl-mode)
-              (and (boundp 'jupyter-repl-interaction-mode)
-                   jupyter-repl-interaction-mode))
-      (jupyter-timer-setup-header-line))))
-
 ;;; 5. Patch Handlers to update all buffers AND detect status changes
 
 (defun jupyter-timer-fix--handle-status-around (orig-fun client req msg)
@@ -251,12 +255,8 @@ This ensures the timer starts even if jupyter-repl.el is outdated."
                 (jupyter-repl--on-execution-complete t))))))))
     res))
 
-;; Remove old advice if exists (cleanup from previous attempts)
-(advice-remove 'jupyter-handle-status #'jupyter-timer-fix--update-status-after)
-;; Apply new advice
 (advice-add 'jupyter-handle-status :around #'jupyter-timer-fix--handle-status-around)
 (advice-add 'jupyter-handle-execute-reply :around #'jupyter-timer-fix--update-reply-after)
 (advice-add 'jupyter-handle-message :around #'jupyter-timer-fix--handle-message-around)
 
-(message "Loaded jupyter-timer-fix.el (FORCE FIX Version)")
 (provide 'jupyter-timer-fix)

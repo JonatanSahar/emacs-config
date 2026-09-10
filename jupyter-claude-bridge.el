@@ -5,19 +5,19 @@
 
 ;;; Capture kernel connection file for Claude Code
 
-(defvar jupyter-timer-fix--remote-runtime-dir nil
+(defvar my/jupyter-bridge--remote-runtime-dir nil
   "Cached remote Jupyter runtime directory path on chronos.")
 
-(defun jupyter-timer-fix--get-remote-runtime-dir ()
+(defun my/jupyter-bridge--get-remote-runtime-dir ()
   "Return (cached) remote Jupyter runtime dir, fetching via SSH if needed."
-  (unless jupyter-timer-fix--remote-runtime-dir
+  (unless my/jupyter-bridge--remote-runtime-dir
     (let ((result (string-trim
                    (shell-command-to-string "ssh yonatan@chronos '/media/chronos/Env_Storage/yonatan/rapids_singlecell/bin/jupyter --runtime-dir'"))))
       (when (and result (not (string-empty-p result)))
-        (setq jupyter-timer-fix--remote-runtime-dir result))))
-  jupyter-timer-fix--remote-runtime-dir)
+        (setq my/jupyter-bridge--remote-runtime-dir result))))
+  my/jupyter-bridge--remote-runtime-dir)
 
-(defun jupyter-timer-fix--export-kernel-for-claude ()
+(defun my/jupyter-bridge--export-kernel-for-claude ()
   "Export ZMQ connection file for the current kernel so Claude Code can use it.
 Gets the kernel ID from the REPL client, constructs the remote kernel JSON path,
 and runs jup-attach-chronos to forward ZMQ ports locally.  Writes the resulting
@@ -30,7 +30,7 @@ local connection file path to ~/.cache/jupyter-current-kernel.txt."
         (lambda (kernel)
           (when (jupyter-server-kernel-p kernel)
             (let* ((kernel-id (jupyter-server-kernel-id kernel))
-                   (runtime-dir (jupyter-timer-fix--get-remote-runtime-dir))
+                   (runtime-dir (my/jupyter-bridge--get-remote-runtime-dir))
                    (remote-path (and runtime-dir kernel-id
                                      (format "%s/kernel-%s.json"
                                              runtime-dir kernel-id))))
@@ -51,6 +51,6 @@ local connection file path to ~/.cache/jupyter-current-kernel.txt."
                            (insert local-path "\n"))
                          (message "Claude kernel ready: %s" local-path))))))))))))))
 
-(add-hook 'jupyter-repl-mode-hook #'jupyter-timer-fix--export-kernel-for-claude)
+(add-hook 'jupyter-repl-mode-hook #'my/jupyter-bridge--export-kernel-for-claude)
 
 (provide 'jupyter-claude-bridge)
