@@ -8,3 +8,5 @@ cute-photo.jpg
 .aider.tags.cache.v4/
 *.elc
 eln-cache/
+.claude/settings.local.json
+.claude/no_checkpoint.*

@@ -1,7 +1,7 @@
 # Repository Guidelines
 
 ## Project Structure & Module Organization
-Core Doom modules live in `init.el`; `config.el` layers UI and behavior settings. Shared helpers sit in `functions.el` (prefixed `my/` or `+`), key maps in `keybindings.el`, and theming in `themes-and-fonts.el`. `packages.el` lists dependencies while `package-config.el` fine-tunes them. Automation belongs in `scripts/` (notably `jupytext_monitor.py`), editor assets in `snippets/`, and reference files in `misc/`. `custom.el` is generated—do not edit it. `pyrightconfig.json` powers static checks for Python helpers.
+Core Doom modules live in `init.el`; `config.el` layers UI and behavior settings. Shared helpers sit in `functions.el` (prefixed `my/` or `+`), key maps in `keybindings.el`, and theming in `themes-and-fonts.el`. `packages.el` lists dependencies while `package-config.el` fine-tunes them. Automation belongs in `scripts/` (notably `jupytext_monitor.py`), editor assets in `snippets/`, and reference files in `misc/`, design notes in `docs/` (see `docs/agent-shell-long-horizon.md` for the agent-shell queue-by-typing and checkpoint/restart flow). `custom.el` is generated—do not edit it. `pyrightconfig.json` powers static checks for Python helpers.
 
 ## Build, Test, and Development Commands
 - `~/.emacs.d/bin/doom sync` — refresh packages and autoloads after editing `init.el` or `packages.el`.
