@@ -79,7 +79,10 @@
 
 (setq which-key-idle-delay 0.2
       which-key-idle-secondary-delay 0.1
-      which-key-allow-multiple-replacements t)
+      which-key-allow-multiple-replacements t
+      ;; Imprecise fit sizes the popup in frame-char-height units, ignoring
+      ;; `line-spacing' (0.3 here), so the last row gets clipped.
+      which-key-allow-imprecise-window-fit nil)
 
 (defadvice! my/prompt-for-buffer-after-vsplit-a (&rest _)
   :after 'evil-window-vsplit

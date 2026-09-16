@@ -131,10 +131,7 @@
       :i "C-S-l" #'right-word
       :i "C-S-h" #'left-word
       ;; Paste
-      :i "C-v" #'evil-paste-after
-      ;; C-c o opens the SPC a "agents" submenu (SPC is not leader while
-      ;; inserting).  Org's own C-c o (agenda) still wins in org buffers.
-      :i "C-c o" (lookup-key doom-leader-map "a"))
+      :i "C-v" #'evil-paste-after)
 
 ;;; ============================================================
 ;;; 3. Mode maps
@@ -511,3 +508,12 @@ _p_rev       _u_pper              _=_: upper/lower       _R_esolve
 
 (map! "<f5>" #'revert-buffer
       "<f6>" #'modus-themes-toggle)
+
+;;; ============================================================
+;;; 7. Late bindings (need the leader map above to be built)
+;;; ============================================================
+
+;; C-c o opens the SPC a "agents" submenu (SPC is not leader while inserting).
+;; Must come after section 5: `lookup-key' resolves now, and earlier in the
+;; file "a" is still Doom+'s embark-act.  Org's own C-c o wins in org buffers.
+(map! :i "C-c o" (lookup-key doom-leader-map "a"))
