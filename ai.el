@@ -183,6 +183,32 @@
        :on-event (lambda (_) (my/agent-shell-lh-maybe-relaunch shell-buffer))))
     shell-buffer)
   (advice-add 'agent-shell--start :filter-return #'my/agent-shell-lh-subscribe)
+
+  ;; Agent picker sorted most-recently-used first.  The picker declares
+  ;; `display-sort-function' as `identity', so vertico shows the candidate
+  ;; list verbatim and the order has to be built here.
+  (defvar my/agent-shell-config-mru nil
+    "Agent config identifiers, most recently selected first.")
+  (add-to-list 'savehist-additional-variables 'my/agent-shell-config-mru)
+
+  (defun my/agent-shell-sort-configs-by-mru (configs)
+    "Order CONFIGS by `my/agent-shell-config-mru', unused ones last."
+    (seq-sort-by (lambda (config)
+                   (or (seq-position my/agent-shell-config-mru
+                                     (map-elt config :identifier))
+                       most-positive-fixnum))
+                 #'< configs))
+  (advice-add 'agent-shell--resolved-agent-configs
+              :filter-return #'my/agent-shell-sort-configs-by-mru)
+
+  (defun my/agent-shell-record-config-mru (config)
+    "Move CONFIG's identifier to the front of `my/agent-shell-config-mru'."
+    (when-let* ((id (map-elt config :identifier)))
+      (setq my/agent-shell-config-mru
+            (cons id (delq id my/agent-shell-config-mru))))
+    config)
+  (advice-add 'agent-shell-select-config
+              :filter-return #'my/agent-shell-record-config-mru)
 )
 
 (use-package! magit-gptcommit
