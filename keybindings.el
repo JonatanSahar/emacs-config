@@ -245,10 +245,8 @@
       "M-y" #'yank
       "C-v" #'yank)
 
-;; agent-shell buffer: `agent-shell-mode-map' binds bare letters (n p r TAB + - 0),
-;; which evil's normal state shadows.  Only chorded / g- / bracket-prefixed
-;; re-bindings here: :n scoping does not hold reliably in comint-derived
-;; buffers (q was quitting the window mid-insert).  Upstream C-c bindings
+;; agent-shell buffer: only chorded / g- / bracket-prefixed re-bindings here,
+;; so evil's normal state keeps its own bare letters.  Upstream C-c bindings
 ;; still apply: C-c C-c interrupt, C-c C-m mode, C-c C-v model,
 ;; C-c C-t thought level, C-c C-s config.
 (map! :map agent-shell-mode-map
@@ -262,7 +260,16 @@
       ;; queue/steer without leaving the shell
       ;; (C-c C-s is taken upstream by agent-shell-set-session-config-option)
       :ni "C-c C-q" #'agent-shell-prompt-queue
-      :ni "C-c C-r" #'agent-shell-prompt-steer)
+      :ni "C-c C-r" #'agent-shell-prompt-steer
+      ;; `agent-shell-mode-map' binds these bare printable keys for transcript
+      ;; navigation.  Evil's insert state has no binding for them, so lookup
+      ;; falls through to the mode map and they fire instead of self-inserting
+      ;; (q buried the buffer mid-prompt).  Restore typing in insert state only.
+      :i "q" #'self-insert-command
+      :i "r" #'self-insert-command
+      :i "+" #'self-insert-command
+      :i "-" #'self-insert-command
+      :i "0" #'self-insert-command)
 
 ;; Diff review buffers.  Mirrors the upstream `agent-shell-diff-mode-map'
 ;; (y accept, C-c C-c reject, n/p hunks, RET open, q kill) into evil normal
@@ -490,7 +497,7 @@ _p_rev       _u_pper              _=_: upper/lower       _R_esolve
 ;; --- w: windows -----------------------------------------------------
 ;; SPC w is Doom's `evil-window-map'; extend it in place so every default
 ;; survives (d delete, u/C-r winner undo/redo, s/v split, hjkl move,
-;; HJKL relocate, o enlargen, = balance, | / _ set width/height).
+;; o enlargen, = balance, | / _ set width/height).
 (map! :map evil-window-map
       :desc "ace-window"           "w" #'ace-window ; replaces evil-window-next
       :desc "ace-delete-window"    "D" #'ace-delete-window
@@ -500,7 +507,15 @@ _p_rev       _u_pper              _=_: upper/lower       _R_esolve
       :desc "other frame"          "f" #'other-frame
       :desc "frame: small"         "F" #'my/make-small-frame
       :desc "frame: medium"        "M" #'my/make-medium-frame
-      :desc "frame: large"         "S" #'my/make-large-frame)
+      :desc "frame: large"         "S" #'my/make-large-frame
+      ;; Doom+ points HJKL at `+evil/window-move-*', which only swaps the two
+      ;; buffers and does nothing useful when there is no window that way.
+      ;; Restore vim's relocate: move this window to that edge, restructuring
+      ;; the layout (a vertical split becomes a horizontal one).
+      :desc "relocate: far left"   "H" #'evil-window-move-far-left
+      :desc "relocate: very bottom" "J" #'evil-window-move-very-bottom
+      :desc "relocate: very top"   "K" #'evil-window-move-very-top
+      :desc "relocate: far right"  "L" #'evil-window-move-far-right)
 
 ;;; ============================================================
 ;;; 6. Function keys
