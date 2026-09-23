@@ -187,6 +187,14 @@
   (setq tab-bar-new-tab-choice "*doom*")
   (put 'tab-bar-tab-inactive 'face-alias 'tab-bar))
 
+(defun my/doom-load-session-reload-a (orig-fn &optional file)
+  "Allow Doom to reload this Emacs process's own desktop session."
+  (cl-letf (((symbol-function 'desktop-owner) (lambda () nil)))
+    (funcall orig-fn file)))
+
+(unless (advice-member-p #'my/doom-load-session-reload-a 'doom-load-session)
+  (advice-add 'doom-load-session :around #'my/doom-load-session-reload-a))
+
 ;; Dired
 (after! dired
   (setq dired-listing-switches "-laht --group-directories-first")
