@@ -209,6 +209,58 @@
     config)
   (advice-add 'agent-shell-select-config
               :filter-return #'my/agent-shell-record-config-mru)
+
+  ;; Clock time and turn duration after each reply.  Drawn as an overlay so it
+  ;; never becomes transcript text, which the agent is replayed with on resume.
+  (defvar-local my/agent-shell-turn-start nil
+    "Time at which the current turn's prompt was submitted.")
+
+  (defun my/agent-shell-format-duration (seconds)
+    "Format SECONDS as a compact duration string."
+    (cond ((< seconds 60) (format "%ds" seconds))
+          ((< seconds 3600) (format "%dm %ds" (/ seconds 60) (% seconds 60)))
+          (t (format "%dh %dm" (/ seconds 3600) (% (/ seconds 60) 60)))))
+
+  (defun my/agent-shell-stamp-turn (shell-buffer)
+    "Stamp each completed turn in SHELL-BUFFER with its time and duration."
+    (agent-shell-subscribe-to
+     :shell-buffer shell-buffer :event 'input-submitted
+     :on-event (lambda (_)
+                 (with-current-buffer shell-buffer
+                   (setq my/agent-shell-turn-start (current-time)))))
+    (agent-shell-subscribe-to
+     :shell-buffer shell-buffer :event 'turn-complete
+     :on-event
+     (lambda (_)
+       (with-current-buffer shell-buffer
+         ;; The turn ends with the next prompt already drawn, so walk back from
+         ;; it to the reply's last character.  Anchoring on the prompt position
+         ;; itself loses to the display properties that render its "Me" block.
+         (let* ((prompt-start (and comint-last-prompt
+                                   (agent-shell--live-input-prompt-p
+                                    comint-last-prompt)
+                                   (marker-position (car comint-last-prompt))))
+                (anchor (save-excursion
+                          (goto-char (or prompt-start (point-max)))
+                          (skip-chars-backward " \t\n")
+                          (point))))
+           (when (> anchor (point-min))
+             (let ((elapsed (when my/agent-shell-turn-start
+                              (round (float-time
+                                      (time-since my/agent-shell-turn-start)))))
+                   (overlay (make-overlay (1- anchor) anchor)))
+               (setq my/agent-shell-turn-start nil)
+               (overlay-put
+                overlay 'after-string
+                (propertize (format "\n%s%s"
+                                    (format-time-string "%H:%M")
+                                    (if elapsed
+                                        (concat " · " (my/agent-shell-format-duration
+                                                       elapsed))
+                                      ""))
+                            'face 'shadow))))))))
+    shell-buffer)
+  (advice-add 'agent-shell--start :filter-return #'my/agent-shell-stamp-turn)
 )
 
 (use-package! magit-gptcommit
