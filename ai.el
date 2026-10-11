@@ -140,22 +140,53 @@
                  "\\`evil-delete-backward-char"))
     (add-to-list 'corfu-auto-commands cmd))
 
-  ;; TUI-style queueing: while the agent is busy, just start typing in the
-  ;; shell buffer and the keystroke opens the minibuffer (prefilled with that
-  ;; char). RET there steers the prompt into the running turn; C-g abandons.
-  ;; Agents without steering support fall back to queueing. Same upstream
-  ;; idiom `agent-shell-send-region' uses when the shell is busy.
+  ;; TUI-style queueing: while the agent is busy, just start typing (or paste)
+  ;; in the shell buffer and the keystroke opens the minibuffer, prefilled
+  ;; with that char or the clipboard. RET there steers the prompt into the
+  ;; running turn; C-g abandons. Agents without steering support fall back to
+  ;; queueing. Same upstream idiom `agent-shell-send-region' uses when busy.
+  (defun my/agent-shell-steer-prompt (initial)
+    "Read a prompt prefilled with INITIAL, then steer it or queue it."
+    (funcall (if (agent-shell-steering-supported-p)
+                 #'agent-shell-prompt-steer
+               #'agent-shell-prompt-queue)
+             (agent-shell--prompt-queue-read :initial initial)))
+
+  (defun my/agent-shell-busy-p ()
+    "Non-nil in a shell buffer whose agent is mid-turn."
+    (and (derived-mode-p 'agent-shell-mode) (shell-maker-busy)))
+
   (defun my/agent-shell-self-insert-or-steer (n)
     "Steer a prompt into the running turn, else `self-insert-command'."
     (interactive "p")
-    (if (and (derived-mode-p 'agent-shell-mode) (shell-maker-busy))
-        (let ((steer (agent-shell-steering-supported-p)))
-          (funcall (if steer #'agent-shell-prompt-steer #'agent-shell-prompt-queue)
-                   (agent-shell--prompt-queue-read
-                    :initial (string last-command-event))))
+    (if (my/agent-shell-busy-p)
+        (my/agent-shell-steer-prompt (string last-command-event))
       (self-insert-command n last-command-event)))
+
+  (defun my/agent-shell-paste-or-steer ()
+    "Steer the clipboard into the running turn, else paste as usual.
+Pasting mid-turn otherwise lands in the read-only transcript above the
+prompt, since only `self-insert-command' is remapped to steer."
+    (interactive)
+    (if (my/agent-shell-busy-p)
+        ;; `current-kill' pulls in the system clipboard and signals when the
+        ;; kill ring is empty; an empty prefill just means type it yourself.
+        (my/agent-shell-steer-prompt (ignore-errors (current-kill 0)))
+      (call-interactively
+       ;; Pre-remap command, so `p' still pastes the evil way and C-y the
+       ;; Emacs way.  Guard the M-x case, where it is this command itself.
+       (if (memq this-original-command '(nil my/agent-shell-paste-or-steer))
+           #'yank
+         this-original-command))))
+
   (define-key agent-shell-mode-map [remap self-insert-command]
               #'my/agent-shell-self-insert-or-steer)
+  (define-key agent-shell-mode-map [remap evil-paste-after]
+              #'my/agent-shell-paste-or-steer)
+  (define-key agent-shell-mode-map [remap evil-paste-before]
+              #'my/agent-shell-paste-or-steer)
+  (define-key agent-shell-mode-map [remap yank]
+              #'my/agent-shell-paste-or-steer)
 
   ;; Long-horizon agent-shell: Emacs equivalent of ~/.local/bin/claude-lh.
   ;; claude-lh exports CLAUDE_LH=<its pid>; the Stop hook (context-checkpoint.sh)
