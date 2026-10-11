@@ -150,9 +150,19 @@ the directory.  `REST' is passed to the `CONSULT-RIPGREP-FUNCTION'."
 (add-hook 'org-mode-hook
           (defun my/org-no-corfu-auto ()
             "Stop corfu from auto-popping-up over the completion preview."
-            (setq-local corfu-auto nil)))
+            (setq-local corfu-auto nil)
+            ;; `corfu-mode' installs `corfu-auto--post-command' only when
+            ;; `corfu-auto' is non-nil at enable time, and that hook never
+            ;; re-reads the variable -- so in a buffer where corfu is already
+            ;; on, setting it nil changes nothing.  Pull the hook directly.
+            (remove-hook 'post-command-hook 'corfu-auto--post-command t)))
 
 (after! completion-preview
-  ;; The preview only refreshes after a command in this list, and evil's
-  ;; backspace is not `delete-backward-char' (same gap as `corfu-auto-commands').
-  (add-to-list 'completion-preview-commands 'evil-delete-backward-char-and-join))
+  ;; `completion-preview-commands' is matched with `memq', so every command
+  ;; that types or deletes a character has to be named exactly.  Org remaps
+  ;; `self-insert-command' to `org-self-insert-command' (for table
+  ;; auto-align), and evil's backspace is not `delete-backward-char': without
+  ;; both, the preview only ever appeared while deleting.
+  (dolist (cmd '(org-self-insert-command
+                 evil-delete-backward-char-and-join))
+    (add-to-list 'completion-preview-commands cmd)))
