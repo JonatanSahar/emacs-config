@@ -353,7 +353,7 @@ _p_rev       _u_pper              _=_: upper/lower       _R_esolve
        ;; agent-shell: session
        :desc "toggle shell"         "a" #'agent-shell-toggle
        :desc "new shell"            "n" #'agent-shell-new-shell
-       :desc "switch shell buffer"  "b" #'agent-shell-switch-buffer
+       :desc "switch shell buffer"  "o" #'agent-shell-switch-buffer
        :desc "fork session"         "F" #'agent-shell-fork
        :desc "resume session"       "R" #'agent-shell-resume-session
        :desc "open transcript"      "t" #'agent-shell-open-transcript
@@ -371,7 +371,7 @@ _p_rev       _u_pper              _=_: upper/lower       _R_esolve
        :desc "set session mode"     "M" #'agent-shell-set-session-mode
        :desc "set thought level"    "T" #'agent-shell-set-session-thought-level
        ;; other agent frontends
-       (:prefix ("o" . "other frontends")
+       (:prefix ("O" . "other frontends")
         :desc "aidermacs"   "a" #'aidermacs-transient-menu
         :desc "claude-code" "c" #'claude-code-transient))
 

@@ -278,3 +278,18 @@
 (load! "ai")           ; gptel, copilot, aidermacs, claude-code, agent-shell, magit-gptcommit
 (load! "functions")    ; pure editing helpers only
 (load! "keybindings")
+
+;; Doom runs projectile with `projectile-enable-caching' 'persistent and
+;; 'hybrid indexing, which serializes the file list to disk and filters it in
+;; Elisp.  The cache goes stale silently: flow-gating's held 1694 files when
+;; `git ls-files' reports 8278, so whole directories added since it was
+;; written (docs/pipeline-for-pi) are invisible to @ completion in
+;; agent-shell, to `projectile-find-file', and to project.el -- Doom puts
+;; `project-projectile' in `project-find-functions', so that routes here too.
+;;
+;; 'alien delegates straight to `projectile-git-command' and skips the Elisp
+;; filtering; dropping the cache keeps it honest.  `git ls-files -zco' on
+;; flow-gating takes ~25ms, so there is nothing to cache for.
+(after! projectile
+  (setq projectile-enable-caching nil
+        projectile-indexing-method 'alien))

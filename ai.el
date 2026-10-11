@@ -121,19 +121,41 @@
   ;; rather than replacing it.
   (setq agent-shell-file-display-action '(display-buffer-pop-up-window))
 
+  ;; Upstream only offers slash-command completion when / is the very first
+  ;; character of the input; the TUI offers it after any whitespace. Match
+  ;; the TUI. (`agent-shell--completion-bounds' still requires / to follow
+  ;; whitespace, so this doesn't fire inside paths or mid-word.)
+  (advice-add 'agent-shell-completion--command-start-p :override #'always)
+
+  ;; `global-corfu-mode' doesn't reach these buffers (shells restored from the
+  ;; desktop session predate corfu's lazy load), so @/ completion fell back to
+  ;; the static `*Completions*' window, which any edit -- a backspace over a
+  ;; typo -- ends outright. Corfu's popup narrows as you edit instead.
+  (add-hook 'agent-shell-mode-hook #'corfu-mode)
+
+  ;; Corfu only auto-reopens after commands matching `corfu-auto-commands'.
+  ;; `self-insert-command' is there, but the queue/steer remap replaces it in
+  ;; these buffers, and evil's backspace isn't a `delete-backward-char'.
+  (dolist (cmd '("my/agent-shell-self-insert-or-steer\\'"
+                 "\\`evil-delete-backward-char"))
+    (add-to-list 'corfu-auto-commands cmd))
+
   ;; TUI-style queueing: while the agent is busy, just start typing in the
-  ;; shell buffer and the keystroke opens the queue minibuffer (prefilled
-  ;; with that char). RET there enqueues; C-g abandons. Same upstream idiom
-  ;; `agent-shell-send-region' uses when the shell is busy.
-  (defun my/agent-shell-self-insert-or-queue (n)
-    "Queue a prompt when the shell is busy, else `self-insert-command'."
+  ;; shell buffer and the keystroke opens the minibuffer (prefilled with that
+  ;; char). RET there steers the prompt into the running turn; C-g abandons.
+  ;; Agents without steering support fall back to queueing. Same upstream
+  ;; idiom `agent-shell-send-region' uses when the shell is busy.
+  (defun my/agent-shell-self-insert-or-steer (n)
+    "Steer a prompt into the running turn, else `self-insert-command'."
     (interactive "p")
     (if (and (derived-mode-p 'agent-shell-mode) (shell-maker-busy))
-        (agent-shell-prompt-queue
-         (agent-shell--prompt-queue-read :initial (string last-command-event)))
+        (let ((steer (agent-shell-steering-supported-p)))
+          (funcall (if steer #'agent-shell-prompt-steer #'agent-shell-prompt-queue)
+                   (agent-shell--prompt-queue-read
+                    :initial (string last-command-event))))
       (self-insert-command n last-command-event)))
   (define-key agent-shell-mode-map [remap self-insert-command]
-              #'my/agent-shell-self-insert-or-queue)
+              #'my/agent-shell-self-insert-or-steer)
 
   ;; Long-horizon agent-shell: Emacs equivalent of ~/.local/bin/claude-lh.
   ;; claude-lh exports CLAUDE_LH=<its pid>; the Stop hook (context-checkpoint.sh)
