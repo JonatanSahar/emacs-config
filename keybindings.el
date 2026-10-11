@@ -228,6 +228,14 @@
 
 ;; Minibuffer / vertico
 (map! :map minibuffer-mode-map :nvi ";" #'embark-act)
+
+;; `evil-want-minibuffer' is nil, so the insert-state "C-v" paste above does
+;; not apply in the minibuffer -- it falls through to `scroll-up-command' --
+;; and "C-y" is shadowed globally by `evil-redo'.  That left no working paste
+;; gesture anywhere a prompt is read, agent-shell's steer prompt included.
+(map! :map minibuffer-local-map
+      "C-v" #'yank
+      "C-y" #'yank)
 (map! :map vertico-map
       "C-;" #'embark-act
       "C-b" #'embark-become
