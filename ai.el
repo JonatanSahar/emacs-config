@@ -90,6 +90,26 @@
   (setq agent-shell-openai-authentication
         (agent-shell-openai-make-authentication :login t))
 
+  ;; Replay the whole prior conversation into the buffer on resume, instead
+  ;; of the default title-only restore.
+  (setq agent-shell-session-restore-verbosity 'full)
+
+  ;; The graphical header is an SVG sized from the default font (icon is
+  ;; three char-heights tall), so laptop mode's size-40 font blows it up to
+  ;; ~200px and it swallows the side window. Cap the sizes it renders at.
+  (defvar my/agent-shell-header-font-cap '((:font-height . 26) (:font-size . 20))
+    "Upper bounds for the font metrics `agent-shell' renders its header at.")
+
+  (defun my/agent-shell-cap-header-size (model)
+    "Clamp MODEL's font metrics to `my/agent-shell-header-font-cap'."
+    (pcase-dolist (`(,key . ,cap) my/agent-shell-header-font-cap)
+      (when-let* ((value (map-elt model key)))
+        (map-put! model key (min value cap))))
+    model)
+
+  (advice-add 'agent-shell--make-header-model :filter-return
+              #'my/agent-shell-cap-header-size)
+
   ;; Show the agent in a right-hand side window instead of taking over the
   ;; current one. `agent-shell-toggle' (SPC a a) shows/hides it.
   (setq agent-shell-display-action
