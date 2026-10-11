@@ -138,3 +138,21 @@ the directory.  `REST' is passed to the `CONSULT-RIPGREP-FUNCTION'."
           #'my/consult-notes-export-denote-xref)
     (setf (alist-get `(file . ,consult-notes-category) embark-exporters-alist nil nil #'equal)
           #'my/consult-notes-export-denote-xref)))
+
+;; Doom puts `ispell-completion-at-point' in text modes, so corfu's popup in
+;; prose lists every /usr/share/dict/words match -- dozens of candidates for
+;; three letters typed.  Emacs 30's `completion-preview-mode' shows just the
+;; best candidate, inline as an overlay, from the same capfs: TAB accepts it,
+;; M-i cycles.  Corfu stays available on demand (it just no longer pops up by
+;; itself here).
+(add-hook 'org-mode-hook #'completion-preview-mode)
+
+(add-hook 'org-mode-hook
+          (defun my/org-no-corfu-auto ()
+            "Stop corfu from auto-popping-up over the completion preview."
+            (setq-local corfu-auto nil)))
+
+(after! completion-preview
+  ;; The preview only refreshes after a command in this list, and evil's
+  ;; backspace is not `delete-backward-char' (same gap as `corfu-auto-commands').
+  (add-to-list 'completion-preview-commands 'evil-delete-backward-char-and-join))
