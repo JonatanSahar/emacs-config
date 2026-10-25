@@ -697,6 +697,27 @@ prompt, since only `self-insert-command' is remapped to steer."
                             'face 'shadow))))))))
     shell-buffer)
   (advice-add 'agent-shell--start :filter-return #'my/agent-shell-stamp-turn)
+
+  (with-eval-after-load 'embark
+    (defun my/agent-shell-embark-file-link-at-point ()
+      "Return the local Agent Shell link at point as an Embark target."
+      (when-let* ((url (agent-shell-markdown-link-url-at-point))
+                  (parsed (agent-shell-markdown--parse-local-link url))
+                  (file (map-elt parsed :file)))
+        `(agent-shell-file-link ,file)))
+
+    (defvar my/agent-shell-embark-file-link-map
+      (let ((map (make-sparse-keymap)))
+        (set-keymap-parent map embark-file-map)
+        (keymap-set map "o" #'embark-open-externally)
+        map)
+      "Embark actions for local links rendered by Agent Shell.")
+
+    (setf (alist-get 'agent-shell-file-link embark-keymap-alist)
+          'my/agent-shell-embark-file-link-map)
+    (add-hook 'embark-target-finders
+              #'my/agent-shell-embark-file-link-at-point
+              0))
 )
 
 (use-package! magit-gptcommit
