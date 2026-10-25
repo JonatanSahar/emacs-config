@@ -470,6 +470,156 @@ prompt, since only `self-insert-command' is remapped to steer."
     shell-buffer)
   (advice-add 'agent-shell--start :filter-return #'my/agent-shell-lh-subscribe)
 
+  ;; Codex long-horizon restarts use a fresh ACP session plus a hook-injected
+  ;; handoff, not Codex session resume.
+  (defvar-local my/agent-shell-codex-lh-id nil
+    "Stable identifier for this Codex shell across fresh-session restarts.")
+  (defvar-local my/agent-shell-codex-lh-auto-resume nil
+    "Non-nil while this Codex shell awaits its SessionStart handoff ack.")
+  (defvar my/agent-shell-codex-lh-restart-id nil
+    "Dynamically bound Codex long-horizon id during `agent-shell-restart'.")
+
+  (defun my/agent-shell-codex-lh-ensure-id ()
+    "Return this buffer's Codex long-horizon id, creating it if needed."
+    (or my/agent-shell-codex-lh-id
+        (setq-local
+         my/agent-shell-codex-lh-id
+         (or my/agent-shell-codex-lh-restart-id
+             (secure-hash
+              'sha256
+              (format "%s:%s:%s:%s" (emacs-pid) (buffer-name)
+                      (float-time) (random)))))))
+
+  (defun my/agent-shell-codex-lh-project-root ()
+    "Return the canonical project root for this Codex shell."
+    (directory-file-name
+     (file-truename
+      (or (and (require 'vc-git nil t)
+               (vc-git-root default-directory))
+          (when-let* ((project (project-current nil default-directory)))
+            (project-root project))
+          default-directory))))
+
+  (defun my/agent-shell-codex-lh-state-dir ()
+    "Return this shell project's writable Codex long-horizon state directory."
+    (let* ((root (my/agent-shell-codex-lh-project-root))
+           (hash (secure-hash 'sha256 root))
+           (dir (expand-file-name hash "/tmp/codex-lh")))
+      (make-directory dir t)
+      dir))
+
+  (defun my/agent-shell-codex-lh-marker (name)
+    "Return the scoped long-horizon marker path for NAME."
+    (expand-file-name
+     (format "%s.%s" name (my/agent-shell-codex-lh-ensure-id))
+     (my/agent-shell-codex-lh-state-dir)))
+
+  (defun my/agent-shell-codex-lh-env (orig &rest args)
+    "Export this shell's Codex long-horizon id and canonical project root."
+    (let* ((buffer (plist-get args :buffer))
+           (id (with-current-buffer buffer
+                 (prog1 (my/agent-shell-codex-lh-ensure-id)
+                   (when my/agent-shell-codex-lh-restart-id
+                     (setq-local
+                      my/agent-shell-codex-lh-auto-resume
+                      (file-exists-p
+                       (my/agent-shell-codex-lh-marker "auto_resume")))))))
+           (root (with-current-buffer buffer
+                   (my/agent-shell-codex-lh-project-root)))
+           (agent-shell-openai-codex-environment
+            (append
+             (list (format "CODEX_LH_ID=%s" id)
+                   (format "CODEX_LH_ROOT=%s" root))
+             (seq-remove
+              (lambda (entry)
+                (or (string-prefix-p "CODEX_LH_ID=" entry)
+                    (string-prefix-p "CODEX_LH_ROOT=" entry)))
+              agent-shell-openai-codex-environment))))
+      (apply orig args)))
+  (advice-add 'agent-shell-openai-make-codex-client
+              :around #'my/agent-shell-codex-lh-env)
+
+  (defun my/agent-shell-codex-lh-preserve-id (orig &rest args)
+    "Preserve a Codex shell's long-horizon id across ORIG restart."
+    (let* ((shell-buffer (ignore-errors (agent-shell--current-shell)))
+           (my/agent-shell-codex-lh-restart-id
+            (and (buffer-live-p shell-buffer)
+                 (buffer-local-value 'my/agent-shell-codex-lh-id
+                                     shell-buffer))))
+      (apply orig args)))
+  (advice-add 'agent-shell-restart
+              :around #'my/agent-shell-codex-lh-preserve-id)
+
+  (defun my/agent-shell-codex-lh-maybe-relaunch (shell-buffer)
+    "Restart Codex SHELL-BUFFER when its scoped relaunch marker exists."
+    (when (buffer-live-p shell-buffer)
+      (with-current-buffer shell-buffer
+        (let ((relaunch (my/agent-shell-codex-lh-marker "relaunch")))
+          (when (file-exists-p relaunch)
+            (let* ((root (my/agent-shell-codex-lh-project-root))
+                   (default-directory (file-name-as-directory root))
+                   (process-environment (copy-sequence process-environment)))
+              (setenv "CODEX_LH_ID" (my/agent-shell-codex-lh-ensure-id))
+              (setenv "CODEX_LH_ROOT" root)
+              (if (eq 0 (call-process
+                         "/home/yonatan/.codex/hooks/codex-lh.sh"
+                         nil nil nil "prepare-restart"))
+                  (progn
+                    (message "agent-shell: Codex checkpoint, starting a fresh session")
+                    (run-at-time 0 nil #'my/agent-shell-codex-lh-relaunch
+                                 shell-buffer))
+                (message "agent-shell: Codex checkpoint preparation failed; leaving markers for retry"))))))))
+
+  (defun my/agent-shell-codex-lh-relaunch (shell-buffer)
+    "Restart Codex SHELL-BUFFER as a fresh ACP session."
+    (when (buffer-live-p shell-buffer)
+      (with-current-buffer shell-buffer
+        (cl-letf (((symbol-function 'y-or-n-p) (lambda (&rest _) t)))
+          (agent-shell-restart)))))
+
+  (defun my/agent-shell-codex-lh-maybe-resume (shell-buffer)
+    "Submit plain resume after SHELL-BUFFER's handoff injection is acknowledged."
+    (when (buffer-live-p shell-buffer)
+      (with-current-buffer shell-buffer
+        (when my/agent-shell-codex-lh-auto-resume
+          (let ((pending (my/agent-shell-codex-lh-marker "pending_resume"))
+                (auto-resume (my/agent-shell-codex-lh-marker "auto_resume"))
+                (injected (my/agent-shell-codex-lh-marker "injected")))
+            (if (not (and (file-exists-p pending)
+                          (file-exists-p auto-resume)
+                          (file-exists-p injected)))
+                (message "agent-shell: Codex handoff was not injected; leaving restart markers for retry")
+              (condition-case err
+                  (progn
+                    (agent-shell--insert-to-shell-buffer
+                     :shell-buffer shell-buffer :text "resume"
+                     :submit t :no-focus t)
+                    (dolist (marker (list injected pending auto-resume))
+                      (delete-file marker))
+                    (setq-local my/agent-shell-codex-lh-auto-resume nil))
+                (error
+                 (message "agent-shell: could not auto-resume Codex: %s"
+                          (error-message-string err))))))))))
+
+  (defun my/agent-shell-codex-lh-subscribe (shell-buffer)
+    "Install Codex long-horizon marker watchers in SHELL-BUFFER."
+    (with-current-buffer shell-buffer
+      (when (member (map-nested-elt agent-shell--state
+                                    '(:agent-config :identifier))
+                    '(codex "codex"))
+        (dolist (event '(turn-complete error))
+          (agent-shell-subscribe-to
+           :shell-buffer shell-buffer :event event
+           :on-event
+           (lambda (_) (my/agent-shell-codex-lh-maybe-relaunch shell-buffer))))
+        (agent-shell-subscribe-to
+         :shell-buffer shell-buffer :event 'prompt-ready
+         :on-event
+         (lambda (_) (my/agent-shell-codex-lh-maybe-resume shell-buffer)))))
+    shell-buffer)
+  (advice-add 'agent-shell--start
+              :filter-return #'my/agent-shell-codex-lh-subscribe)
+
   ;; Agent picker sorted most-recently-used first.  The picker declares
   ;; `display-sort-function' as `identity', so vertico shows the candidate
   ;; list verbatim and the order has to be built here.

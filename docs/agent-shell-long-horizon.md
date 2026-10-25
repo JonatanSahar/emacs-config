@@ -109,3 +109,92 @@ pause with `touch .claude/no_checkpoint.$CLAUDE_LH` if it is not a sentinel.
   ACP env, Stop hook nag at threshold, hook SIGTERM of the SDK process (exit
   143) once the flag was armed, Emacs restart of the shell with the same
   sentinel pid, and `resume` submitted automatically.
+
+## Codex fresh-thread long horizon
+
+Codex long-horizon work deliberately starts a new ACP `session/new` with an
+empty transcript, injects the durable handoff, then sends plain `resume` as the
+first user prompt. It does **not** use `codex resume`, `agent-shell-reload`, or
+any other operation that retains or restores the old session context.
+
+The installed pieces are:
+
+- `model_context_window = 1050000` for the current GPT-5.6/GPT-6 models, with
+  `model_auto_compact_token_limit = 1050000` so the automatic trigger does not
+  coincide with the 220k notice. A trusted `PreCompact` hook vetoes automatic
+  compaction even at the context limit; manual `/compact` remains available.
+- An independent `Stop` hook reads the latest context usage from the Codex
+  transcript and requests `$wrapup` once per session at 220k tokens. Transcript
+  parsing is best-effort because Codex does not promise a stable format.
+- An independent Codex `$wrapup` skill using native Codex subagents.
+- `/home/yonatan/.codex/hooks/codex-lh.sh`, the sole owner of marker creation,
+  validation, transition, and SessionStart handoff injection.
+- An agent-shell watcher that exports the canonical `CODEX_LH_ROOT`, keeps a
+  stable per-buffer `CODEX_LH_ID` across `agent-shell-restart`, starts the
+  fresh session, and submits `resume` only after injection is acknowledged.
+
+### State location and isolation
+
+All markers live in `/tmp/codex-lh/<full-project-sha256>/`, where the hash is
+the full SHA-256 of the canonical project root. This keeps protocol state out
+of the worktree, makes it writable even when the project is read-only to a
+sandboxed Codex process, and prevents projects with the same directory name
+from sharing state. Every project gets its own directory automatically; future
+sessions write flags through `codex-lh.sh`, not directly into their worktrees.
+
+`CODEX_LH_ROOT` and `CODEX_LH_ID` jointly identify one project and one
+agent-shell buffer within it. Agent-shell injects its canonical project root;
+the helper accepts the hook or command `cwd` only when it equals or lies below
+that root. Without `CODEX_LH_ROOT`, the helper falls back to the canonical Git
+root, then to the canonical current directory when outside Git. Non-Git
+projects therefore use the same protocol and per-project isolation.
+
+Each marker payload binds the canonical project root to a canonical, readable
+handoff file inside that project. The helper rejects invalid IDs, mismatched
+payloads, cross-project handoffs, and handoffs larger than 64 KiB.
+
+### Marker lifecycle
+
+| Marker | Purpose | Removal or transition |
+|---|---|---|
+| `pending_resume` | Manual handoff for the next fresh Codex session. | A successful startup `SessionStart` injects it, then removes it. |
+| `pending_resume.<id>` | Handoff owned by one automatic restart. | Removed only after agent-shell successfully submits `resume`. |
+| `relaunch.<id>` | Complete automatic-restart request written last by `$wrapup +flag`. | `codex-lh.sh prepare-restart` clears any stale `injected.<id>`, then atomically moves it to `auto_resume.<id>`. |
+| `auto_resume.<id>` | Authorizes scoped injection and the automatic first prompt. | Removed after successful `resume` submission. |
+| `injected.<id>` | SessionStart acknowledgement that the handoff reached the new context. | Removed after successful `resume` submission. |
+
+For `$wrapup +flag`, the helper writes `pending_resume.<id>` and then
+`relaunch.<id>`. The Emacs watcher sees the relaunch marker and invokes
+`codex-lh.sh prepare-restart`; the helper validates both payloads, removes any
+stale injection acknowledgement from an earlier attempt, and moves
+`relaunch.<id>` to `auto_resume.<id>`. Agent-shell then restarts into a fresh
+ACP session while preserving the same root and ID.
+
+The Codex `SessionStart` hook runs `codex-lh.sh session-start` for `startup`
+only. For an automatic restart it requires matching scoped pending and
+auto-resume markers, emits the handoff as `additionalContext`, and writes
+`injected.<id>` only after producing that output. At `prompt-ready`, Emacs
+requires all three of `pending_resume.<id>`, `auto_resume.<id>`, and
+`injected.<id>` before submitting the ordinary user prompt `resume`; it then
+removes all three. Missing acknowledgement leaves the markers in place and no
+prompt is sent.
+
+A plain `$wrapup` writes unsuffixed `pending_resume` for a manually opened
+fresh session. SessionStart injects and consumes that marker, but Emacs does
+not submit an automatic prompt.
+
+Codex reviews hook command hashes before trusting changed hooks. Open `/hooks`
+in the CLI and trust the `PreCompact` veto, `Stop` wrapup reminder, and
+`SessionStart` handoff hooks. Until trusted, the first two are skipped;
+without a trusted SessionStart hook, no `injected.<id>` acknowledgement appears
+and agent-shell correctly refuses to send `resume`.
+
+The installed helper test suite passes manual arm/startup consumption,
+automatic arm/prepare/SessionStart acknowledgement, root/ID/handoff
+validation, cross-project isolation, and atomic temporary-file cleanup. The
+Codex skill validates, `hooks.json` parses, and targeted Emacs assertions pass
+for Git and non-Git project roots, environment override and ID preservation,
+and acknowledgement-gated `resume` plus cleanup. `check-parens`, the final
+Doom build, and `git diff --check` also pass. The only remaining verification
+is one live agent-shell/Codex ACP end-to-end cycle from `$wrapup +flag`
+through fresh-session `resume`.
