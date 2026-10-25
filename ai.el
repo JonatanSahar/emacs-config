@@ -297,6 +297,10 @@
         (agent-shell-google-make-authentication :api-key (getenv "GEMINI_API_KEY")))
   (setq agent-shell-openai-authentication
         (agent-shell-openai-make-authentication :login t))
+  (setq agent-shell-openai-default-model-id "gpt-6-sol")
+  ;; Full access is disallowed by the workspace policy; use the strongest
+  ;; compatible Codex mode by default.
+  (setq agent-shell-openai-default-session-mode-id "agent")
 
   ;; Replay the whole prior conversation into the buffer on resume, instead
   ;; of the default title-only restore.
