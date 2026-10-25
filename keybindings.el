@@ -261,6 +261,7 @@
       :n "gj"    #'agent-shell-next-item
       :n "gk"    #'agent-shell-previous-item
       :n "C-M-u" #'agent-shell-backward-up-item
+      :ni "C-p"  #'delete-other-windows
       ;; permission prompt navigation
       :n "]p"    #'agent-shell-next-permission-button
       :n "[p"    #'agent-shell-previous-permission-button
@@ -464,9 +465,9 @@ _p_rev       _u_pper              _=_: upper/lower       _R_esolve
 
       ;; --- o: open --------------------------------------------------
       (:prefix "o"
-       (:prefix "a"
-        :desc "agenda: literature followup" "l" (cmd! (org-agenda nil "l")))
-       :desc "dired in some dir" "d" #'consult-dir)
+               (:prefix "a"
+                :desc "agenda: literature followup" "l" (cmd! (org-agenda nil "l")))
+               :desc "dired in some dir" "d" #'consult-dir)
 
       ;; --- q: quit --------------------------------------------------
       (:prefix "q"
@@ -484,6 +485,7 @@ _p_rev       _u_pper              _=_: upper/lower       _R_esolve
 
       ;; --- t: toggle ------------------------------------------------
       (:prefix "t"
+       :desc "toggle tab bar"   "b" #'toggle-frame-tab-bar
        :desc "treemacs"         "t" #'treemacs
        :desc "popper toggle"    "p" #'popper-toggle
        :desc "toggle org timer" "i" #'my/toggle-org-timer
