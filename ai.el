@@ -82,6 +82,214 @@
   (setopt claude-code-terminal-backend 'vterm)
   (claude-code-mode))
 
+(defvar-local my/agent-shell-sidebar-timer nil)
+(defvar-local my/agent-shell-sidebar-snapshot nil)
+
+(defun my/agent-shell-sidebar-entries ()
+  "Return picker-style rows sorted by working directory, then buffer name."
+  ;; shortcut: picker formatting is private upstream; update this with picker changes.
+  (let* ((buffers (agent-shell-buffers))
+         (ids (mapcar (lambda (buffer)
+                        (with-current-buffer buffer
+                          (map-nested-elt agent-shell--state '(:agent-config :identifier))))
+                      buffers))
+         (homogeneous (seq-every-p (lambda (id) (eq id (car ids))) ids))
+         (entries
+          (mapcar
+           (lambda (buffer)
+             (with-current-buffer buffer
+               (let* ((config (map-elt agent-shell--state :agent-config))
+                      (prefix (agent-shell--buffer-name-prefix (map-elt config :buffer-name)))
+                      (title (string-trim
+                              (car (split-string
+                                    (or (map-nested-elt agent-shell--state '(:session :title)) "")
+                                    "\n")))))
+                 (list buffer
+                       (if (and homogeneous prefix)
+                           (string-remove-prefix prefix (buffer-name))
+                         (buffer-name))
+                       (symbol-name (agent-shell-status))
+                       (if (> (length title) 50) (concat (substring title 0 47) "...") title)
+                       (when agent-shell-show-config-icons
+                         (agent-shell--config-icon :config config))
+                       ;; Shell creation initializes this from `agent-shell-cwd'.
+                       (directory-file-name (expand-file-name default-directory))))))
+           buffers))
+         (name-width (apply #'max 0 (mapcar (lambda (entry) (length (nth 1 entry))) entries)))
+         (status-width (apply #'max 0 (mapcar (lambda (entry) (length (nth 2 entry))) entries))))
+    (setq entries (sort entries
+                        (lambda (a b)
+                          (if (equal (nth 5 a) (nth 5 b))
+                              (string-lessp (buffer-name (car a)) (buffer-name (car b)))
+                            (string-lessp (nth 5 a) (nth 5 b))))))
+    (mapcar
+     (lambda (entry)
+       (pcase-let ((`(,buffer ,name ,status ,title ,icon ,directory) entry))
+         (cons (propertize
+                (concat (if icon (concat icon " ") "")
+                        (string-pad (propertize name 'face 'agent-shell-buffer-name) (1+ name-width))
+                        (string-pad (propertize status 'face
+                                                (pcase status
+                                                  ("busy" 'agent-shell-warning)
+                                                  ("blocked" 'agent-shell-error)
+                                                  (_ 'agent-shell-success)))
+                                    (1+ status-width))
+                        (propertize title 'face 'agent-shell-session-title))
+                'my/agent-shell-sidebar-directory directory)
+               buffer)))
+     entries)))
+
+(defun my/agent-shell-sidebar-refresh (&optional force)
+  "Refresh session rows when changed, preserving selection and scroll."
+  (interactive "P")
+  (let ((entries (my/agent-shell-sidebar-entries)))
+    (when (or force (not (equal-including-properties entries my/agent-shell-sidebar-snapshot)))
+      (let ((selected (get-text-property (point) 'my/agent-shell-sidebar-buffer))
+            (old-point (point))
+            (windows (mapcar (lambda (window)
+                               (list window (window-start window) (window-hscroll window)
+                                     (get-text-property (window-point window) 'my/agent-shell-sidebar-buffer)))
+                             (get-buffer-window-list (current-buffer) nil t)))
+            (inhibit-read-only t))
+        (erase-buffer)
+        (if entries
+            (let (directory)
+              (dolist (entry entries)
+                (let ((next-directory (get-text-property 0 'my/agent-shell-sidebar-directory (car entry))))
+                  (unless (equal directory next-directory)
+                    (setq directory next-directory)
+                    (insert (propertize (concat directory "\n") 'face 'font-lock-keyword-face))))
+                (insert (propertize (concat (car entry) "\n")
+                                    'my/agent-shell-sidebar-buffer (cdr entry)
+                                    'mouse-face 'highlight))))
+          (insert "No agent-shell sessions\n"))
+        (setq my/agent-shell-sidebar-snapshot entries)
+        (goto-char (or (and selected (text-property-any (point-min) (point-max)
+                                                       'my/agent-shell-sidebar-buffer selected))
+                       (min old-point (point-max))))
+        (dolist (state windows)
+          (pcase-let ((`(,window ,start ,hscroll ,buffer) state))
+            (set-window-start window (min start (point-max)) t)
+            (set-window-hscroll window hscroll)
+            (when-let* ((position (and buffer (text-property-any (point-min) (point-max)
+                                                                 'my/agent-shell-sidebar-buffer buffer))))
+              (set-window-point window position))))))))
+
+(defun my/agent-shell-sidebar-stop-timer ()
+  "Stop the sidebar's refresh timer."
+  (when (timerp my/agent-shell-sidebar-timer)
+    (cancel-timer my/agent-shell-sidebar-timer))
+  (setq my/agent-shell-sidebar-timer nil))
+
+(defun my/agent-shell-sidebar-tick (buffer)
+  "Refresh BUFFER only while it is visible."
+  (when (and (buffer-live-p buffer) (get-buffer-window buffer t))
+    (with-current-buffer buffer
+      (my/agent-shell-sidebar-refresh))))
+
+(defun my/agent-shell-sidebar-close ()
+  "Hide this frame's sidebar without closing any sessions."
+  (interactive)
+  (when-let* ((window (get-buffer-window (current-buffer))))
+    (delete-window window)))
+
+(defun my/agent-shell-sidebar-open ()
+  "Switch the invoking window to the session at point."
+  (interactive)
+  (let ((shell (get-text-property (point) 'my/agent-shell-sidebar-buffer)))
+    (unless shell
+      (user-error "Choose a session row"))
+    (unless (buffer-live-p shell)
+      (my/agent-shell-sidebar-refresh t)
+      (user-error "This session is no longer available"))
+    (let* ((origin (window-parameter (selected-window) 'my/agent-shell-sidebar-origin-window))
+           (window (if (and (window-live-p origin)
+                            (eq (window-frame origin) (selected-frame))
+                            (not (eq (window-buffer origin) (current-buffer))))
+                       origin
+                     (car (sort (seq-filter
+                                 (lambda (candidate)
+                                   (and (not (window-dedicated-p candidate))
+                                        (not (window-parameter candidate 'window-side))
+                                        (not (eq (window-buffer candidate) (current-buffer)))))
+                                 (window-list))
+                                (lambda (a b) (> (window-use-time a) (window-use-time b)))))))
+           (target (or (when agent-shell-prefer-viewport-interaction
+                         (agent-shell-viewport--buffer :shell-buffer shell :existing-only t))
+                       shell)))
+      (unless window
+        (user-error "No window available for this session"))
+      (select-window window)
+      (let ((dedicated (window-dedicated-p window)))
+        (unwind-protect
+            (progn
+              (set-window-dedicated-p window nil)
+              (switch-to-buffer target))
+          (set-window-dedicated-p window dedicated))))))
+
+(defun my/agent-shell-sidebar-fit (window)
+  "Fit WINDOW to the session list on focus; collapse it on leaving."
+  (when (window-live-p window)
+    (if (eq window (selected-window))
+        (fit-window-to-buffer window)
+      (fit-window-to-buffer window 4 4))))
+
+(defun my/agent-shell-sidebar-click (event)
+  "Show the session clicked by EVENT."
+  (interactive "e")
+  (mouse-set-point event)
+  (my/agent-shell-sidebar-open))
+
+(defvar my/agent-shell-sidebar-mode-map
+  (let ((map (make-sparse-keymap)))
+    (define-key map (kbd "RET") #'my/agent-shell-sidebar-open)
+    (define-key map [mouse-1] #'my/agent-shell-sidebar-click)
+    (define-key map (kbd "j") #'next-line)
+    (define-key map (kbd "k") #'previous-line)
+    (define-key map (kbd "g") #'my/agent-shell-sidebar-refresh)
+    (define-key map (kbd "q") #'my/agent-shell-sidebar-close)
+    (define-key map (kbd "C-l") #'windmove-up)
+    (define-key map (kbd "C-k") #'windmove-up)
+    map))
+
+(define-derived-mode my/agent-shell-sidebar-mode special-mode "Agent sessions"
+  "Browse live Agent Shell sessions in a bottom bar."
+  (setq-local truncate-lines t)
+  (setq-local cursor-type nil)
+  (add-hook 'kill-buffer-hook #'my/agent-shell-sidebar-stop-timer nil t)
+  (add-hook 'window-selection-change-functions #'my/agent-shell-sidebar-fit nil t))
+
+(after! evil
+  (evil-set-initial-state 'my/agent-shell-sidebar-mode 'motion)
+  (evil-define-key 'motion my/agent-shell-sidebar-mode-map
+    (kbd "RET") #'my/agent-shell-sidebar-open
+    (kbd "g") #'my/agent-shell-sidebar-refresh
+    (kbd "q") #'my/agent-shell-sidebar-close
+    (kbd "C-k") #'windmove-up
+    (kbd "C-l") #'windmove-up))
+
+(defun my/agent-shell-sidebar-toggle ()
+  "Toggle a bottom bar listing the same sessions as the buffer picker."
+  (interactive)
+  (require 'agent-shell)
+  (let ((buffer (get-buffer-create "*Agent sessions*"))
+        (origin (selected-window)))
+    (with-current-buffer buffer
+      (if (get-buffer-window buffer)
+          (my/agent-shell-sidebar-close)
+        (unless (derived-mode-p 'my/agent-shell-sidebar-mode)
+          (my/agent-shell-sidebar-mode))
+        (my/agent-shell-sidebar-refresh t)
+        (let* ((window-sides-vertical nil)
+               (window (display-buffer-in-side-window
+                        buffer '((side . bottom) (slot . -2) (window-height . 8)
+                                 (window-parameters . ((no-delete-other-windows . t)))))))
+          (set-window-parameter window 'my/agent-shell-sidebar-origin-window origin)
+          (select-window window))
+        (unless (timerp my/agent-shell-sidebar-timer)
+          (setq my/agent-shell-sidebar-timer
+                (run-at-time 1 1 #'my/agent-shell-sidebar-tick buffer)))))))
+
 (after! agent-shell
   (setq agent-shell-anthropic-claude-environment
         (agent-shell-make-environment-variables :inherit-env t))
@@ -93,6 +301,11 @@
   ;; Replay the whole prior conversation into the buffer on resume, instead
   ;; of the default title-only restore.
   (setq agent-shell-session-restore-verbosity 'full)
+
+  ;; Compact buffer names: "Claude@project" instead of "Claude Agent @ project".
+  (setq agent-shell-buffer-name-format
+        (lambda (agent-name project-name)
+          (format "%s@%s" agent-name project-name)))
 
   ;; The graphical header is an SVG sized from the default font (icon is
   ;; three char-heights tall), so laptop mode's size-40 font blows it up to

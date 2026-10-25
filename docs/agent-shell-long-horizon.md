@@ -2,6 +2,18 @@
 
 Code: `ai.el`, inside `(after! agent-shell ...)`. Keybindings: `keybindings.el`.
 
+## Session bar
+
+`SPC a b` toggles a bottom session bar; `SPC a o` still opens the
+completion picker. The bar groups sessions by working directory, sorting
+directories and session names alphabetically so switching sessions does not
+reorder the list. It shows the picker's names, status, and session titles.
+
+Use `j`/`k` to move, `RET` or click to open a session, `g` to refresh, and `q`
+to hide the bar. `C-k` (or `C-l`) moves to the window above it. Choosing a session replaces
+the buffer in the window from which you opened the bar, respecting the viewport
+preference. The bar refreshes while visible and can coexist with Treemacs.
+
 ## Queue by typing (TUI-style)
 
 While the agent is busy, any printable key in the agent-shell buffer opens the

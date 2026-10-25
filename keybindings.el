@@ -360,6 +360,7 @@ _p_rev       _u_pper              _=_: upper/lower       _R_esolve
       (:prefix ("a" . "agents")
        ;; agent-shell: session
        :desc "toggle shell"         "a" #'agent-shell-toggle
+       :desc "toggle session bar"   "b" #'my/agent-shell-sidebar-toggle
        :desc "new shell"            "n" #'agent-shell-new-shell
        :desc "switch shell buffer"  "o" #'agent-shell-switch-buffer
        :desc "fork session"         "F" #'agent-shell-fork
