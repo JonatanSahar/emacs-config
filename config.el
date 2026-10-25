@@ -178,6 +178,16 @@
 ;; Bind the text object to "il" for inner line
 (map! :textobj "l" #'evil-select-inner-line-no-whitespace nil)
 
+;; "gh" escapes: plain binding where "g" is already a prefix, chord where it self-inserts
+;; (map! :n "gh" #'evil-force-normal-state
+;;       :v "gh" #'evil-exit-visual-state)
+
+;; (after! evil-escape
+;;   (setq evil-escape-key-sequence "gh")
+;;   ;; the minibuffer runs in emacs state, and Doom blocks escape there outright
+;;   (setq evil-escape-excluded-states (remq 'emacs evil-escape-excluded-states))
+;;   (remove-hook 'evil-escape-inhibit-functions #'+evil-inhibit-escape-in-minibuffer-fn))
+
 ;; tabs
 (after! tab-bar
   (setopt tab-bar-show nil)
