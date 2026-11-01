@@ -206,9 +206,32 @@
   (advice-add 'doom-load-session :around #'my/doom-load-session-reload-a))
 
 ;; Dired
+(defun my/external-open-file-p (file)
+  "Return non-nil when FILE is a local HTML or image file."
+  (and file
+       (not (file-remote-p file))
+       (not (file-directory-p file))
+       (or (member (downcase (or (file-name-extension file) ""))
+                   '("html" "htm"))
+           (image-type-from-file-name file))))
+
 (after! dired
   (setq dired-listing-switches "-laht --group-directories-first")
   (dired-async-mode 1)
+
+  (defun my/dired-open-file-a (orig)
+    "Open local HTML and image files externally; otherwise call ORIG."
+    (let ((file (dired-get-file-for-visit)))
+      (if (my/external-open-file-p file)
+          (progn
+            (message "Opening %s externally..." file)
+            ;; Match Treemacs's delay while xdg-open hands off to the desktop app.
+            (start-process "xdg-open" nil "sh" "-c"
+                           (format "xdg-open %s; sleep 1"
+                                   (shell-quote-argument file))))
+        (funcall orig))))
+  (advice-add 'dired-find-file :around #'my/dired-open-file-a)
+
   (setq dired-compress-file-alist '(("\\.gz\\'" . "gzip -9f %i") ("\\.bz2\\'" . "bzip2 -9f %i") ("\\.xz\\'" . "xz -9f %i") ("\\.zst\\'" . "zstd -qf -19 --rm -o %o %i") ("\\.zip\\'" . "zip %o -r --filesync %i")))
 
   (setq dired-guess-shell-alist-user

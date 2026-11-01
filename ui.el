@@ -149,6 +149,24 @@ the default tab-bar name uses the buffer name."
   (setopt treemacs-sorting 'mod-time-desc)
   (define-key treemacs-mode-map (kbd "C-l") #'windmove-right)
   (evil-define-key 'treemacs treemacs-mode-map (kbd "y n") #'my/treemacs-copy-name-at-point)
+  (defun my/treemacs-RET-open-external-a (orig &optional arg)
+    "Visit directories in Dired and HTML or image files externally."
+    (let ((state (treemacs--prop-at-point :state)))
+      (cond ((memq state '(root-node-open root-node-closed
+                           dir-node-open dir-node-closed))
+             (treemacs-visit-node-default arg))
+            ((and (memq state '(file-node-open file-node-closed))
+                  (my/external-open-file-p (treemacs--prop-at-point :path)))
+             (treemacs-visit-node-in-external-application))
+            (t (funcall orig arg)))))
+  (advice-add 'treemacs-RET-action :around #'my/treemacs-RET-open-external-a)
+  (defun my/treemacs-l-action ()
+    "Toggle directory nodes, or visit other nodes normally."
+    (interactive)
+    (if (memq (treemacs--prop-at-point :state)
+              '(root-node-open root-node-closed dir-node-open dir-node-closed))
+        (treemacs-toggle-node)
+      (treemacs-RET-action)))
   ;; Hide heavy data dirs on SSHFS mounts to avoid stat'ing ~100k files.
   (add-to-list 'treemacs-ignored-file-predicates
                (lambda (filename absolute-path)
@@ -161,6 +179,9 @@ the default tab-bar name uses the buffer name."
     (unless (string-match-p "chronos-mount" path)
       (apply orig-fn path args)))
   (advice-add 'treemacs--git-status-process-function :around #'my/treemacs--skip-sshfs-git))
+
+(after! treemacs-evil
+  (evil-define-key 'treemacs treemacs-mode-map (kbd "l") #'my/treemacs-l-action))
 
 (use-package! spacious-padding
   :hook (doom-first-buffer . spacious-padding-mode))
