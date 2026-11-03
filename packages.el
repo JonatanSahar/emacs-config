@@ -29,3 +29,4 @@
   :recipe (:type git :host github :repo "stevemolitor/claude-code.el" :branch "main" :depth 1
            :files ("*.el" (:exclude "images/*"))))
 (package! agent-shell)
+(package! whisper :recipe (:host github :repo "natrys/whisper.el"))

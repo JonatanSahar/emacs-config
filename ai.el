@@ -290,6 +290,68 @@
           (setq my/agent-shell-sidebar-timer
                 (run-at-time 1 1 #'my/agent-shell-sidebar-tick buffer)))))))
 
+;;; Voice dictation in agent-shell (whisper.el + whisper.cpp, local).
+;; One key does both TUI voice modes: tap/talk/tap, or hold/talk/release.
+;; Emacs never sees key releases, but a held key auto-repeats, so "no repeat
+;; for a while" means released.
+(use-package! whisper
+  :commands whisper-run
+  :config
+  (setq whisper-model "base.en"
+        whisper-language "en"
+        whisper-return-cursor 'end)
+  ;; whisper-cli glues segments together ("testing.Wow"); re-space them, and
+  ;; lead with a space when appending to text already in the prompt.
+  (add-hook 'whisper-after-transcription-hook
+            (lambda ()
+              (while (re-search-forward "\\([.!?,]\\)\\([[:alpha:]]\\)" nil t)
+                (replace-match "\\1 \\2"))
+              (let ((prev (and (marker-buffer whisper--marker)
+                               (with-current-buffer (marker-buffer whisper--marker)
+                                 (char-before whisper--marker)))))
+                (when (and prev (not (memq prev '(?\s ?\n ?\t))))
+                  (goto-char (point-min))
+                  (insert " "))))))
+
+(defvar my/agent-shell-voice--timer nil)
+(defvar my/agent-shell-voice--held nil)
+
+(defun my/agent-shell-voice ()
+  "Dictate into the prompt: tap to toggle recording, or hold to record."
+  (interactive)
+  (cond
+   ;; Auto-repeat from a held key: keep the release timer alive.
+   (my/agent-shell-voice--timer
+    (setq my/agent-shell-voice--held t)
+    (cancel-timer my/agent-shell-voice--timer)
+    (setq my/agent-shell-voice--timer
+          (run-with-timer 0.25 nil #'my/agent-shell-voice--release)))
+   ;; Second tap: stop and transcribe.
+   ((whisper-recording-p) (whisper-run))
+   ;; Mid-turn: dictate into the steer prompt, not the read-only transcript.
+   ((my/agent-shell-busy-p)
+    (minibuffer-with-setup-hook
+        (lambda ()
+          (use-local-map (let ((map (make-sparse-keymap)))
+                           (set-keymap-parent map (current-local-map))
+                           (define-key map (kbd "M-k") #'my/agent-shell-voice)
+                           map))
+          (my/agent-shell-voice))
+      (my/agent-shell-steer-prompt nil)))
+   ;; First press: record, then wait past the key-repeat delay to see
+   ;; whether it is being held.  ponytail: 0.6s > GNOME's 500ms repeat delay.
+   (t
+    (setq my/agent-shell-voice--held nil)
+    (whisper-run)
+    (setq my/agent-shell-voice--timer
+          (run-with-timer 0.6 nil #'my/agent-shell-voice--release)))))
+
+(defun my/agent-shell-voice--release ()
+  "Key stopped repeating: stop recording if it was a hold, else keep going."
+  (setq my/agent-shell-voice--timer nil)
+  (when (and my/agent-shell-voice--held (whisper-recording-p))
+    (whisper-run)))
+
 (after! agent-shell
   (setq agent-shell-anthropic-claude-environment
         (agent-shell-make-environment-variables :inherit-env t))
