@@ -458,7 +458,10 @@
 point scrolled up into the read-only transcript."
     (and (derived-mode-p 'agent-shell-mode)
          (or (shell-maker-busy)
-             (< (point) (shell-maker--prompt-begin-position)))))
+             ;; `shell-maker--prompt-begin-position' searches back from
+             ;; point, so measure from the end to get the live prompt.
+             (< (point) (save-excursion (goto-char (point-max))
+                                        (shell-maker--prompt-begin-position))))))
 
   (defun my/agent-shell-insert-or-prompt ()
     "Enter insert state, or read a prompt in the minibuffer when point is
