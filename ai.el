@@ -295,7 +295,7 @@
 ;; Emacs never sees key releases, but a held key auto-repeats, so "no repeat
 ;; for a while" means released.
 (use-package! whisper
-  :commands whisper-run
+  :commands (whisper-run whisper-recording-p)
   :config
   (setq whisper-model "base.en"
         whisper-language "en"
@@ -335,6 +335,7 @@
           (use-local-map (let ((map (make-sparse-keymap)))
                            (set-keymap-parent map (current-local-map))
                            (define-key map (kbd "M-k") #'my/agent-shell-voice)
+                           (define-key map (kbd "RET") #'my/agent-shell-voice-ret)
                            map))
           (my/agent-shell-voice))
       (my/agent-shell-steer-prompt nil)))
@@ -345,6 +346,23 @@
     (whisper-run)
     (setq my/agent-shell-voice--timer
           (run-with-timer 0.6 nil #'my/agent-shell-voice--release)))))
+
+(defun my/agent-shell-voice-ret ()
+  "RET while tap-recording: stop, transcribe, then submit the result."
+  (interactive)
+  (if (not (whisper-recording-p))
+      (call-interactively (if (minibufferp) #'exit-minibuffer #'agent-shell-submit))
+    (when my/agent-shell-voice--timer
+      (cancel-timer my/agent-shell-voice--timer)
+      (setq my/agent-shell-voice--timer nil))
+    (letrec ((submit (lambda ()
+                       (remove-hook 'whisper-after-insert-hook submit)
+                       (if (minibufferp)
+                           (progn (select-window (active-minibuffer-window))
+                                  (exit-minibuffer))
+                         (agent-shell-submit)))))
+      (add-hook 'whisper-after-insert-hook submit))
+    (whisper-run)))
 
 (defun my/agent-shell-voice--release ()
   "Key stopped repeating: stop recording if it was a hold, else keep going."

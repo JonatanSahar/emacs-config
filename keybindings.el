@@ -272,6 +272,7 @@
       :ni "C-c C-r" #'agent-shell-prompt-steer
       ;; voice dictation, same key as the TUI's push-to-talk
       :ni "M-k"     #'my/agent-shell-voice
+      :i  "RET"     #'my/agent-shell-voice-ret
       ;; `agent-shell-mode-map' binds these bare printable keys for transcript
       ;; navigation.  Evil's insert state has no binding for them, so lookup
       ;; falls through to the mode map and they fire instead of self-inserting
