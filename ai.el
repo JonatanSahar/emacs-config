@@ -782,18 +782,51 @@ prompt, since only `self-insert-command' is remapped to steer."
     shell-buffer)
   (advice-add 'agent-shell--start :filter-return #'my/agent-shell-stamp-turn)
 
+  (defvar my/agent-shell-external-extensions
+    '("pdf" "html" "htm" "docx" "xlsx" "pptx" "odt" "ods" "odp"
+      "svg" "png" "jpg" "jpeg" "gif" "webp" "bmp" "tif" "tiff")
+    "File extensions that Agent Shell links open externally on RET.
+Links to any other local file open in Emacs at their line.")
+
+  (autoload 'embark-open-externally "embark")
+  (defun my/agent-shell-link-open-external-a (orig url)
+    "Open local links whose extension is in `my/agent-shell-external-extensions'
+with `embark-open-externally'; call ORIG with URL for everything else."
+    (let ((file (map-elt (agent-shell-markdown--parse-local-link url) :file)))
+      (if (and file (member (downcase (or (file-name-extension file) ""))
+                            my/agent-shell-external-extensions))
+          (embark-open-externally file)
+        (funcall orig url))))
+  (advice-add 'agent-shell-markdown--open-link :around
+              #'my/agent-shell-link-open-external-a)
+
   (with-eval-after-load 'embark
+    (defvar my/agent-shell-embark-link-url nil
+      "Full URL of the last Agent Shell file link targeted by Embark.
+The Embark target is the bare file, so this keeps its line anchor.")
+
     (defun my/agent-shell-embark-file-link-at-point ()
       "Return the local Agent Shell link at point as an Embark target."
       (when-let* ((url (agent-shell-markdown-link-url-at-point))
                   (parsed (agent-shell-markdown--parse-local-link url))
                   (file (map-elt parsed :file)))
+        (setq my/agent-shell-embark-link-url url)
         `(agent-shell-file-link ,file)))
+
+    (defun my/agent-shell-embark-open-link (_file)
+      "Open the targeted Agent Shell link exactly like a plain RET."
+      (agent-shell-markdown--open-link my/agent-shell-embark-link-url))
+
+    (defun my/agent-shell-embark-dired-jump (file)
+      "Open FILE's directory in Dired with point on FILE."
+      (dired-jump nil (expand-file-name file)))
 
     (defvar my/agent-shell-embark-file-link-map
       (let ((map (make-sparse-keymap)))
         (set-keymap-parent map embark-file-map)
         (keymap-set map "o" #'embark-open-externally)
+        (keymap-set map "d" #'my/agent-shell-embark-dired-jump)
+        (keymap-set map "RET" #'my/agent-shell-embark-open-link)
         map)
       "Embark actions for local links rendered by Agent Shell.")
 
