@@ -262,6 +262,13 @@
       :n "gk"    #'agent-shell-previous-item
       :n "C-M-u" #'agent-shell-backward-up-item
       :ni "C-p"  #'delete-other-windows
+      ;; insert while scrolled up: prompt in the minibuffer, keep the view
+      :n "i" #'my/agent-shell-insert-or-prompt
+      :n "a" #'my/agent-shell-insert-or-prompt
+      :n "A" #'my/agent-shell-insert-or-prompt
+      :n "I" #'my/agent-shell-insert-or-prompt
+      :n "o" #'my/agent-shell-insert-or-prompt
+      :n "O" #'my/agent-shell-insert-or-prompt
       ;; permission prompt navigation
       :n "]p"    #'agent-shell-next-permission-button
       :n "[p"    #'agent-shell-previous-permission-button

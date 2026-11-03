@@ -328,8 +328,8 @@
           (run-with-timer 0.25 nil #'my/agent-shell-voice--release)))
    ;; Second tap: stop and transcribe.
    ((whisper-recording-p) (whisper-run))
-   ;; Mid-turn: dictate into the steer prompt, not the read-only transcript.
-   ((my/agent-shell-busy-p)
+   ;; Mid-turn or scrolled up: dictate into the minibuffer prompt instead.
+   ((my/agent-shell-away-from-prompt-p)
     (minibuffer-with-setup-hook
         (lambda ()
           (use-local-map (let ((map (make-sparse-keymap)))
@@ -453,10 +453,29 @@
     "Non-nil in a shell buffer whose agent is mid-turn."
     (and (derived-mode-p 'agent-shell-mode) (shell-maker-busy)))
 
+  (defun my/agent-shell-away-from-prompt-p ()
+    "Non-nil when typing cannot land in the prompt: agent mid-turn, or
+point scrolled up into the read-only transcript."
+    (and (derived-mode-p 'agent-shell-mode)
+         (or (shell-maker-busy)
+             (< (point) (shell-maker--prompt-begin-position)))))
+
+  (defun my/agent-shell-insert-or-prompt ()
+    "Enter insert state, or read a prompt in the minibuffer when point is
+up in the transcript so the view stays where you are reading."
+    (interactive)
+    (if (my/agent-shell-away-from-prompt-p)
+        (my/agent-shell-steer-prompt nil)
+      (call-interactively
+       (pcase last-command-event
+         (?a #'evil-append) (?A #'evil-append-line)
+         (?I #'evil-insert-line) (?o #'evil-open-below)
+         (?O #'evil-open-above) (_ #'evil-insert)))))
+
   (defun my/agent-shell-self-insert-or-steer (n)
     "Steer a prompt into the running turn, else `self-insert-command'."
     (interactive "p")
-    (if (my/agent-shell-busy-p)
+    (if (my/agent-shell-away-from-prompt-p)
         (my/agent-shell-steer-prompt (string last-command-event))
       (self-insert-command n last-command-event)))
 
@@ -465,7 +484,7 @@
 Pasting mid-turn otherwise lands in the read-only transcript above the
 prompt, since only `self-insert-command' is remapped to steer."
     (interactive)
-    (if (my/agent-shell-busy-p)
+    (if (my/agent-shell-away-from-prompt-p)
         ;; `current-kill' pulls in the system clipboard and signals when the
         ;; kill ring is empty; an empty prefill just means type it yourself.
         (my/agent-shell-steer-prompt (ignore-errors (current-kill 0)))
