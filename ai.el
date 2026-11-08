@@ -382,6 +382,63 @@
   ;; compatible Codex mode by default.
   (setq agent-shell-openai-default-session-mode-id "agent")
 
+  ;; Remote agents: starting agent-shell from a TRAMP dir (e.g. /ssh:chronos:)
+  ;; makes acp.el spawn the agent on that host. Paths then need mapping
+  ;; between Emacs's TRAMP view and the agent's host-local view.
+  (defvar my/agent-shell--remote-prefix nil
+    "TRAMP prefix of the shell whose ACP request is being handled.")
+
+  (defun my/agent-shell-tramp-resolve-path (path)
+    "Map PATH between a remote shell's TRAMP view and the agent's local view.
+TRAMP paths (cwd sent to the agent) lose their prefix; absolute paths coming
+from a remote agent gain the shell's TRAMP prefix.  No-op for local shells."
+    (let ((remote (or my/agent-shell--remote-prefix
+                      (file-remote-p default-directory))))
+      (cond ((not (stringp path)) path)
+            ((file-remote-p path) (file-local-name path))
+            ((and remote (file-name-absolute-p path)) (concat remote path))
+            (t path))))
+  (setq agent-shell-path-resolver-function #'my/agent-shell-tramp-resolve-path)
+
+  (defun my/agent-shell-on-request-remote (orig &rest args)
+    "Around `agent-shell--on-request': expose the shell's TRAMP prefix.
+ACP requests arrive in a process filter, where the current buffer is arbitrary."
+    (let* ((buf (map-elt (plist-get args :state) :buffer))
+           (my/agent-shell--remote-prefix
+            (and (buffer-live-p buf)
+                 (file-remote-p (buffer-local-value 'default-directory buf)))))
+      (apply orig args)))
+  (advice-add 'agent-shell--on-request :around #'my/agent-shell-on-request-remote)
+
+  (defun my/acp-start-client-no-remote-tty (orig &rest args)
+    "Around `acp--start-client': no remote pty for TRAMP direct-async ssh.
+TRAMP's ssh method passes `-t -t' even for pipe processes; the remote tty
+then echoes our JSON-RPC requests back as if the agent had sent them."
+    (let ((tramp-methods
+           (mapcar (lambda (m)
+                     (if (equal (car m) "ssh")
+                         (cons "ssh" (cons '(tramp-direct-async t)
+                                           (assq-delete-all 'tramp-direct-async
+                                                            (copy-sequence (cdr m)))))
+                       m))
+                   (bound-and-true-p tramp-methods))))
+      (apply orig args)))
+  (advice-add 'acp--start-client :around #'my/acp-start-client-no-remote-tty)
+
+  (defun my/agent-shell-transcript-file-path ()
+    "Project transcript path, kept local for remote shells.
+The transcript is appended on every update; over TRAMP each append is a
+full remote file round trip, which makes remote shells lag."
+    (if (file-remote-p default-directory)
+        (expand-file-name
+         (format-time-string "%F-%H-%M-%S.md")
+         (agent-shell-cache-dir "transcripts"
+                                (file-remote-p default-directory 'host)
+                                (file-name-nondirectory
+                                 (directory-file-name (file-local-name (agent-shell-cwd))))))
+      (agent-shell--default-transcript-file-path)))
+  (setq agent-shell-transcript-file-path-function #'my/agent-shell-transcript-file-path)
+
   ;; Replay the whole prior conversation into the buffer on resume, instead
   ;; of the default title-only restore.
   (setq agent-shell-session-restore-verbosity 'full)
@@ -534,11 +591,14 @@ prompt, since only `self-insert-command' is remapped to steer."
 
   (defun my/agent-shell-lh-env (orig &rest args)
     "Around `agent-shell-anthropic-make-claude-client': export CLAUDE_LH."
-    (let ((agent-shell-anthropic-claude-environment
-           (cons (format "CLAUDE_LH=%d" (with-current-buffer (plist-get args :buffer)
-                                           (my/agent-shell-lh-pid t)))
-                 agent-shell-anthropic-claude-environment)))
-      (apply orig args)))
+    ;; ponytail: long-horizon restart is local-only (sentinel pid is a local process)
+    (if (file-remote-p (buffer-local-value 'default-directory (plist-get args :buffer)))
+        (apply orig args)
+      (let ((agent-shell-anthropic-claude-environment
+             (cons (format "CLAUDE_LH=%d" (with-current-buffer (plist-get args :buffer)
+                                             (my/agent-shell-lh-pid t)))
+                   agent-shell-anthropic-claude-environment)))
+        (apply orig args))))
   (advice-add 'agent-shell-anthropic-make-claude-client :around #'my/agent-shell-lh-env)
 
   (defun my/agent-shell-lh-maybe-relaunch (shell-buffer)

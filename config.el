@@ -75,7 +75,14 @@
 
 (after! tramp
   (add-to-list 'tramp-remote-path "/home/yonatan/.local/bin")
-  (add-to-list 'tramp-remote-path "/home/yonatan/anaconda3/bin"))
+  (add-to-list 'tramp-remote-path "/home/yonatan/anaconda3/bin")
+  ;; Spawn remote processes as plain `ssh host cmd' instead of via a login
+  ;; shell: chronos's login banner otherwise corrupts piped output (breaks
+  ;; agent-shell's ACP stream when started from a /ssh:chronos: dir).
+  (connection-local-set-profile-variables
+   'my/tramp-direct-async '((tramp-direct-async-process . t)))
+  (connection-local-set-profiles
+   '(:application tramp :machine "chronos") 'my/tramp-direct-async))
 
 (setq which-key-idle-delay 0.2
       which-key-idle-secondary-delay 0.1
